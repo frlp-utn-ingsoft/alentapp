@@ -9,7 +9,7 @@ titulo: New Payment
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-Permite registrar un nuevo paso asociado a un socio que tenga como estado inicial "Pending".
+Permite registrar un nuevo pago asociado a un socio que tenga como estado inicial "Pending".
 
 ### User Persona
  
