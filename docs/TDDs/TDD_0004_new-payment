@@ -53,3 +53,23 @@ Entidad existente `PAYMENT`:
   member_id: string;
 }
 ```
+
+### Componentes de Arquitectura Hexagonal
+ 
+- **Domain**: Entidad `Payment`. Regla: `status` inicial es `Pending`.
+- **Application**: Caso de uso `CreatePayment`. Puerto de salida `PaymentRepository`.
+- **Infrastructure**: `PaymentController` (POST). `PrismaPaymentRepository`.
+
+## Casos de Borde y Errores
+ 
+| Escenario | Resultado Esperado | Código HTTP |
+|---|---|---|
+| `member_id` inexistente | Error: socio no encontrado | 404 Not Found |
+| `amount` negativo o cero | Error de validación | 400 Bad Request |
+ 
+## Plan de Implementación
+ 
+1. Definir DTO `CreatePaymentDto` en `@alentapp/shared`
+2. Implementar caso de uso `CreatePayment` en Application
+3. Implementar método `create` en `PrismaPaymentRepository`
+4. Implementar endpoint `POST /api/v1/payments` en `PaymentController`
