@@ -22,3 +22,34 @@ Permite registrar un nuevo paso asociado a un socio que tenga como estado inidci
 - El campo `status` se establece automáticamente como `Pending` al momento de la creación.
 - El `member_id` debe corresponder a un socio existente.
 - El `amount` debe ser mayor a cero.
+
+
+## Diseño Técnico (RFC)
+ 
+### Modelo de Datos
+ 
+Entidad existente `PAYMENT`:
+ 
+- `id`: uuid (PK)
+- `amount`: float
+- `month`: int
+- `year`: int
+- `status`: string — (Pending, Paid y Canceled)
+- `due_date`: date
+- `payment_date`: datetime (nullable)
+- `member_id`: uuid (FK → MEMBER)
+
+### Contrato de API (@alentapp/shared)
+ 
+- **Endpoint**: `POST /api/v1/payments`
+- **Request Body**:
+```ts
+{
+  amount: number;
+  month: number;
+  year: number;
+  due_date: string; 
+  payment_date?: string | null;
+  member_id: string;
+}
+```
