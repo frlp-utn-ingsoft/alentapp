@@ -7,24 +7,21 @@ titulo: Registro de Sanciones Disciplinarias
 ---
 
 # TDD-0001: Registro de Sanciones Disciplinarias
-- **Estado:** Propuesto
-- **Autor:** Santiago Gonzalez D'Angelo
-- **Fecha:** 2026-04-30
 
 ## 1. Contexto de Negocio 
 
 ### 1.1. Objetivo
 
-Permitir a los administradores registrar sanciones disciplinarias a los socios del club. Establecer un período de inhibición; durante el mismo, el socio no podrá realizar acciones dentro del club.
+Permitir a los administradores registrar sanciones disciplinarias a los socios del club, estableciendo un período de inhibición durante el cual el socio no podrá realizar acciones dentro del club.
 
 ### 1.2. User Persona
 *   **Rol**: Administrador
 *   **Necesidad**: Registrar una sanción asociada a un socio, indicando el período de suspensión de la misma.
 
 ### 1.3. Criterios de Aceptación
-*   Como administrador, quiero registrar una sanción para bloquear al socio de interactuar con las instalaciones.
+*   Como administrador, quiero registrar una sanción para bloquear al socio para que no pueda interactuar con las instalaciones.
     - Escenario de éxito: "Si el usuario completa el registro con los datos correctos, el sistema debe responder creando la sanción y notificando al usuario".
-    - Escenario de fallo: "Si el usuario ingresa una fecha de inicio posterior a la fecha de fin, el sistema debe bloquear la acción y notificar al usuario que la fecha de fin debe ser posterior a la fecha de inicio".
+    - Escenario de fallo: "Si el usuario ingresa una fecha de fin menor o igual a la fecha de inicio, el sistema debe bloquear la acción y notificar al usuario que la fecha de fin debe ser posterior a la fecha de inicio".
     - Escenario de fallo: "Si el usuario ingresa un socio que no existe, el sistema debe responder indicando el error y cancelando la operación".
 
 ## 2. Diseño Técnico 
@@ -72,7 +69,7 @@ model Discipline {
 
 ### 3.1. Componentes de Arquitectura Hexagonal
 
-*   **Puerto**: `DisciplineRepository`.
+*   **Puerto**: `DisciplineRepository` con método `create(data)`.
 *   **Adaptador de Salida**: `PostgresDisciplineRepository`.
 *   **Adaptador de Entrada**: `DisciplineController`.
 
@@ -94,6 +91,13 @@ model Discipline {
 | Campos obligatorios faltantes | "Todos los campos son requeridos" | 400 Bad Request |
 | Error de conexión a DB     | "Error interno, reintente más tarde" | 500 Internal Server Error |
 
-## 5. Observaciones Adicionales
+## 5. Plan de Implementación
+
+1. Definir el esquema de persistencia de `Discipline` y correr migración.
+2. Crear tipos en `@alentapp/shared` y puerto `DisciplineRepository` en el Dominio.
+3. Implementar el repositorio y el caso de uso `NewDisciplineUseCase`, validando fechas y existencia del socio.
+4. Crear formulario y conectar con el endpoint `POST /api/v1/disciplines`.
+
+## 6. Observaciones Adicionales
 
 * La consulta de si un socio está suspendido actualmente debería resolverse comparando la fecha actual con `start_date` y `end_date`.
