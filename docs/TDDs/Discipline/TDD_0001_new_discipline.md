@@ -1,0 +1,99 @@
+---
+id: 0001
+estado: Propuesto
+autor: Santiago Gonzalez D'Angelo
+fecha: 2026-04-30
+titulo: Registro de Sanciones Disciplinarias
+---
+
+# TDD-0001: Registro de Sanciones Disciplinarias
+- **Estado:** Propuesto
+- **Autor:** Santiago Gonzalez D'Angelo
+- **Fecha:** 2026-04-30
+
+## 1. Contexto de Negocio 
+
+### 1.1. Objetivo
+
+Permitir a los administradores registrar sanciones disciplinarias a los socios del club. Establecer un período de inhibición; durante el mismo, el socio no podrá realizar acciones dentro del club.
+
+### 1.2. User Persona
+*   **Rol**: Administrador
+*   **Necesidad**: Registrar una sanción asociada a un socio, indicando el período de suspensión de la misma.
+
+### 1.3. Criterios de Aceptación
+*   Como administrador, quiero registrar una sanción para bloquear al socio de interactuar con las instalaciones.
+    - Escenario de éxito: "Si el usuario completa el registro con los datos correctos, el sistema debe responder creando la sanción y notificando al usuario".
+    - Escenario de fallo: "Si el usuario ingresa una fecha de inicio posterior a la fecha de fin, el sistema debe bloquear la acción y notificar al usuario que la fecha de fin debe ser posterior a la fecha de inicio".
+    - Escenario de fallo: "Si el usuario ingresa un socio que no existe, el sistema debe responder indicando el error y cancelando la operación".
+
+## 2. Diseño Técnico 
+
+### 2.1. Modelo de Dominio
+
+Se definirá la entidad "Discipline" con las siguientes propiedades:
+
+*   `id`: Identificador único universal (UUID).
+*   `reason`: Cadena de texto, obligatoria.
+*   `start_date`: Fecha, obligatoria.
+*   `end_date`: Fecha, obligatoria.
+*   `is_total_suspension`: Booleano, obligatorio.
+*   `member_id`: Identificador del socio sancionado, obligatorio.
+
+### 2.2. Contrato de API (@alentapp/shared)
+
+*   **Endpoint**: `POST /api/v1/disciplines`
+*   **Request Body**:
+```ts
+{
+    reason: string;
+    start_date: string; 
+    end_date: string; 
+    is_total_suspension: boolean;
+    member_id: string;
+}
+```
+
+### 2.3 Esquema de Persistencia
+
+```prisma
+model Discipline {
+  id                  String   @id @default(uuid())
+  reason              String
+  start_date          DateTime
+  end_date            DateTime
+  is_total_suspension Boolean
+  member_id           String
+  member              Member   @relation(fields: [member_id], references: [id])
+}
+```
+
+## 3. Arquitectura y Flujo
+
+### 3.1. Componentes de Arquitectura Hexagonal
+
+*   **Puerto**: `DisciplineRepository`.
+*   **Adaptador de Salida**: `PostgresDisciplineRepository`.
+*   **Adaptador de Entrada**: `DisciplineController`.
+
+### 3.2. Lógica del Caso de Uso
+
+**Caso de Uso**: `NewDisciplineUseCase`.
+1. Validar los datos de entrada.
+2. Verificar que `end_date` sea estrictamente posterior a `start_date`.
+3. Verificar que el socio exista mediante su `member_id`.
+4. Mapear el DTO a Entidad de Dominio.
+5. Persistir la entidad a través de `DisciplineRepository`.
+6. Retornar la sanción creada.
+
+## 4. Casos de Borde y Errores
+| Escenario                   | Resultado Esperado                            | Código HTTP               |
+| ----------------------------| --------------------------------------------- | ------------------------- |
+| Socio inexistente     | "El socio no existe"       | 404 Not Found              |
+| Fecha de fin menor a fecha de inicio | "La fecha de fin debe ser estrictamente posterior a la fecha de inicio"              | 400 Bad Request           |
+| Campos obligatorios faltantes | "Todos los campos son requeridos" | 400 Bad Request |
+| Error de conexión a DB     | "Error interno, reintente más tarde" | 500 Internal Server Error |
+
+## 5. Observaciones Adicionales
+
+* La consulta de si un socio está suspendido actualmente debería resolverse comparando la fecha actual con `start_date` y `end_date`.
