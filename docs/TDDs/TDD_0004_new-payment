@@ -4,12 +4,12 @@ fecha: [2026-05-01]
 titulo: New Payment
 ---
 
-# TDD-[0004]: [Crear Payment]
+# TDD-[0004]: Crear Payment
 
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-Permite registrar un nuevo paso asociado a un socio que tenga como estado inidcial "Pending".
+Permite registrar un nuevo paso asociado a un socio que tenga como estado inicial "Pending".
 
 ### User Persona
  

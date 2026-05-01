@@ -1,0 +1,23 @@
+---
+autor: [Valentina Pértile de la Vega]
+fecha: [2026-05-01]
+titulo: Update Payment
+---
+ 
+# TDD-[0005]: Actualizar Payment
+ 
+## Contexto de Negocio (PRD)
+ 
+### Objetivo
+Permitir actualizar el estado de un pago existente, únicamente al valor "Canceled".
+ 
+### User Persona
+ 
+- **Nombre**: Administrativo del club
+- **Necesidad**: Cancelar un pago registrado cuando corresponda, sin poder modificar otros campos ni eliminar el registro.
+
+### Criterios de Aceptación
+- El único campo modificable de un pago es `status`.
+- El único valor permitido para `status` en una actualización es `Canceled`.
+- No se permite cambiar `status` a `Pending` ni a `Paid` mediante este endpoint.
+- El pago debe existir para poder actualizarlo.
