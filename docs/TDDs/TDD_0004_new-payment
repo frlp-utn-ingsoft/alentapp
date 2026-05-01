@@ -1,0 +1,24 @@
+---
+autor: [Valentina Pértile de la Vega]
+fecha: [2026-05-01]
+titulo: New Payment
+---
+
+# TDD-[0004]: [Crear Payment]
+
+## Contexto de Negocio (PRD)
+
+### Objetivo
+Permite registrar un nuevo paso asociado a un socio que tenga como estado inidcial "Pending".
+
+### User Persona
+ 
+- **Nombre**: Administrativo del club
+- **Necesidad**: Registrar el pago de un socio indicando monto, mes, año y fecha de vencimiento.
+
+### Criterios de Aceptación
+ 
+- El sistema debe permitir crear un pago con los campos `amount`, `month`, `year`, `due_date`, `payment_date` (nullable) y `member_id`.
+- El campo `status` se establece automáticamente como `Pending` al momento de la creación.
+- El `member_id` debe corresponder a un socio existente.
+- El `amount` debe ser mayor a cero.
