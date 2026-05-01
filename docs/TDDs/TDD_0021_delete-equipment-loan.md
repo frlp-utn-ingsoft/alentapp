@@ -14,7 +14,7 @@ Permitir que un administrativo elimine un registro de préstamo de equipamiento 
 
 ### User Persona
 
-- **Nombre**: Alberto (Administrativo).
+- **Nombre**: administrativo
 - **Necesidad**: Borrar un préstamo registrado incorrectamente. Necesita confirmación de que la operación fue exitosa.
 
 ### Criterios de Aceptación
