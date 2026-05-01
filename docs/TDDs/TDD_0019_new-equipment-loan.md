@@ -1,4 +1,3 @@
-
 ---
 autor: Macarena Romero Olmo
 fecha: 2026-05-01
