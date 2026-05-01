@@ -1,0 +1,26 @@
+---
+autor: [Valentina Pértile de la Vega]
+fecha: [2026-05-01]
+titulo: Create MedicalCertificate
+---
+
+# TDD-[0006]: Crear MedicalCertificate
+
+## Contexto de Negocio (PRD)
+
+### Objetivo
+
+Registrar un certificado médico asegurando que solo exista uno activo por socio.
+
+### User Persona
+
+- **Nombre**: Administrativo del club
+- **Necesidad**: Cargar certificados médicos y mantener vigente únicamente el más reciente.
+
+### Criterios de Aceptación
+
+- El sistema debe permitir crear un certificado con los campos: `issue_date`, `expiry_date`, `doctor_license` y `member_id`.
+- El campo `is_invalidated` se establece automáticamente como Falso.
+- Al crear un nuevo certificado, los anteriores del mismo socio deben pasar a `is_invalidated: true`.
+- Solo puede existir un certificado activo por socio.
+- `expiry_date` debe ser posterior a `issue_date`.
