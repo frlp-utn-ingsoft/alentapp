@@ -47,6 +47,8 @@ Actualización de campos en la entidad `Payment`:
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Pago ya estaba pagado       | Error: "El pago ya ha sido procesado"         | 409 Conflict              |
+| Pago está anulado           | Error: "No se puede pagar un registro anulado"| 409 Conflict              |
+| ID de pago inexistente      | Error: "Pago no encontrado"                   | 404 Not Found             |
 
 ## Plan de Implementación
 1. Agregar el caso de uso `PagarPaymentUseCase` en la capa Application.
