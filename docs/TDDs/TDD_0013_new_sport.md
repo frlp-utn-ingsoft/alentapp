@@ -1,7 +1,7 @@
 ---
 id: 0013
 estado: Propuesto
-autor: [Maximo Carpignano]
+autor: Maximo Carpignano
 fecha: 2026-04-30
 titulo: Registro de Nuevos Deportes
 ---
