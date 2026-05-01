@@ -1,4 +1,4 @@
-cat > /mnt/c/Users/macar/Desktop/integradorIng/alentapp/docs/TDDs/TDD_0019_new-equipment-loan.md << 'EOF'
+
 ---
 autor: Macarena Romero Olmo
 fecha: 2026-05-01
