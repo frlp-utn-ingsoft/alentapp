@@ -14,7 +14,7 @@ Permitir que un administrativo elimine una sanción registrada por error, manten
 
 ### User Persona
 
-- **Nombre**: Alberto (Administrativo).
+- **Nombre**: administrativo
 - **Necesidad**: Poder borrar una disciplina cargada incorrectamente. Necesita confirmación de que la operación fue exitosa.
 
 ### Criterios de Aceptación

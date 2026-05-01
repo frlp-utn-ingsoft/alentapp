@@ -14,7 +14,7 @@ Permitir que un administrativo registre una sanción o disciplina aplicada a un 
 
 ### User Persona
 
-- **Nombre**: Alberto (Administrativo).
+- **Nombre**: administrativo
 - **Necesidad**: Registrar sanciones o suspensiones a socios de forma rápida y sin errores de fechas. No puede cargar una disciplina con fecha de fin anterior a la de inicio.
 
 ### Criterios de Aceptación

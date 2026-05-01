@@ -14,7 +14,7 @@ Permitir que un administrativo modifique los datos de una sanción existente, ga
 
 ### User Persona
 
-- **Nombre**: Alberto (Administrativo).
+- **Nombre**: administrativo
 - **Necesidad**: Corregir errores en sanciones ya cargadas (motivo, fechas, tipo de suspensión) sin tener que eliminar y volver a crear el registro.
 
 ### Criterios de Aceptación
