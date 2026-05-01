@@ -1,0 +1,24 @@
+---
+autor: [Valentina Pértile de la Vega]
+fecha: [2026-05-01]
+titulo: Delete Payment
+---
+
+# TDD-[0006]: Eliminar Payment (Borrado Lógico)
+
+## Contexto de Negocio (PRD)
+
+### Objetivo
+Permitir eliminar un pago de forma lógica, cambiando su estado a `Canceled` sin borrar físicamente el registro. ES UN CAMBIO EXCLUSIVAMENTE LÓGICO
+
+### User Persona
+
+- **Nombre**: Administrativo del club
+- **Necesidad**: Eliminar un pago registrado sin perder el historial.
+
+### Criterios de Aceptación
+
+- El sistema no debe eliminar físicamente el registro.
+- El sistema debe cambiar el estado del pago a `Canceled`.
+- El pago debe existir para poder ser eliminado.
+- Si el pago ya se encuentra en estado `Canceled`, la operación no debe generar cambios.
