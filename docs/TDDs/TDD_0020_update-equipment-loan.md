@@ -14,7 +14,7 @@ Permitir que un administrativo modifique los datos de un préstamo de equipamien
 
 ### User Persona
 
-- **Nombre**: Alberto (Administrativo).
+- **Nombre**: administrativo.
 - **Necesidad**: Actualizar el estado de un préstamo cuando el socio devuelve el equipamiento o cuando se detecta que fue dañado, sin tener que eliminar y recrear el registro.
 
 ### Criterios de Aceptación
@@ -39,7 +39,6 @@ No se requieren cambios en el modelo. Se utiliza la entidad `EquipmentLoan` defi
 export interface UpdateEquipmentLoanRequest {
     item_name?: string;
     status?: EquipmentLoanStatus; // 'Loaned' | 'Returned' | 'Damaged'
-    loan_date?: string; // ISO DateTime string
     due_date?: string;  // ISO DateTime string
 }
 ```

@@ -15,7 +15,7 @@ Permitir que un administrativo registre el préstamo de equipamiento a un socio,
 
 ### User Persona
 
-- **Nombre**: Alberto (Administrativo).
+- **Nombre**: administrativo
 - **Necesidad**: Registrar préstamos de material deportivo rápidamente, con la seguridad de que el sistema le avise si el socio no tiene permitido solicitar equipamiento según su categoría.
 
 ### Criterios de Aceptación
@@ -25,6 +25,7 @@ Permitir que un administrativo registre el préstamo de equipamiento a un socio,
 - El sistema debe asociar el préstamo a un socio existente mediante `member_id`.
 - Al finalizar, el sistema debe retornar el registro creado con su `id` generado y estado "Loaned".
 - Si el socio no existe, el sistema debe retornar un error claro.
+- Al crear el préstamo, el status inicial debe ser "Loaned".
 
 ## Diseño Técnico (RFC)
 
