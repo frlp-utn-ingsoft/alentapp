@@ -28,24 +28,54 @@ titulo: [Modificacion de casillero]
 ## Diseño Técnico (RFC)
 
 ### Modelo de Datos
-[Descripción de cambios en Prisma o nuevas entidades.]
-*   `campo`: Tipo (Restricciones).
+Se utilizará la entidad 'locker' existente para la actualizar los datos basicos de un casillero. 
+*   `id`: UUID. Identificador único del casillero.
+*   `number`: Number. Número identificatorio del casillero. Obligatorio, único y mayor a cero.
+*   `status`: String. Estado actual del casillero.
+*   `is_active`: Boolean. Indica si el casillero se encuentra activo.
+
+Estados permitido para 'status':
+*   'Aviable': casillero disponible.
+*   'Assidned': casillero asignado.
+*   'Maintenance': casillero en mantenimiento.
+
+Restricciones:
+*   'id' debe corresponder a un casilelro existente.
+*   'number' debe ser unico.
+*   'number'debe er mayor que cero.
+*   'status' debe pertenecer a lso estados permitidos.
 
 ### Contrato de API (@alentapp/shared)
-[Definición de endpoints y tipos compartidos.]
-*   **Endpoint**: `METHOD /api/v1/[recurso]`
+
+*   **Endpoint**: `PUT /api/v1/lockers/:id`
+
 *   **Request Body**:
+
 ```ts
 {
-    // propiedades
+    number: number;
+    status: "Available" | "Assigned" | "Maintenance";
+}
+```
+
+*   **Response Body**:
+
+```ts
+{
+    id: string;
+    number: number;
+    status: "Available" | "Assigned" | "Maintenance";
+    is_active: boolean;
 }
 ```
 
 ### Componentes de Arquitectura Hexagonal
-[Cómo se distribuye la lógica en las capas.]
-*   **Domain**: [Entidades, Value Objects, Reglas de negocio]
-*   **Application**: [Casos de Uso, Puertos de Salida]
-*   **Infrastructure**: [Adaptadores, Controladores, Implementación de Repositorios]
+
+*   **Domain**: Entidad `Locker` y reglas de negocio asociadas a la modificación de casilleros: número obligatorio, número único, número mayor a cero y estado válido.
+
+*   **Application**: Caso de uso `UpdateLockerUseCase`, encargado de validar la existencia del casillero, verificar los datos recibidos, controlar que no exista otro casillero con el mismo número y solicitar la actualización.
+
+*   **Infrastructure**: Controlador HTTP para `PUT /api/v1/lockers/:id`, implementación del repositorio de casilleros utilizando Prisma y persistencia de los cambios en base de datos.
 
 ## Casos de Borde y Errores
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
