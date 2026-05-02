@@ -1,25 +1,30 @@
 ---
-autor: [Nombre]
-fecha: [AAAA-MM-DD]
-titulo: [Nombre de la Funcionalidad]
+autor: [Luana Suarez]
+fecha: [2026-05-01]
+titulo: [Modificacion de casillero]
 ---
 
-# TDD-[XXXX]: [Nombre de la Funcionalidad]
+# TDD-[XXXX]: [Modificación de casillero]
+]
 
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-[Descripción del valor de negocio y qué problema resuelve.]
+[Permitir que un administrador del club modifique los datos basicos de un casillero existente dentor del sistema Alentapp. Esta funcionalidad permite corregir o actualizar la información de un casillero ya registrado, manteniendo la consistencia de los datos y evitando que existan casilleros duplicados.]
 
 ### User Persona
-*   **Nombre**: [Nombre del rol/persona]
-*   **Necesidad**: [Descripción de lo que necesita lograr y sus puntos de dolor.]
+*   **Nombre**: [Administrador del club]
+*   **Necesidad**: [Actualizar la informacion de un casillero existente, asegurando que el numero del casillero siga siendo valido y que el estado restringido refleje su situacion actual]
 
 ### Criterios de Aceptación
-*   [Criterio 1: ej. El sistema debe validar que...]
-*   [Criterio 2: ej. Al finalizar, el sistema debe...]
-*   [Criterio 3: ej. El estado por defecto debe ser...]
-
+*   [El sistema debera permitir modificar un casillero existente]
+*   [El sistema deberá validar que el casillero exista antes de actualizarlo..]
+*   [El sistema deberá validar que el campo `number` sea obligatorio.]
+*   El sistema debera validar que el campo 'number sea mayor que cero'.
+*   El sistema debera validar que no exista otro casillero registrado con el mismo 'number'.
+*   El sistema deberá validar que el campo 'status' tenga un valor permitido.
+*   Al finalizar la modificación, el sistema deberá guardar los nuevos datos del casillero.
+*   Si el casillero no existe, el sistema deberá rechazar la operación e informar el error correspondiente.
 ## Diseño Técnico (RFC)
 
 ### Modelo de Datos
