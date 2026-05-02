@@ -28,6 +28,16 @@ Digitalizar el registro de sanciones disciplinarias aplicadas a socios. Una sanc
 
 - Si el usuario completa todos los campos obligatorios con datos válidos, el sistema debe registrar la sanción y devolver una confirmación exitosa.
 
+### Campos obligatorios
+
+Los siguientes son campos obligatorios para registrar una sanción:
+
+- `member_id`: Identificador del socio.
+- `reason`: Motivo/descripcion de la sancion.
+- `start_date`: Fecha y hora de inicio de la sanción.
+- `end_date`: Fecha y hora de finalización de la sanción. 
+- `is_total_suspension`: Indica si la sanción bloquea completamente al socio.
+
 ### Escenario de fallo
 
 - Si el socio no existe, el sistema debe rechazar la operación e informar el conflicto.
@@ -39,10 +49,10 @@ Digitalizar el registro de sanciones disciplinarias aplicadas a socios. Una sanc
 Se definirá la entidad `Discipline` con las siguientes propiedades y restricciones:
 
 - `id`: Identificador único universal (UUID).
-- `motivo`: Cadena de texto obligatoria que describe la causa de la sanción.
-- `fecha_inicio`: Fecha y hora de inicio de la sanción.
-- `fecha_fin`: Fecha y hora de finalización de la sanción.
-- `es_suspension_total`: Valor booleano que indica si la sanción bloquea completamente al socio.
+- `reason`: Cadena de texto obligatoria que describe la causa de la sanción.
+- `start_date`: Fecha y hora de inicio de la sanción.
+- `end_date`: Fecha y hora de finalización de la sanción.
+- `is_total_suspension`: Valor booleano que indica si la sanción bloquea completamente al socio.
 - `member_id`: Identificador del socio sancionado (UUID, clave foránea hacia `Member`).
 
 ### Contrato de API (@alentapp/shared)
@@ -53,10 +63,10 @@ Se definirá la entidad `Discipline` con las siguientes propiedades y restriccio
 ```ts
 {
     memberId: string;
-    motivo: string;
-    fechaInicio: string;
-    fechaFin: string;
-    esSuspensionTotal: boolean;
+    reason: string;
+    startDate: string;
+    endDate: string;
+    isTotalSuspension: boolean;
 }
 ```
 
@@ -78,7 +88,7 @@ Se definirá la entidad `Discipline` con las siguientes propiedades y restriccio
 
 ## Plan de Implementación
 
-1. Definir esquema de persistencia y correr migración.
+1. Definir esquema de persistencia y correr migración: crear la tabla Discipline con sus relaciones hacia Member y los campos correspondientes.
 2. Crear tipos en shared y puerto en el Dominio.
-3. Implementar el repositorio y el caso de uso.
-4. Crear formulario en React y conectar con el endpoint del backend.
+3. Implementar el repositorio y el caso de uso:desarrollar la lógica de negocio para verificar que el socio exista, validar que todos los campos obligatorios estén presentes, comprobar que la fecha de finalización sea posterior a la fecha de inicio y persistir la sanción en la base de datos.
+4. Crear formulario en React y conectar con el endpoint del backend: desarrollar la interfaz para que el equipo de Disciplina registre sanciones, enviando los datos al endpoint correspondiente (POST /api/v1/discipline) y mostrando mensajes claros ante operaciones exitosas o errores de validación.
