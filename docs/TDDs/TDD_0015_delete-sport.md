@@ -1,25 +1,32 @@
 ---
-autor: [Nombre]
-fecha: [AAAA-MM-DD]
-titulo: [Nombre de la Funcionalidad]
+autor: Luana Suarez
+fecha: 2026-05-01
+titulo: Baja de deporte
 ---
 
-# TDD-[XXXX]: [Nombre de la Funcionalidad]
+# TDD-0015: Baja de deporte
 
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-[Descripción del valor de negocio y qué problema resuelve.]
+
+Permitir que un administrador del club dé de baja un deporte existente dentro del sistema Alentapp.
+
+Esta funcionalidad permite quitar un deporte del uso operativo del sistema sin eliminar físicamente su registro de la base de datos. De esta forma, se mantiene la información histórica y se evita perder datos necesarios para consultas futuras.
 
 ### User Persona
-*   **Nombre**: [Nombre del rol/persona]
-*   **Necesidad**: [Descripción de lo que necesita lograr y sus puntos de dolor.]
+
+*   **Nombre**: Administrador del club
+*   **Necesidad**: Dar de baja deportes que ya no se ofrecen en el club, evitando que sigan disponibles para futuras operaciones.
 
 ### Criterios de Aceptación
-*   [Criterio 1: ej. El sistema debe validar que...]
-*   [Criterio 2: ej. Al finalizar, el sistema debe...]
-*   [Criterio 3: ej. El estado por defecto debe ser...]
 
+*   El sistema deberá permitir dar de baja un deporte existente.
+*   El sistema deberá validar que el deporte exista antes de darlo de baja.
+*   El sistema no deberá eliminar físicamente el deporte de la base de datos.
+*   Al finalizar la baja, el sistema deberá marcar el deporte como inactivo.
+*   Un deporte dado de baja no deberá aparecer como activo para futuras operaciones.
+*   Si el deporte no existe, el sistema deberá rechazar la operación e informar el error correspondiente.
 ## Diseño Técnico (RFC)
 
 ### Modelo de Datos
