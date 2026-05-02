@@ -31,11 +31,11 @@ Sin cambios en Prisma. Se actualizan campos existentes de `Payment`:
 
 ### Contrato de API (@alentapp/shared)
 * **Endpoint**: `PATCH /api/v1/payment/{id}`
-* **Request Body**:
-```json
+* **Request Body** (UpdatePaymentRequest):
+```ts
 {
-    "status": "Paid",
-    "payment_date": "2026-05-05T10:00:00Z"
+    status: 'Paid';              // Único valor válido para la confirmación
+    payment_date: string;        // ISO 8601 (YYYY-MM-DDTHH:mm:ssZ)
 }
 ```
 

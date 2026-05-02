@@ -29,9 +29,9 @@ Se modifica el campo `status` de la entidad `Payment` a `Canceled`.
 
 ### Contrato de API (@alentapp/shared)
 * **Endpoint**: `PATCH /api/v1/payment/{id}/cancel`
-* **Request Body**:
-```json
-{}
+* **Request Body** (CancelPaymentRequest):
+```ts
+{} // Sin campos: la acción queda determinada por el endpoint
 ```
 
 ### Componentes de Arquitectura Hexagonal

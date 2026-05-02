@@ -41,14 +41,14 @@ Se utiliza la entidad `Payment`:
 
 ### Contrato de API (@alentapp/shared)
 * **Endpoint**: `POST /api/v1/payment`
-* **Request Body**:
-```json
+* **Request Body** (CreatePaymentRequest):
+```ts
 {
-    "amount": 15000.50,
-    "month": 5,
-    "year": 2026,
-    "due_date": "2026-05-10",
-    "member_id": "uuid-del-socio"
+    amount: number;      // Monto del pago, debe ser mayor a cero
+    month: number;       // Mes del pago (1-12)
+    year: number;        // Año del pago
+    due_date: string;    // ISO 8601 (YYYY-MM-DD)
+    member_id: string;   // UUID del socio
 }
 ```
 
