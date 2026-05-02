@@ -1,6 +1,6 @@
 ---
 id: 0008
-estado: Implementado
+estado: Propuesto
 autor: Tomás Bellizzi
 fecha: 2026-05-01
 titulo: Registro de Nuevo Deporte (Sport)

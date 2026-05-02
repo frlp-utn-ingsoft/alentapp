@@ -1,7 +1,7 @@
 ---
 id: 0010
+estado: Propuesto
 autor: Tomás Bellizzi
-estado: Implementado
 fecha: 2026-05-01
 titulo: Baja de Deporte Existente (Sport)
 ---

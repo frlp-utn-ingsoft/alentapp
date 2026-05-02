@@ -1,6 +1,6 @@
 ---
 id: 0011
-estado: Implementado
+estado: Propuesto
 autor: Tomás Bellizzi
 fecha: 2026-05-01
 titulo: Consulta de Deporte (Sport)
