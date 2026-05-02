@@ -82,11 +82,28 @@ Restricciones:
 *   **Infrastructure**: Controlador HTTP para `PUT /api/v1/sports/:id`, implementación del repositorio de deportes utilizando Prisma y persistencia de los cambios en base de datos.
 
 ## Casos de Borde y Errores
-| Escenario                   | Resultado Esperado                            | Código HTTP               |
-| ----------------------------| --------------------------------------------- | ------------------------- |
-| [Ej: DNI ya registrado]     | [Error de validación con mensaje claro]       | 409 Conflict              |
-| [Ej: Formato email inválido]| [Error de validación de formato]              | 400 Bad Request           |
+
+| Escenario                         | Resultado Esperado                                      | Código HTTP      |
+| --------------------------------- | ------------------------------------------------------- | ---------------- |
+| El deporte no existe              | Error indicando que el deporte no fue encontrado         | 404 Not Found    |
+| Se intenta modificar `name`       | Error indicando que el nombre del deporte es inmutable   | 400 Bad Request  |
+| No se envía `max_capacity`        | Error indicando que el cupo máximo es requerido          | 400 Bad Request  |
+| `max_capacity` es menor o igual a cero | Error indicando que el cupo debe ser mayor a cero    | 400 Bad Request  |
+| Error inesperado al guardar       | Error interno del servidor                               | 500 Server Error |
 
 ## Plan de Implementación
-1. [Paso 1: ej. Definir tipos en @alentapp/shared]
-2. [Paso 2: ej. Implementar entidad en Domain]
+
+1. Definir el contrato compartido para modificar deportes en `@alentapp/shared`.
+2. Verificar que el modelo `Sport` exista en Prisma con los campos necesarios.
+3. Implementar la lógica de dominio de `Sport`.
+4. Implementar el caso de uso `UpdateSportUseCase`.
+5. Implementar en el repositorio la búsqueda de deporte por `id`.
+6. Validar que el deporte exista antes de modificarlo.
+7. Validar que no se intente modificar el campo `name`.
+8. Validar que `max_capacity` sea obligatorio y mayor a cero.
+9. Actualizar únicamente los campos `description` y `max_capacity`.
+10. Implementar el endpoint `PUT /api/v1/sports/:id`.
+11. Agregar prueba de modificación exitosa de deporte.
+12. Agregar prueba de error por deporte inexistente.
+13. Agregar prueba de error por intento de modificar `name`.
+14. Agregar prueba de error por `max_capacity` inválido.
