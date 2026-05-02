@@ -21,7 +21,7 @@ Permitir a los administradores eliminar sanciones disciplinarias, manteniendo ac
 ### 1.3. Criterios de Aceptación
 
 *   Como administrador, quiero eliminar una sanción para no suspender incorrectamente a un socio.
-    - Escenario de éxito: "Si el usuario elimina una sanción existente, el sistema debe borrar el registro y notificar al usuario".
+    - Escenario de éxito: "Si el usuario elimina una sanción existente, el sistema debe marcarla como eliminada y notificar al usuario".
     - Escenario de fallo: "Si el usuario intenta eliminar una sanción inexistente, el sistema debe cancelar la acción y notificar al usuario".
     - Escenario de fallo: "Si ocurre un error de conexión con la base de datos, el sistema debe informar un error interno".
 
@@ -36,15 +36,17 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 *   `start_date`: Fecha, obligatoria.
 *   `end_date`: Fecha, obligatoria.
 *   `is_total_suspension`: Booleano, obligatorio.
+*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema.
 *   `member_id`: Identificador del socio sancionado, obligatorio.
+
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
 *   **Endpoint**: `DELETE /api/v1/disciplines/:id`
-*   **Request Body**: No aplica
+*   **Request Body**: No aplica.
 
 
-### 2.3 Esquema de Persistencia
+### 2.3. Esquema de Persistencia
 
 ```prisma
 model Discipline {
@@ -53,6 +55,7 @@ model Discipline {
   start_date          DateTime
   end_date            DateTime
   is_total_suspension Boolean
+  deleted_at          DateTime?
   member_id           String
   member              Member   @relation(fields: [member_id], references: [id])
 }
@@ -62,9 +65,9 @@ model Discipline {
 
 ### 3.1. Componentes de Arquitectura Hexagonal
 
-*   **Puerto (Domain)**: `DisciplineRepository` con métodos `findById(id)` y `delete(id)`.
+*   **Puerto (Domain)**: `DisciplineRepository` con métodos `findById(id)` y `softDelete(id)`.
 *   **Adaptador de Entrada (Delivery)**: `DisciplineController`, recibe el parámetro `id` desde la URL y delega al caso de uso.
-*   **Adaptador de Salida (Infrastructure)**: `PostgresDisciplineRepository`, implementa los métodos `findById` y `delete`.
+*   **Adaptador de Salida (Infrastructure)**: `PostgresDisciplineRepository`, implementa los métodos `findById` y `softDelete`.
 
 ### 3.2. Lógica del Caso de Uso
 
@@ -73,7 +76,7 @@ model Discipline {
 1. Recibir el `id` de la sanción a eliminar.
 2. Buscar la sanción por `id`.
 3. Notificar el error en caso de que no exista una sanción con ese id.
-4. Eliminar la sanción.
+4. Marcar la sanción como eliminada, asignando la fecha actual a `deleted_at`.
 5. Retornar respuesta de éxito vacía.
 
 ## 4. Casos de Borde y Errores
@@ -81,11 +84,12 @@ model Discipline {
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Sanción inexistente     | "La sanción no existe"       | 404 Not Found              |
 | ID con formato inválido | "Formato de ID inválido" | 400 Bad Request |
+| Sanción ya eliminada | "La sanción ya fue eliminada" | 409 Conflict |
 | Error de conexión a DB | "Error interno, reintente más tarde" | 500 Internal Server Error |
 
 ## 5. Plan de Implementación
 
-1. Ampliar el puerto `DisciplineRepository` con los métodos `findById(id)` y `delete(id)`.
+1. Ampliar el puerto `DisciplineRepository` con los métodos `findById(id)` y `softDelete(id)`.
 2. Implementar el caso de uso `DeleteDisciplineUseCase`.
 3. Implementar la eliminación en `PostgresDisciplineRepository`.
 4. Crear la ruta `DELETE /api/v1/disciplines/:id` en `DisciplineController`.
@@ -94,4 +98,4 @@ model Discipline {
 ## 6. Observaciones Adicionales
 
 * Antes de eliminar, el frontend debería mostrar una confirmación al usuario para evitar borrados accidentales.
-
+* Esta operación realiza un borrado lógico: la sanción no se elimina físicamente de la base de datos, sino que se marca con `deleted_at`.

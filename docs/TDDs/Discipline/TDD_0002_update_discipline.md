@@ -36,7 +36,9 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 *   `start_date`: Fecha, obligatoria.
 *   `end_date`: Fecha, obligatoria.
 *   `is_total_suspension`: Booleano, obligatorio.
+*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema.
 *   `member_id`: Identificador del socio sancionado, obligatorio.
+
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
@@ -51,7 +53,7 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 }
 ```
 
-### 2.3 Esquema de Persistencia
+### 2.3. Esquema de Persistencia
 
 ```prisma
 model Discipline {
@@ -60,6 +62,7 @@ model Discipline {
   start_date          DateTime
   end_date            DateTime
   is_total_suspension Boolean
+  deleted_at          DateTime?
   member_id           String
   member              Member   @relation(fields: [member_id], references: [id])
 }
@@ -79,7 +82,7 @@ model Discipline {
 **Caso de Uso**: `UpdateDisciplineUseCase`.
 1. Recibir el `id` de la sanción a actualizar.
 2. Buscar la sanción por `id`.
-3. Si no existe, retornar error.
+3. Si no existe o tiene `deleted_at` distinto de null, retornar error.
 4. Validar los datos de entrada.
 5. Si se modifican fechas, verificar que `end_date` sea estrictamente posterior a `start_date`.
 6. Mapear el DTO a Entidad de Dominio.
@@ -94,6 +97,7 @@ model Discipline {
 | Fecha de fin menor a fecha de inicio | "La fecha de fin debe ser estrictamente posterior a la fecha de inicio" | 400 Bad Request |
 | Campos con formato inválido | "Formato de datos inválido" | 400 Bad Request |
 | Request sin campos para actualizar | "Debe enviar al menos un campo para actualizar" | 400 Bad Request |
+| Sanción eliminada | "No se puede modificar una sanción eliminada" | 409 Conflict |
 | Error de conexión a DB | "Error interno, reintente más tarde" | 500 Internal Server Error |
 
 ## 5. Plan de Implementación
@@ -108,4 +112,5 @@ model Discipline {
 ## 6. Observaciones Adicionales
 
 * No se permite modificar el `member_id` desde este endpoint para evitar reasignar sanciones entre socios.
+* No se permite modificar una sanción que ya ha sido eliminada. Atributo `deleted_at` distinto de null.
 

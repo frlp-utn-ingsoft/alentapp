@@ -21,7 +21,7 @@ Permitir a los administradores registrar sanciones disciplinarias a los socios d
 ### 1.3. Criterios de Aceptación
 *   Como administrador, quiero registrar una sanción para bloquear al socio para que no pueda interactuar con las instalaciones.
     - Escenario de éxito: "Si el usuario completa el registro con los datos correctos, el sistema debe responder creando la sanción y notificando al usuario".
-    - Escenario de fallo: "Si el usuario ingresa una fecha de fin menor o igual a la fecha de inicio, el sistema debe bloquear la acción y notificar al usuario que la fecha de fin debe ser posterior a la fecha de inicio".
+    - Escenario de fallo: "Si el usuario ingresa una fecha de fin menor o igual a la fecha de inicio, el sistema debe bloquear la acción y notificar al usuario que la fecha de fin debe ser estrictamente posterior a la fecha de inicio".
     - Escenario de fallo: "Si el usuario ingresa un socio que no existe, el sistema debe responder indicando el error y cancelando la operación".
 
 ## 2. Diseño Técnico 
@@ -35,7 +35,9 @@ Se definirá la entidad "Discipline" con las siguientes propiedades:
 *   `start_date`: Fecha, obligatoria.
 *   `end_date`: Fecha, obligatoria.
 *   `is_total_suspension`: Booleano, obligatorio.
+*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema.
 *   `member_id`: Identificador del socio sancionado, obligatorio.
+
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
@@ -51,7 +53,7 @@ Se definirá la entidad "Discipline" con las siguientes propiedades:
 }
 ```
 
-### 2.3 Esquema de Persistencia
+### 2.3. Esquema de Persistencia
 
 ```prisma
 model Discipline {
@@ -60,6 +62,7 @@ model Discipline {
   start_date          DateTime
   end_date            DateTime
   is_total_suspension Boolean
+  deleted_at          DateTime?
   member_id           String
   member              Member   @relation(fields: [member_id], references: [id])
 }
@@ -101,4 +104,7 @@ model Discipline {
 
 ## 6. Observaciones Adicionales
 
+* Al crear una sanción, `deleted_at` debe inicializarse en `null`.
+* Las sanciones con `deleted_at` distinto de `null` no deben considerarse activas.
 * La consulta de si un socio está suspendido actualmente debería resolverse comparando la fecha actual con `start_date` y `end_date`.
+
