@@ -1,24 +1,39 @@
 ---
-autor: [Nombre]
-fecha: [AAAA-MM-DD]
-titulo: [Nombre de la Funcionalidad]
+autor: [Luana Suarez]
+fecha: [2026-05-02]
+titulo: [Baja del casillero]
 ---
 
-# TDD-[XXXX]: [Nombre de la Funcionalidad]
+
+---
+autor: Luana Suarez
+fecha: 2026-05-01
+titulo: Baja de casillero
+---
+
+# TDD-0012: Baja de casillero
 
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-[Descripción del valor de negocio y qué problema resuelve.]
+
+Permitir que un administrador del club dé de baja un casillero existente dentro del sistema Alentapp.
+
+Esta funcionalidad permite quitar un casillero del uso operativo del sistema sin eliminar físicamente su registro de la base de datos. De esta forma, se mantiene la información histórica y se evita perder datos que podrían ser necesarios para consultas futuras.
 
 ### User Persona
-*   **Nombre**: [Nombre del rol/persona]
-*   **Necesidad**: [Descripción de lo que necesita lograr y sus puntos de dolor.]
+
+*   **Nombre**: Administrador del club
+*   **Necesidad**: Dar de baja casilleros que ya no se utilizan, que fueron retirados del club o que no deben estar disponibles para nuevas operaciones.
 
 ### Criterios de Aceptación
-*   [Criterio 1: ej. El sistema debe validar que...]
-*   [Criterio 2: ej. Al finalizar, el sistema debe...]
-*   [Criterio 3: ej. El estado por defecto debe ser...]
+
+*   El sistema deberá permitir dar de baja un casillero existente.
+*   El sistema deberá validar que el casillero exista antes de darlo de baja.
+*   El sistema no deberá eliminar físicamente el casillero de la base de datos.
+*   Al finalizar la baja, el sistema deberá marcar el casillero como inactivo.
+*   Un casillero dado de baja no deberá aparecer como disponible para futuras operaciones.
+*   Si el casillero no existe, el sistema deberá rechazar la operación e informar el error correspondiente.
 
 ## Diseño Técnico (RFC)
 
