@@ -26,6 +26,7 @@ Este TDD es necesario porque una sancion activa puede condicionar otras acciones
 - El sistema debe validar que el socio exista antes de crear la sancion.
 - El sistema debe validar que el motivo de la sancion no este vacio.
 - El sistema debe validar que `start_date` y `end_date` sean fechas validas.
+- El sistema debe permitir registrar una sancion con `start_date` anterior a `fecha.now()`.
 - La regla de negocio principal indica que `end_date` debe ser estrictamente posterior a `start_date`.
 - El sistema debe registrar si la sancion corresponde a una suspension total.
 - Si la carga es correcta, debe crear la sancion y devolver sus datos.
