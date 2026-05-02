@@ -1,5 +1,5 @@
 ---
-id: 0061
+id: "0061"
 estado: Propuesto
 autor: Julian Coloma
 fecha: 2026-05-01
@@ -31,13 +31,13 @@ Entidad `EquipmentLoan`:
 * `id`: UUID (PK).
 * `item_name`: String.
 * `status`: Enum ('Loaned', 'Returned', 'Damaged').
-* `loan_date`: DateTime (Default now).
+* `loan_date`: DateTime. (Este campo no se envía en el request; el backend lo setea automáticamente utilizando la fecha y hora actual (`now()`) en el momento de la creación)
 * `due_date`: DateTime.
 * `member_id`: UUID (FK).
 
 ### Contrato de API (@alentapp/shared)
-* **Endpoint**: `POST /api/v1/prestamos`
-* **Request Body**:
+* **Endpoint**: `POST /api/v1/equipament-loan`
+* **Request Body** (CreateLoanRequest):
 ```ts
 {
     member_id: string;
@@ -45,6 +45,18 @@ Entidad `EquipmentLoan`:
     due_date: string; // ISO Date String
 }
 ```
+- **Response** (Success): 201 created
+```ts
+{
+    id: string;
+    member_id: string;
+    item_name: string;
+    loan_date: string; // Generado automáticamente
+    due_date: string;
+    status: 'Loaned';
+}
+```
+
 
 ### Componentes de Arquitectura Hexagonal
 
@@ -61,6 +73,7 @@ Entidad `EquipmentLoan`:
 | Socio con categoría "Cadet"      | Mensaje: "Los socios Cadetes tienen prohibido solicitar material" | 403 Forbidden      |
 | Fecha de devolución anterior     | Mensaje: "La fecha de devolución debe ser posterior a la de inicio" | 400 Bad Request    |
 | Socio inexistente                | Mensaje: "El socio especificado no existe"                      | 404 Not Found      |
+| `item_name` vacío           | Mensaje: "El nombre del ítem es obligatorio"  | 400 Bad Request           |
 
 ## Plan de Implementación
 

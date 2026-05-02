@@ -1,5 +1,5 @@
 ---
-id: 0062
+id: "0062"
 estado: Propuesto
 autor: Julian Coloma
 fecha: 2026-05-01
@@ -25,11 +25,22 @@ Registrar el reingreso del material al inventario del club y dejar constancia de
 ## Diseño Técnico (RFC)
 
 ### Contrato de API (@alentapp/shared)
-* **Endpoint**: `PATCH /api/v1/prestamos/:id/status`
+* **Endpoint**: `PATCH /api/v1/equipament-loan/:id/status`
 * **Request Body** (UpdateLoanStatusRequest):
 ```ts
 {
     status: 'Returned' | 'Damaged';
+}
+```
+- **Response** (Success): 200 ok
+```ts
+{
+    id: string;
+    member_id: string;
+    item_name: string;
+    loan_date: string;
+    due_date: string;
+    status: 'Returned' | 'Damaged'; // El nuevo estado actualizado
 }
 ```
 ### Componentes de Arquitectura Hexagonal
