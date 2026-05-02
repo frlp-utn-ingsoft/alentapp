@@ -1,5 +1,5 @@
 ---
-id: 0054
+id: "0054"
 estado: Propuesto
 autor: Tomas
 fecha: 2026-05-01
