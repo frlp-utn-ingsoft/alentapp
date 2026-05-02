@@ -77,12 +77,27 @@ Restricciones:
 
 *   **Infrastructure**: Controlador HTTP para `POST /api/v1/sports`, implementación del repositorio de deportes utilizando Prisma y persistencia del nuevo deporte en base de datos.
 
+
 ## Casos de Borde y Errores
-| Escenario                   | Resultado Esperado                            | Código HTTP               |
-| ----------------------------| --------------------------------------------- | ------------------------- |
-| [Ej: DNI ya registrado]     | [Error de validación con mensaje claro]       | 409 Conflict              |
-| [Ej: Formato email inválido]| [Error de validación de formato]              | 400 Bad Request           |
+
+| Escenario                         | Resultado Esperado                                  | Código HTTP      |
+| --------------------------------- | --------------------------------------------------- | ---------------- |
+| No se envía `name`                | Error indicando que el nombre es requerido           | 400 Bad Request  |
+| No se envía `max_capacity`        | Error indicando que el cupo máximo es requerido      | 400 Bad Request  |
+| `max_capacity` es menor o igual a cero | Error indicando que el cupo debe ser mayor a cero | 400 Bad Request  |
+| Error inesperado al guardar       | Error interno del servidor                           | 500 Server Error |
 
 ## Plan de Implementación
-1. [Paso 1: ej. Definir tipos en @alentapp/shared]
-2. [Paso 2: ej. Implementar entidad en Domain]
+
+1. Definir el contrato compartido para crear deportes en `@alentapp/shared`.
+2. Verificar o agregar el modelo `Sport` en Prisma.
+3. Implementar la lógica de dominio de `Sport`.
+4. Implementar el caso de uso `CreateSportUseCase`.
+5. Implementar el repositorio de deportes usando Prisma.
+6. Implementar el endpoint `POST /api/v1/sports`.
+7. Validar que `name` sea obligatorio.
+8. Validar que `max_capacity` sea obligatorio y mayor a cero.
+9. Crear el deporte con `is_active` en `true` por defecto.
+10. Agregar prueba de creación exitosa de deporte.
+11. Agregar prueba de error por `name` faltante.
+12. Agregar prueba de error por `max_capacity` inválido.
