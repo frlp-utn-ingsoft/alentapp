@@ -1,10 +1,12 @@
 ---
+id: 1002
+estado: Pendiente
 autor: Ignacio Benitez
 fecha: 2026-05-01
 titulo: Confirmación de Pago (Actualizar)
 ---
 
-# TDD-0102: Confirmación de Pago (Actualizar)
+# TDD-1002: Confirmación de Pago (Actualizar)
 
 ## Contexto de Negocio (PRD)
 
@@ -30,10 +32,12 @@ Sin cambios en Prisma. Se actualizan campos existentes de `Payment`:
 ### Contrato de API (@alentapp/shared)
 * **Endpoint**: `PATCH /api/v1/payment/{id}`
 * **Request Body**:
+```json
 {
     "status": "Paid",
     "payment_date": "2026-05-05T10:00:00Z"
 }
+```
 
 ### Componentes de Arquitectura Hexagonal
 * **Domain**: Entidad `Payment`.
@@ -41,9 +45,13 @@ Sin cambios en Prisma. Se actualizan campos existentes de `Payment`:
 * **Infrastructure**: Adaptador de persistencia para ejecutar la actualización en PostgreSQL.
 
 ## Casos de Borde y Errores
-| Escenario                   | Resultado Esperado                               | Código HTTP               |
-| ----------------------------| --------------------------------------------- | ------------------------- |
-| Recurso inexistente         | Intento de actualizar un ID de pago que no existe | 404 Not Found   |
+| Escenario                            | Resultado Esperado                                                    | Código HTTP               |
+| ------------------------------------ | --------------------------------------------------------------------- | ------------------------- |
+| Recurso inexistente                  | Mensaje: "No existe un pago con ese ID"                               | 404 Not Found             |
+| Pago ya confirmado (`Paid`)          | Mensaje: "El pago ya fue confirmado y no puede modificarse"           | 409 Conflict              |
+| Pago ya cancelado (`Canceled`)       | Mensaje: "El pago está cancelado y no puede modificarse"              | 409 Conflict              |
+| `payment_date` con formato inválido  | Mensaje: "Formato de fecha inválido"                                  | 400 Bad Request           |
+| Error de conexión a DB               | Mensaje: "Error interno, reintente más tarde"                         | 500 Internal Server Error |
 
 ## Plan de Implementación
 1. Crear DTO de actualización en el paquete shared.
