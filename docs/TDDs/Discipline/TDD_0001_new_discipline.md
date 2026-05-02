@@ -69,9 +69,10 @@ model Discipline {
 
 ### 3.1. Componentes de Arquitectura Hexagonal
 
-*   **Puerto**: `DisciplineRepository` con método `create(data)`.
-*   **Adaptador de Salida**: `PostgresDisciplineRepository`.
-*   **Adaptador de Entrada**: `DisciplineController`.
+*   **Puerto (Domain)**: `DisciplineRepository` con método `create(data)`.
+*   **Adaptador de Entrada (Delivery)**: `DisciplineController`, recibe la request HTTP, extrae el body y delega al caso de uso.
+*   **Adaptador de Salida (Infrastructure)**: `PostgresDisciplineRepository`, implementa el método `create`.
+
 
 ### 3.2. Lógica del Caso de Uso
 
