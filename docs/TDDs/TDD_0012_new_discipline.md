@@ -1,11 +1,10 @@
 ---
-
 id: 0012
 estado: Propuesto
 autor: Luca Giordani
 fecha: 2026-05-01
 titulo: Registro de Sanción Disciplinaria
------------------------------------------
+---
 
 # TDD-0012: Registro de Sanción Disciplinaria
 

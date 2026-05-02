@@ -1,11 +1,10 @@
 ---
-
 id: 0014
 estado: Propuesto
 autor: Luca Giordani
 fecha: 2026-05-01
 titulo: Eliminación de Sanción Disciplinaria
---------------------------------------------
+---
 
 # TDD-0014: Eliminación de Sanción Disciplinaria
 
@@ -27,6 +26,7 @@ Permitir a los administrativos eliminar sanciones registradas por error, manteni
 * El sistema debe realizar un borrado físico de la base de datos (hard delete).
 * Si la eliminación es exitosa, la lista de sanciones debe actualizarse automáticamente.
 
+
 ## Diseño Técnico (RFC)
 
 ### Contrato de API (@alentapp/shared)
@@ -46,11 +46,11 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 
 ## Casos de Borde y Errores
 
-| Escenario            | Resultado Esperado              | Código HTTP     |
-| -------------------- | ------------------------------- | --------------- |
-| Sanción inexistente  | Mensaje: "La sanción no existe" | 400 Bad Request |
-| Error de conexión DB | Mensaje: error del motor de BD  | 400 Bad Request |
-| Eliminación exitosa  | Respuesta vacía                 | 204 No Content  |
+| Escenario            | Resultado Esperado              | Código HTTP               |
+| -------------------- | ------------------------------- | ---------------           |
+| Sanción inexistente  | Mensaje: "La sanción no existe" | 404 Not Found             |
+| Error de conexión DB | Mensaje: error del motor de BD  | 500 Internal Server Error |
+| Eliminación exitosa  | Respuesta vacía                 | 204 No Content            |
 
 ## Plan de Implementación
 

@@ -1,11 +1,10 @@
 ---
-
 id: 0013
 estado: Propuesto
 autor: Luca Giordani
 fecha: 2026-05-01
 titulo: Actualización de Sanción Disciplinaria
-----------------------------------------------
+---
 
 # TDD-0013: Actualización de Sanción Disciplinaria
 
