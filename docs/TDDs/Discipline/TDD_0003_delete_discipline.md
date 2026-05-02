@@ -62,9 +62,9 @@ model Discipline {
 
 ### 3.1. Componentes de Arquitectura Hexagonal
 
-*   **Puerto**: `DisciplineRepository` con métodos `findById(id)` y `delete(id)`.
-*   **Adaptador de Salida**: `PostgresDisciplineRepository`.
-*   **Adaptador de Entrada**: `DisciplineController`.
+*   **Puerto (Domain)**: `DisciplineRepository` con métodos `findById(id)` y `delete(id)`.
+*   **Adaptador de Entrada (Delivery)**: `DisciplineController`, recibe el parámetro `id` desde la URL y delega al caso de uso.
+*   **Adaptador de Salida (Infrastructure)**: `PostgresDisciplineRepository`, implementa los métodos `findById` y `delete`.
 
 ### 3.2. Lógica del Caso de Uso
 
