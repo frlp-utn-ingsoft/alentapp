@@ -6,7 +6,7 @@ fecha: 2026-04-30
 titulo: Actualización de Lockers Existentes
 ---
 
-# TDD-0002: Actualización de Lockers Existentes
+# TDD-0005: Actualización de Lockers Existentes
 
 ## Contexto de Negocio (PRD)
 
@@ -67,5 +67,5 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
 1. Actualizar las interfaces en el paquete `@alentapp/shared` agregando `UpdateLockerRequest`.
 2. Ampliar el `LockerRepository` con el método `update`.
 3. Implementar la lógica en `UpdateLockerUseCase` utilizando el `LockerValidator` centralizado.
-4. Crear la ruta `PATCH /api/v1/lockers/:id` en el controlador y enlazarla a la aplicación.
+4. Crear la ruta `PUT /api/v1/lockers/:id` en el controlador y enlazarla a la aplicación.
 5. Consumir el endpoint desde el frontend y reutilizar el modal de creación para permitir la edición.

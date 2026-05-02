@@ -6,7 +6,7 @@ fecha: 2026-04-30
 titulo: Consulta de Lockers
 ---
 
-# TDD-0001: Consulta de Lockers
+# TDD-0007: Consulta de Lockers
 
 ## Contexto de Negocio (PRD)
 

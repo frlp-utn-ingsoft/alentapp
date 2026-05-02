@@ -6,7 +6,7 @@ fecha: 2026-04-30
 titulo: Eliminación de Lockers Existentes
 ---
 
-# TDD-0003: Eliminación de Lockers Existentes
+# TDD-0006: Eliminación de Lockers Existentes
 
 ## Contexto de Negocio (PRD)
 
@@ -47,8 +47,8 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 
 | Escenario                  | Resultado Esperado                            | Código HTTP actual        |
 | -------------------------- | --------------------------------------------- | ------------------------- |
-| Locker inexistente         | Mensaje: "El locker no existe"                | 400 Bad Request           |
-| Error de conexión a DB     | Mensaje: error del motor de base de datos     | 400 Bad Request           |
+| Locker inexistente         | Mensaje: "El locker no existe"                | 404 Not found            |
+| Error de conexión a DB     | Mensaje: error del motor de base de datos     | 500 Error a conexión a BD           |
 | Eliminación exitosa        | Respuesta vacía                               | 204 No Content            |
 
 ## Plan de Implementación
