@@ -1,24 +1,26 @@
 ---
-autor: [Nombre]
-fecha: [AAAA-MM-DD]
-titulo: [Nombre de la Funcionalidad]
+autor: [Luana Suarez]
+fecha: [2026-05-02]
+titulo: [Alta deporte]
 ---
 
-# TDD-[XXXX]: [Nombre de la Funcionalidad]
+# TDD-[0013]: [Alta deporte]
 
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-[Descripción del valor de negocio y qué problema resuelve.]
+[Permitir que un administrador del club registre un nievo deporte dentro del sistema Alentapp. Esta funcionalidad permite mantener actualizado el catalogo de deportes ofrecidos por el club, defendiendo su nombre, descripcion y cupo maximo disponible]
 
 ### User Persona
-*   **Nombre**: [Nombre del rol/persona]
-*   **Necesidad**: [Descripción de lo que necesita lograr y sus puntos de dolor.]
+*   **Nombre**: [Administrador del club]
+*   **Necesidad**: [Necesita registrar nueos deportes de forma ordenada, asegurando que cada deporte tenga un nombre identificatorio y un cupo maximo]
 
 ### Criterios de Aceptación
-*   [Criterio 1: ej. El sistema debe validar que...]
-*   [Criterio 2: ej. Al finalizar, el sistema debe...]
-*   [Criterio 3: ej. El estado por defecto debe ser...]
+*   [El sistema debera permitir registrar un nuevo deporte indicando 'name', 'descripcion' y 'max_capacity']
+*   [El sistema debera validar que el campo 'name' sea obligatorio]
+*   [El sistema debera validar que el campo `max_capacity` sea obligatorio y mayor que 0.]
+*   Al finalizar la creación, el sistema deberá guardar el deporte como activo.
+*   Una vez creado el deporte, el campo `name` no deberá ser modificado en futuras operaciones de actualización.
 
 ## Diseño Técnico (RFC)
 
