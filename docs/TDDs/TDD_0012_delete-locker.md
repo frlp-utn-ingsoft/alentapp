@@ -80,11 +80,21 @@ Restricciones:
 *   **Infrastructure**: Controlador HTTP para `DELETE /api/v1/lockers/:id`, implementación del repositorio de casilleros utilizando Prisma y persistencia de la baja lógica en base de datos.
 
 ## Casos de Borde y Errores
-| Escenario                   | Resultado Esperado                            | Código HTTP               |
-| ----------------------------| --------------------------------------------- | ------------------------- |
-| [Ej: DNI ya registrado]     | [Error de validación con mensaje claro]       | 409 Conflict              |
-| [Ej: Formato email inválido]| [Error de validación de formato]              | 400 Bad Request           |
+| Escenario                       | Resultado Esperado                                       | Código HTTP               |
+| --------------------------------| -------------------------------------------------------- | ------------------------- |
+| [El casillero no existe]        | [Error indicando que el casillero no fue encontrado]     | 404 Not Found             |
+| El casillero ya está inactivo   | Error indicando que el casillero ya fue dado de baja     | 409 Conflict              |
+| Error inesperado al guardar     | Error interno del servidor                               | 500 Server Error          |
 
 ## Plan de Implementación
-1. [Paso 1: ej. Definir tipos en @alentapp/shared]
-2. [Paso 2: ej. Implementar entidad en Domain]
+1. Definir el contrato compartido para la baja de casilleros en `@alentapp/shared`.
+2. Verificar que el modelo `Locker` tenga el campo `is_active`.
+3. Implementar el caso de uso `DeleteLockerUseCase`.
+4. Implementar en el repositorio la búsqueda de casillero por `id`.
+5. Validar que el casillero exista antes de darlo de baja.
+6. Validar que el casillero no se encuentre previamente inactivo.
+7. Actualizar el campo `is_active` a `false` usando Prisma.
+8. Implementar el endpoint `DELETE /api/v1/lockers/:id`.
+9. Agregar prueba de baja lógica exitosa.
+10. Agregar prueba de error por casillero inexistente.
+11. Agregar prueba de error por casillero ya inactivo.
