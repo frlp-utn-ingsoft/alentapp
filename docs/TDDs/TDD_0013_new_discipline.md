@@ -21,8 +21,8 @@ Digitalizar el registro de sanciones disciplinarias aplicadas a socios. Una sanc
 
 ### Criterios de Aceptación
 
-- Como usuario quiero registrar una sancion sobre un socio existente.
-- Como usuario quiero ver un mensaje de confirmacion al finalizar la carga. 
+- Como usuario quiero registrar una sancion sobre un socio existente para dejar constancia formal e inhabilitar al socio durante el periodo de la sancion.
+- Como usuario quiero ver un mensaje de confirmacion al finalizar la carga para asegurarme de que la accion se realizo correctamente. 
 
 ### Escenario de éxito
 
