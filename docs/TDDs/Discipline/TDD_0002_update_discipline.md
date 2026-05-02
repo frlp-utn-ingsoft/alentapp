@@ -69,9 +69,10 @@ model Discipline {
 
 ### 3.1. Componentes de Arquitectura Hexagonal
 
-*   **Puerto**: `DisciplineRepository` con métodos `findById(id)` y `update(id, data)`.
-*   **Adaptador de Salida**: `PostgresDisciplineRepository`.
-*   **Adaptador de Entrada**: `DisciplineController`.
+*   **Puerto (Domain)**: `DisciplineRepository` con métodos `findById(id)` y `update(id, data)`.
+*   **Adaptador de Entrada (Delivery)**: `DisciplineController`, recibe la request HTTP, extrae params y body, y delega al caso de uso.
+*   **Adaptador de Salida (Infrastructure)**: `PostgresDisciplineRepository`, implementa los métodos `findById` y `update`.
+
 
 ### 3.2. Lógica del Caso de Uso
 
