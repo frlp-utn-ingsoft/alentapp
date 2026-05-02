@@ -1,24 +1,33 @@
 ---
-autor: [Nombre]
-fecha: [AAAA-MM-DD]
-titulo: [Nombre de la Funcionalidad]
+autor: Luana Suarez
+fecha: 2026-05-01
+titulo: Modificacion de deporte
 ---
 
-# TDD-[XXXX]: [Nombre de la Funcionalidad]
+# TDD-[0014]: Modificacion de deporte
 
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-[Descripción del valor de negocio y qué problema resuelve.]
+
+Permitir que un administrador del club modifique los datos editables de un deporte existente dentro del sistema Alentapp.
+
+Esta funcionalidad permite actualizar la descripción y el cupo máximo de un deporte ya registrado, manteniendo la consistencia de la información y respetando que el nombre del deporte no puede modificarse luego de su creación.
 
 ### User Persona
-*   **Nombre**: [Nombre del rol/persona]
-*   **Necesidad**: [Descripción de lo que necesita lograr y sus puntos de dolor.]
+
+*   **Nombre**: Administrador del club
+*   **Necesidad**: Actualizar la información operativa de un deporte, como su descripción o cupo máximo, sin alterar su nombre identificatorio.
 
 ### Criterios de Aceptación
-*   [Criterio 1: ej. El sistema debe validar que...]
-*   [Criterio 2: ej. Al finalizar, el sistema debe...]
-*   [Criterio 3: ej. El estado por defecto debe ser...]
+
+*   El sistema deberá permitir modificar un deporte existente.
+*   El sistema deberá validar que el deporte exista antes de actualizarlo.
+*   El sistema deberá permitir modificar únicamente los campos `description` y `max_capacity`.
+*   El sistema deberá validar que el campo `max_capacity` sea mayor a cero.
+*   El sistema no deberá permitir modificar el campo `name`.
+*   Al finalizar la modificación, el sistema deberá guardar los nuevos datos del deporte.
+*   Si el deporte no existe, el sistema deberá rechazar la operación e informar el error correspondiente.
 
 ## Diseño Técnico (RFC)
 
