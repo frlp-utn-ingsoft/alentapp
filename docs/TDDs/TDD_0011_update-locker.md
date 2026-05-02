@@ -78,11 +78,27 @@ Restricciones:
 *   **Infrastructure**: Controlador HTTP para `PUT /api/v1/lockers/:id`, implementación del repositorio de casilleros utilizando Prisma y persistencia de los cambios en base de datos.
 
 ## Casos de Borde y Errores
-| Escenario                   | Resultado Esperado                            | Código HTTP               |
-| ----------------------------| --------------------------------------------- | ------------------------- |
-| [Ej: DNI ya registrado]     | [Error de validación con mensaje claro]       | 409 Conflict              |
-| [Ej: Formato email inválido]| [Error de validación de formato]              | 400 Bad Request           |
+
+| Escenario                                | Resultado Esperado                                         | Código HTTP      |
+| ---------------------------------------- | ---------------------------------------------------------- | ---------------- |
+| El casillero no existe                   | Error indicando que el casillero no fue encontrado          | 404 Not Found    |
+| No se envía `number`                     | Error indicando que el número de casillero es requerido     | 400 Bad Request  |
+| `number` es menor o igual a cero         | Error indicando que el número debe ser mayor a cero         | 400 Bad Request  |
+| Ya existe otro casillero con ese número  | Error indicando que el número de casillero ya está en uso   | 409 Conflict     |
+| `status` tiene un valor inválido         | Error indicando que el estado del casillero no es válido    | 400 Bad Request  |
+| Error inesperado al guardar              | Error interno del servidor                                  | 500 Server Error |
 
 ## Plan de Implementación
-1. [Paso 1: ej. Definir tipos en @alentapp/shared]
-2. [Paso 2: ej. Implementar entidad en Domain]
+
+1. Definir el contrato compartido para modificar casilleros en `@alentapp/shared`.
+2. Verificar que el modelo `Locker` exista en Prisma con los campos necesarios.
+3. Implementar la lógica de dominio para validar los datos modificables de `Locker`.
+4. Implementar el caso de uso `UpdateLockerUseCase`.
+5. Implementar en el repositorio la búsqueda de casillero por `id`.
+6. Implementar en el repositorio la validación de existencia de otro casillero con el mismo `number`.
+7. Implementar la actualización del casillero usando Prisma.
+8. Implementar el endpoint `PUT /api/v1/lockers/:id`.
+9. Agregar prueba de modificación exitosa de casillero.
+10. Agregar prueba de error por casillero inexistente.
+11. Agregar prueba de error por número duplicado.
+12. Agregar prueba de error por estado inválido.
