@@ -21,9 +21,15 @@ Digitalizar el registro de actividades deportivas ofrecidas por el club. Este re
 
 ### Criterios de Aceptación
 
-- El sistema debe validar que el nombre sea único.
-- El sistema debe validar que la capacidad maxima sea mayor a cero.
-- Al finalizar, el sistema debe mostrar un mensaje de éxito y limpiar el formulario.
+- Como Administrativo quiero poder registrar nuevos deportes para poder llevar un registro de las actividades que realiza cada socio, asi como los montos extra que deben pagar.
+
+### Escenario de Exito
+
+- Si el usuario completa el formulario de registro con los campos Nombre, Descripcion, Capacidad máxima, Precio adicional y Requiere certificado médico con datos validos, entonces el sistema registra el nuevo deporte e informa al usuario con un mensaje de exito.
+
+### Escenario de Fallo
+
+- Si el usuario ingresa un nombre de deporte ya existente, una capacidad máxima menor o igual a cero, o un precio adicional negativo, el sistema debe informarlo con un mensaje de error.
 
 ## Diseño Técnico (RFC)
 
@@ -36,7 +42,15 @@ Se definirá la entidad `Sport` con las siguientes propiedades y restricciones:
 - `description`: Cadena de texto, describe el deporte.
 - `max_capacity`: Capacidad de socios registrados en un dado momento. Debe ser mayor a cero.
 - `additional_price`: Importe extra al costo de la cuota social. Debe ser cero o mayor a cero.
-- `requires_medical_certificate`: Booleano. Registra si se requiere certificado medico para practicar dicho deporte.
+- `requires_medical_certificate`: Registra si se requiere certificado medico para practicar dicho deporte. (Booleano)
+
+A demas se definirá la entidad `Enrollment` para vincular `Member` y `Sport` con las siguientes propiedades y restricciones:
+
+- `id`: Identificador único universal (UUID).
+- `member_id`: Identificador de un socio que practica o practicó un deporte dado. (UUID, clave foránea hacia `Member`)
+- `sport_id`: Identificador de un deporte practicado por un socio. (UUID, clave foránea hacia `Sport`)
+- `enrollment_date`: Fecha en la que el socio empezó a practicar el deporte. (datetime)
+- `is_active`: Registra si el socio actualmente practica el deporte. (Booleano)
 
 ### Contrato de API (@alentapp/shared)
 
@@ -48,7 +62,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 {
     name: string;
     description: string;
-    max_capacity: string;
+    max_capacity: number;
     additional_price?: float | null; // opcional, default: 0
     requires_medical_certificate: boolean;
 }
@@ -72,7 +86,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 ## Plan de Implementación
 
-1. Definir esquema de persistencia y correr migración: crear la tabla Sport con los campos correspondientes, incluyendo contraint `UNIQUE` para `name`, y correr la migración.
+1. Definir esquema de persistencia y correr migración: crear la tabla Sport y la tabla intermedia `Enrollment` con los campos correspondientes, incluyendo contraint `UNIQUE` para `name`, y correr la migración.
 2. Crear tipos en shared y puerto en el Dominio.
 3. Implementar el repositorio y el caso de uso: Implementar lógica de para verificar que `max_capacity` sea mayor a cero y `additional_price` sea igual o mayor a cero.
 4. Crear formulario en React y conectar con el endpoint del backend.
