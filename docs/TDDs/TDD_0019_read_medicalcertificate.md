@@ -1,0 +1,76 @@
+---
+id: 0019
+estado: Propuesto
+autor: Leonel Piquet
+fecha: 2026-05-03
+titulo: Consulta de Certificados Médicos
+---
+
+# TDD-0019: Consulta de Certificados Médicos
+
+## Contexto de Negocio (PRD)
+
+### Objetivo
+Proveer una interfaz centralizada para que el personal administrativo pueda visualizar el historial de certificados médicos de los socios[cite: 4]. El sistema debe permitir identificar rápidamente quiénes cuentan con un apto físico vigente y quiénes tienen su documentación vencida o invalidada para garantizar la seguridad legal del club.
+
+### User Persona
+*   **Nombre**: Administrador del club[cite: 4].
+*   **Necesidad**: Consultar el estado de salud legal de un socio antes de permitirle realizar acciones condicionadas (como inscripciones a deportes), visualizando tanto el certificado actual como el historial[cite: 4].
+
+### Criterios de Aceptación
+*   El sistema debe permitir listar todos los certificados asociados a un `member_id` específico[cite: 1, 4].
+*   El sistema debe permitir filtrar la búsqueda para mostrar únicamente el certificado que tiene `esta_validado: true`[cite: 4, 6].
+*   La respuesta debe incluir los campos: fecha de emisión, vencimiento, institución y matrícula del médico[cite: 4].
+*   Si un socio no tiene certificados registrados, el sistema debe informar que no posee antecedentes médicos.
+
+## Diseño Técnico (RFC)
+
+### Modelo de Datos
+La operación de lectura accede a la entidad `MedicalCertificate` en Prisma, realizando consultas de selección y filtrado[cite: 1, 4]:
+*   `member_id`: Filtro obligatorio para recuperar el historial de un socio específico[cite: 1, 4].
+*   `esta_validado`: Filtro opcional para obtener solo el certificado vigente[cite: 4].
+
+### Contrato de API (@alentapp/shared)
+Definición de los endpoints de consulta en el paquete compartido:
+
+*   **Endpoint (Listado)**: `GET /api/v1/medical-certificates?memberId={uuid}`
+*   **Endpoint (Individual)**: `GET /api/v1/medical-certificates/:id`[cite: 2, 7]
+*   **Response Body (MedicalCertificateResponse)**:
+```ts
+{
+    id: string;
+    fecha_emision: string;
+    fecha_vencimiento: string;
+    medico_matricula: string;
+    institucion: string;
+    esta_validado: boolean;
+    member_id: string
+}
+
+##Componentes de Arquitectura Hexagonal
+
+* Domain:
+	*Puerto MedicalCertificateRepository: Interfaz que define los métodos findById(id), findAllByMember(memberId) y findActiveByMember(memberId).
+
+* Application:
+	*Caso de Uso GetMedicalCertificate: Lógica para recuperar un certificado único por su ID.
+	*Caso de Uso GetMemberMedicalHistory: Lógica para recuperar la lista completa de certificados de un socio.
+
+*Infrastructure:
+	*MedicalCertificateController: Adaptador de entrada que extrae el memberId de la query string o el id de los parámetros de ruta.
+	*PrismaMedicalCertificateRepository: Implementación que ejecuta prisma.medicalCertificate.findMany o findUnique aplicando los filtros de búsqueda.
+
+
+## Casos de Borde y Errores
+| Escenario                   | Resultado Esperado                                       | Código HTTP               |
+| ----------------------------| -------------------------------------------------------- | ------------------------- |
+| Socio sin certificados      | Mensaje: "No se encontraron certificados para este socio"| 200 OK (Lista vacía)      |
+| ID de certificado inválido  | Mensaje: "El ID proporcionado no es un UUID válido"      | 400 Bad Request           |
+| Certificado no encontrado   | Mensaje: "El recurso solicitado no existe"               | 404 Not Found             |
+| Error de infraestructura    | Mensaje: "Error al recuperar los datos de la DB"         | 500 Internal Server Error |
+## Plan de Implementación
+1. Definir los tipos de respuesta (DTOs) en el paquete compartido @alentapp/shared.
+2. Implementar los métodos de búsqueda en la clase PrismaMedicalCertificateRepository dentro de la capa de Infrastructure.
+3. Desarrollar los casos de uso en la capa de Application para la recuperación individual y el historial por socio.
+4. Crear el controlador y configurar las rutas GET en el backend.
+5. Desarrollar la vista de historial médico en el Frontend (React) para visualizar los datos del socio.
