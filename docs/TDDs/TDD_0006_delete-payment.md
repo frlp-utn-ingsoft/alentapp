@@ -1,10 +1,10 @@
 ---
-autor: [Valentina Pértile de la Vega]
-fecha: [2026-05-01]
+autor: Valentina Pértile de la Vega
+fecha: 2026-05-01
 titulo: Delete Payment
 ---
 
-# TDD-[0006]: Eliminar Payment (Borrado Lógico)
+# TDD-0006: Eliminar Payment (Borrado Lógico)
 
 ## Contexto de Negocio (PRD)
 
