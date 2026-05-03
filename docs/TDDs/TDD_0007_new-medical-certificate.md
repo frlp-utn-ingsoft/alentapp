@@ -1,10 +1,10 @@
 ---
-autor: [Valentina Pértile de la Vega]
-fecha: [2026-05-01]
+autor: Valentina Pértile de la Vega
+fecha: 2026-05-01
 titulo: Create MedicalCertificate
 ---
 
-# TDD-[0007]: Crear MedicalCertificate
+# TDD-0007: Crear MedicalCertificate
 
 ## Contexto de Negocio (PRD)
 
