@@ -21,7 +21,7 @@ Permitir cambiar los datos de un certificado médico existente.
 
 - El sistema debe permitir actualizar los campos `issue_date`, `expiry_date` y `doctor_license`.
 - El certificado debe existir para poder ser actualizado.
-- `expiry_date` debe ser posterior a `issue_date`.
+- `expiry_date` debe ser posterior a `issue_date`, incluso si se actualiza sólo uno de los campos.
 - No se debe modificar el campo `member_id`.
 - No se debe modificar el campo `is_invalidated`.
 
@@ -51,8 +51,9 @@ Entidad `MEDICAL_CERTIFICATE`:
   doctor_license?: string;
 }
 ```
-
-- **Response**:
+- **Response:** `200 OK`
+- **Response Body**:
+```ts
 {
   id: string;
   issue_date: string;
@@ -61,8 +62,7 @@ Entidad `MEDICAL_CERTIFICATE`:
   is_invalidated: boolean;
   member_id: string;
 }
-
-`200 OK` con el certificado médico actualizado
+```
 
 ### Componentes de Arquitectura Hexagonal
 
@@ -74,19 +74,20 @@ Entidad `MEDICAL_CERTIFICATE`:
 ## Casos de Borde y Errores
 |Escenario	|Resultado Esperado|	Código HTTP|
 |---|---|---|
-| ` id ` inexistente 	| Error: certificado no encontrado	| 404 Not Found| 
-| ` expiry_date`  < ` issue_date` 	| Error: fecha de vencimiento no válida	| 400 Bad Request|
+| `id` inexistente 	| Error: certificado no encontrado	| 400 Bad Request| 
+| `expiry_date` <= `issue_date` (validación directa)| Error: fecha de vencimiento no válida	| 400 Bad Request|
+| Actualizar solo `issue_date` a una fecha posterior al vencimiento guardado en DB (validación cruzada) | Error: la fecha de emisión resultante no puede ser posterior al vencimiento actual | 400 Bad Request |
 
 
 ## Plan de Implementación
 1. Definir DTO `UpdateMedicalCertificateDto` en `@alentapp/shared`
-2. Recibir `id` desde parametros y datos desde el request body
-3. Buscar certificado por `id` en el repositorio
-4. Validar que el certificado exista
-5. Validar fechas solo si se envían en el request:
-   - Si vienen ambas → verificar `expiry_date > issue_date`
-   - Si viene una sola → validar contra el valor existente
-6. Construir objeto con los campos a actualizar (`issue_date`, `expiry_date`, `doctor_license`)
-7. Aplicar cambios al certificado
-8. Persistir actualización en base de datos mediante `MedicalCertificateRepository`
-9. Retornar el certificado actualizado
+2. Implementar el endpoint `PATCH /api/v1/medical-certificates/:id` en `MedicalCertificateController`.
+3. En el caso de uso `UpdateMedicalCertificate`:
+   3.1. Buscar el certificado actual en la base de datos mediante el `id` recibido en los parámetros.
+   3.2. Validar la existencia del certificado
+4. Ejecutar validación de fechas:
+   4.1. Determinar la **Fecha de Emisión Final**: si viene en el request, usar la nueva; si no, usar la almacenada en la BBDD.
+   4.2. Determinar la **Fecha de Vencimiento Final**: si viene en el request, usar la nueva; si no, usar la almacenada en la BBDD.
+   4.3. Validar que la **Fecha de Vncimiento Final** sea estrictamente posterior a la **Fecha de Emisión Final**.
+5. Persistir actualización en base de datos mediante `MedicalCertificateRepository`
+6. Retornar el certificado actualizado

@@ -47,7 +47,20 @@ Entidad existente `PAYMENT`:
   status: "Pending" | "Paid" | "Canceled";
 }
 ```
-- **Response**: `200 OK` con payment actualizado.
+- **Response:** `200 OK`
+- **Response Body**:
+```ts
+{
+  id: string;
+  amount: number;
+  month: number;
+  year: number;
+  status: "Pending" | "Paid" | "Canceled";
+  due_date: string;
+  payment_date: string | null;
+  member_id: string;
+}
+```
 
 ### Componentes de Arquitectura Hexagonal
  
@@ -55,7 +68,8 @@ Entidad existente `PAYMENT`:
  1. No se permite transicionar desde `Canceled` a ningún otro estado.
  2. Cuando el estado transiciona a `Paid`, el dominio setea automáticamente `payment_date` con el tiempo actual. El campo no lo modifica el usuario.
 
-- **Application**: Caso de uso `Updatepayment`. Puerto de salida `PaymentRepository`.
+- **Application**: Caso de uso `UpdatePayment`. Puerto de salida `PaymentRepository`.
+
 - **Infrastructure**: `PaymentController` (PATCH). `PrismaPaymentRepository`.
 
 ## Casos de Borde y Errores
