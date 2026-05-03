@@ -35,7 +35,7 @@ Permitir a los administrativos dar de baja los pagos existentes. En otras palabr
 
 ### Contrato de API (@alentapp/shared)
 
-- Endpoint: `DELETE /api/v1/payment/:id`
+- Endpoint: `DELETE /api/v1/payments/:id`
 - Request Body: `None`
 - Response: `204 No Content` en caso de éxito.
 
