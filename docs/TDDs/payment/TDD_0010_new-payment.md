@@ -5,7 +5,7 @@ estado: Propuesto
 autor: Melissa Braunstein
 fecha: 2026-05-03
 titulo: Registro de Pagos
--------------------------
+---
 
 # TDD-0010: Registro de Pagos
 
@@ -24,7 +24,7 @@ Permitir al sistema generar registros de pagos asociados a socios del club, deja
 
 * Como administrador, quiero que el sistema registre pagos para socios para mantener actualizado el estado financiero.
 
-- Escenario de éxito: Si el sistema genera un pago con datos válidos para un socio existente, debe crear el registro en estado `Pending` y notificar el resultado exitoso.
+- Escenario de éxito: Si el sistema genera un pago con datos válidos para un socio existente, debe crear el registro en estado `Pending`.
 - Escenario de éxito: Si el sistema genera pagos para múltiples socios habilitados en un nuevo período, debe registrar cada pago correspondiente sin duplicados.
 - Escenario de éxito: Si el administrador carga manualmente un pago con datos válidos, el sistema debe registrarlo en estado Pending.
 - Escenario de fallo: Si el sistema intenta generar un pago para un socio inactivo, debe cancelar la operación para ese socio e informar el error.
