@@ -1,14 +1,7 @@
 ---
-autor: [Luana Suarez]
-fecha: [2026-05-02]
-titulo: [Baja del casillero]
----
-
-
----
 autor: Luana Suarez
-fecha: 2026-05-01
-titulo: Baja de casillero
+fecha: 2026-05-02
+titulo: Baja del casillero
 ---
 
 # TDD-0012: Baja de casillero
@@ -44,10 +37,18 @@ Para la baja de un casillero no se realizará eliminación física del registro.
 
 *   `id`: UUID. Identificador único del casillero.
 *   `number`: Int. Número identificatorio del casillero.
-*   `location`: String. Ubicación física o referencia del casillero dentro del club.
+*   `location`: String. Ubicación física del casillero dentro del club. Debe pertenecer a una lista de locaciones permitidas.
 *   `status`: String. Estado actual del casillero.
 *   `member_id`: UUID | null. Identificador del socio asignado al casillero.
 *   `is_active`: Boolean. Indica si el casillero se encuentra activo dentro del sistema.
+
+Locaciones permitidas para `location`:
+
+*   `Hall`
+*   `Vestibulo`
+*   `Pasillo`
+*   `Gimnasio`
+*   `Administracion`
 
 Restricciones:
 
@@ -60,11 +61,7 @@ Restricciones:
 
 *   **Endpoint**: `DELETE /api/v1/lockers/:id`
 
-*   **Request Body**:
-
-```ts
-{}
-```
+*   **Request Body**: no aplica
 
 *   **Response Body**:
 
@@ -72,7 +69,7 @@ Restricciones:
 {
     id: string;
     number: number;
-    location: string;
+    location: "Hall" | "Vestibulo" | "Pasillo" | "Gimnasio" | "Administracion";
     status: "Available" | "Assigned" | "Maintenance";
     member_id: string | null;
     is_active: boolean;
@@ -88,11 +85,12 @@ Restricciones:
 *   **Infrastructure**: Controlador HTTP para `DELETE /api/v1/lockers/:id`, implementación del repositorio de casilleros utilizando Prisma y persistencia de la baja lógica en base de datos.
 
 ## Casos de Borde y Errores
-| Escenario                       | Resultado Esperado                                       | Código HTTP               |
-| --------------------------------| -------------------------------------------------------- | ------------------------- |
-| [El casillero no existe]        | [Error indicando que el casillero no fue encontrado]     | 404 Not Found             |
-| El casillero ya está inactivo   | Error indicando que el casillero ya fue dado de baja     | 409 Conflict              |
-| Error inesperado al guardar     | Error interno del servidor                               | 500 Server Error          |
+
+| Escenario                     | Resultado Esperado                                  | Código HTTP      |
+| ----------------------------- | --------------------------------------------------- | ---------------- |
+| El casillero no existe        | Error indicando que el casillero no fue encontrado   | 404 Not Found    |
+| El casillero ya está inactivo | Error indicando que el casillero ya fue dado de baja | 409 Conflict     |
+| Error inesperado al guardar   | Error interno del servidor                           | 500 Server Error |
 
 ## Plan de Implementación
 1. Definir el contrato compartido para la baja de casilleros en `@alentapp/shared`.
