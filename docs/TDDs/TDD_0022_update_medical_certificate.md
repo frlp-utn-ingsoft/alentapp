@@ -33,7 +33,7 @@ Permitir corregir o extender la vigencia de un certificado medico existente cuan
 
 Todos los campos son opcionales porque se trata de una actualizacion parcial.
 
-- Endpoint: `PUT /api/v1/medical-certificates/:id`
+- Endpoint: `PATCH /api/v1/medical-certificates/:id`
 - Request Body (`UpdateMedicalCertificateRequest`):
 
 ```ts
