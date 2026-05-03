@@ -1,6 +1,10 @@
-## autor: Facundo Devida
+---
+id: 0019
+estado: Propuesto
+autor: Facundo Devida
 fecha: 2026-05-02
 titulo: Consultas y Listado de Préstamos
+---
 
 # TDD-0019: Consultas y Listado de Préstamos
 

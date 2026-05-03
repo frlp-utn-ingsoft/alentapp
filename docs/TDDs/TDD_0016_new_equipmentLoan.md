@@ -1,6 +1,10 @@
-## autor: Facundo Devida
+---
+id: 0016
+estado: Propuesto
+autor: Facundo Devida
 fecha: 2026-05-02
-titulo: Registro de Prestamo de equipamiento
+titulo: Registro de Prestamos de equipamiento
+---
 
 # TDD-0016: Registro de Prestamos de equipamiento
 

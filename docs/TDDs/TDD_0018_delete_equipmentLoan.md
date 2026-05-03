@@ -1,6 +1,10 @@
-## autor: Facundo Devida
+---
+id: 0018
+estado: Propuesto
+autor: Facundo Devida
 fecha: 2026-05-02
 titulo: Eliminacion de Prestamo de equipamiento
+---
 
 # TDD-0018: Eliminacion de Prestamo de equipamiento
 

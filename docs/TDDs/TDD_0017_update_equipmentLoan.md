@@ -1,7 +1,10 @@
-## autor: Facundo Devida
+---
+id: 0017
+estado: Propuesto
+autor: Facundo Devida
 fecha: 2026-05-02
 titulo: Actualizacion de Prestamo de equipamiento existente
-
+---
 # TDD-0017: Actualizacion de Prestamos de equipamiento existente
 
 ## Contexto de Negocio (PRD)
