@@ -56,6 +56,19 @@ Se definirá la entidad `Sport` con las siguientes propiedades y restricciones:
     requires_medical_certificate: boolean;
 }
 ```
+- Response (`SportResponse`):
+
+```ts
+{
+    id: string;
+    name: string;
+    description: string;
+    max_capacity: number;
+    additional_price: number;
+    requires_medical_certificate: boolean;
+}
+```
+
 ### Componentes de Arquitectura Hexagonal
 
 1. **Entidad de Dominio**: `Sport` (Valida los datos).

@@ -27,7 +27,7 @@ Permitir a los administrativos corregir o modificar la información de un deport
 - El sistema no debe permitir modificar `additional_price`.
 - El sistema no debe permitir modificar `requires_medical_certificate`.
 - El sistema debe permitir actualizar solo `description` y `max_capacity`.
-- Si se modificia  `max_capacity` el sistema debe validar que `max_capacity` sea un numero entero, mayor a cero.
+- Si se modifica  `max_capacity` el sistema debe validar que `max_capacity` sea un numero entero, mayor a cero.
 - Si se modifica `description`, el valor no puede quedar vacio.
 - Si la edición es correcta, debe retornar los nuevos datos del deporte actualizados.
 
@@ -46,6 +46,19 @@ Todos los campos son opcionales porque se trata de una actualizacion parcial.
     max_capacity?: number;
 }
 ```
+- Response (`SportResponse`):
+
+```ts
+{
+    id: string;
+    name: string;
+    description: string;
+    max_capacity: number;
+    additional_price: number;
+    requires_medical_certificate: boolean;
+}
+```
+
 ### Componentes de Arquitectura Hexagonal
 
 1. **Entidad de Dominio**: `Sport` (Valida los datos).
