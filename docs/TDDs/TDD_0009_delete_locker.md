@@ -53,7 +53,7 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 | -------------------------- | ---------------------------------------------------------------- | ------------------------- |
 | Locker tiene `member_id`   | Mensaje: "No se puede eliminar un locker con member asignado"    | 422 Unprocessable Entity  | 
 | Locker inexistente         | Mensaje: "El locker no existe"                                   | 404 Not Found             |
-| Error de conexión a DB     | Mensaje: error del motor de base de datos                        | 400 Bad Request           |
+| Error de conexión a DB     | Mensaje: error del motor de base de datos                        | 500 Internal Server Error |
 | Eliminación exitosa        | Respuesta vacía                                                  | 204 No Content            |
 
 ## Plan de Implementación
