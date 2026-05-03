@@ -12,7 +12,7 @@ titulo: Registro de Nuevos Deportes
 
 ### Objetivo
 
-Digitalizar el registro de actividades deportivas ofrecidas por el club. Este registro verifica ser único e inmutable para cada deporte ofrecido.
+Digitalizar el registro de actividades deportivas ofrecidas por el club. Este registro verifica que el nombre del deporte es único e inmutable para cada deporte ofrecido.
 
 ### User Persona
 
