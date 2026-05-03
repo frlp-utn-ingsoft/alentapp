@@ -128,5 +128,6 @@ Caso de Uso: UpdateLockerUseCase.
 
 ## 6. Observaciones Adicionales
 
+- Aunque el endpoint utiliza PUT, la operación permite actualizar parcialmente la información del locker. Solo se modifican los campos enviados en el request.
 - Las operaciones de asignación deben manejar concurrencia para evitar doble asignación del mismo locker.
 - Cuando un locker se asigna, su estado debe actualizarse automáticamente a "Occupied".
