@@ -33,7 +33,7 @@ La operación de actualización impacta sobre la entidad `MedicalCertificate` ex
 *   `institucion`: String (Editable).
 
 ### Contrato de API (@alentapp/shared)
-Definición del contrato para la actualización parcial (Patch/Put):
+Definición del contrato para la actualización parcial (Put):
 
 *   **Endpoint**: `PUT /api/v1/medical-certificates/:id`
 *   **Request Body (UpdateMedicalCertificateRequest)**:
