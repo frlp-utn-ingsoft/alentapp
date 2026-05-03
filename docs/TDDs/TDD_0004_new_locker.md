@@ -21,7 +21,6 @@ Eliminar el registro manual de los lockers del club en planillas de papel, permi
 ### Criterios de Aceptación
 - El sistema debe validar que no haya un locker con el mismo número.
 - El locker debe quedar guardado con estado 'Disponible' por defecto.
-- El atributo number debe ser único y obligatorio.
 - El atributo miembro_id es null al crearse el objeto o con locker vacio.
 - Al finalizar, el sistema debe mostrar un mensaje de éxito y limpiar el formulario.
 
