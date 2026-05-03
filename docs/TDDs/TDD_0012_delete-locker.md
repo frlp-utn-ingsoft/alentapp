@@ -61,11 +61,7 @@ Restricciones:
 
 *   **Endpoint**: `DELETE /api/v1/lockers/:id`
 
-*   **Request Body**:
-
-```ts
-{}
-```
+*   **Request Body**: no aplica
 
 *   **Response Body**:
 
@@ -73,7 +69,7 @@ Restricciones:
 {
     id: string;
     number: number;
-    location: string;
+    location: "Hall" | "Vestibulo" | "Pasillo" | "Gimnasio" | "Administracion";
     status: "Available" | "Assigned" | "Maintenance";
     member_id: string | null;
     is_active: boolean;
@@ -89,11 +85,12 @@ Restricciones:
 *   **Infrastructure**: Controlador HTTP para `DELETE /api/v1/lockers/:id`, implementación del repositorio de casilleros utilizando Prisma y persistencia de la baja lógica en base de datos.
 
 ## Casos de Borde y Errores
-| Escenario                       | Resultado Esperado                                       | Código HTTP               |
-| --------------------------------| -------------------------------------------------------- | ------------------------- |
-| [El casillero no existe]        | [Error indicando que el casillero no fue encontrado]     | 404 Not Found             |
-| El casillero ya está inactivo   | Error indicando que el casillero ya fue dado de baja     | 409 Conflict              |
-| Error inesperado al guardar     | Error interno del servidor                               | 500 Server Error          |
+
+| Escenario                     | Resultado Esperado                                  | Código HTTP      |
+| ----------------------------- | --------------------------------------------------- | ---------------- |
+| El casillero no existe        | Error indicando que el casillero no fue encontrado   | 404 Not Found    |
+| El casillero ya está inactivo | Error indicando que el casillero ya fue dado de baja | 409 Conflict     |
+| Error inesperado al guardar   | Error interno del servidor                           | 500 Server Error |
 
 ## Plan de Implementación
 1. Definir el contrato compartido para la baja de casilleros en `@alentapp/shared`.
