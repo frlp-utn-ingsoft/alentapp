@@ -37,7 +37,7 @@ Permitir a los administrativos corregir o modificar la información de un deport
 
 Todos los campos son opcionales porque se trata de una actualizacion parcial.
 
-- Endpoint: `PUT /api/v1/sports/:id`
+- Endpoint: `PATCH /api/v1/sports/:id`
 - Request Body (`UpdateSportRequest`):
 
 ```ts
@@ -63,7 +63,7 @@ Todos los campos son opcionales porque se trata de una actualizacion parcial.
 
 1. **Entidad de Dominio**: `Sport` (Valida los datos).
 2. **Puerto**: `SportRepository` (Metodos `findById(id)` y `update(id, data)`).
-3. **Caso de Uso**: `UpdateSportUseCase` (Busca el deporte, combina los datos actuales con los enviados y valida la regla de negocio).
+3. **Caso de Uso**: `UpdateSportUseCase` (Busca el deporte, aplica una actualización parcial sobre los campos permitidos y valida la regla de negocio).
 4. **Adaptador de Salida**: `PostgresSportRepository` (Actualización usando el método `update` de Prisma).
 5. **Adaptador de Entrada**: `SportController` (Ruta HTTP que extrae el `id` de la URL y mapea excepciones a códigos HTTP).
 
@@ -83,7 +83,7 @@ Todos los campos son opcionales porque se trata de una actualizacion parcial.
 3. Implementar la logica en `UpdateSportUseCase`.
 4. Validar la regla `max_capacity > 0` con los datos finales .
 5. Implementar la actualizacion en `PostgresSportRepository`.
-6. Crear el endpoint `PUT /api/v1/sports/:id` en el `SportController`.
+6. Crear el endpoint `PATCH /api/v1/sports/:id` en el `SportController`.
 7. Agregar la edicion de deportes en el Frontend.
 8. Agregar tests unitarios del caso de uso y tests de integracion del endpoint.
 
