@@ -1,0 +1,85 @@
+---
+id: 0013
+estado: Propuesto
+autor: Ruaro Francina
+fecha: 2026-05-01
+titulo: Registro de nuevos certificados medicos
+---
+
+# TDD-0013: Registro de nuevos certificados medicos
+
+## Contexto de Negocio (PRD)
+
+### Objetivo
+
+Digitalizar la gestión de certificados médicos de los socios, en caso de que el socio está apto para realizar actividad física se certifica que es apto para realizar deportes en el Club 
+
+### User Persona
+
+- Nombre: Gabriel (Administrativo).
+- Necesidad: Registrar rápidamente certificados médicos al momento de la presentación, sin preocuparse por certificados anteriores ni cometer errores de duplicación.
+
+### Criterios de Aceptación
+
+- El sistema debe permitir el registro de un certificado médico vinculándolo a un socio existente
+- Si el administrativo carga un certificado nuevo, el sistema debe marcarlo como el único activo e invalidar automáticamente todos los registros anteriores de ese socio
+El certificado creado debe quedar como "Activo".
+- Si el administrativo intenta cargar un certificado con una fecha de vencimiento menor o igual a la fecha de emisión, el sistema debe mostrar un error de validación
+-Al finalizar, se debe mostrar un mensaje de éxito.
+
+## Diseño Técnico (RFC)
+
+### Modelo de Datos
+
+Se definirá la entidad `MedicalCertificate` con las siguientes propiedades y restricciones:
+
+- `id`: Identificador único universal (UUID).
+- `issueDate`: Fecha de creación autogenerada.
+- `expiryDate`: Fecha cargada por el usuario.
+- `doctorLicense`: Cadena de texto.
+- `isValidated`: Booleano, 1 indica valido, 0 no valido.
+- `memberId`: Referencia al socio (UUID).
+- `deletedAt`: Fecha de borrado lógico (null si no está eliminado).
+
+### Contrato de API (@alentapp/shared)
+
+Definiremos los tipos en el paquete compartido para asegurar sincronización:
+
+- Endpoint: `POST /api/v1/medical-certificates 
+- Request Body (CreatemedicalCertificate):
+
+```ts
+{
+    memberId: string; (UUID)
+    expiryDate: string; (ISO Date)
+    doctorLicense: string;
+}
+```
+
+### Componentes de Arquitectura Hexagonal
+
+1. Puerto: MedicalCertificateRepository (Interface en el Dominio).
+2. Caso de Uso: CreateMedicalCertificate (Lógica que verifica si el socio tiene certificados activos, si es asi los invalida y crea el nuevo certificado).
+3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
+4. Adaptador de Entrada: MedicalCertificateController (Ruta HTTP).
+
+## Casos de Borde y Errores
+
+| Escenario | Resultado Esperado | Código HTTP |
+|---|---|---|
+| Socio inexistente | Mensaje: "El socio no existe" | 404 Not Found |
+| Fechas inválidas (expiration < issue) | Mensaje: "La fecha de vencimiento debe ser posterior a la de emisión" | 400 Bad Request |
+| Fechas vacías o mal formateadas | Mensaje: "Formato de fecha inválido" | 400 Bad Request |
+| Certificado activo existente | Se invalida automáticamente el certificado anterior y se crea el nuevo | 201 Created |
+| Certificado eliminado | Mensaje: "El certificado fue eliminado previamente" | 400 Bad Request |
+| Error al guardar en base de datos | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |
+| memberId vacío o nulo | Mensaje: "El campo memberId es obligatorio" | 400 Bad Request |
+
+## Plan de Implementación
+
+1.Definir esquema de persistencia y migraciones.
+2.Crear tipos en shared y puerto en el dominio.
+3.Implementar lógica de invalidación de certificados previos.
+4.Implementar caso de uso CreateMedicalCertificate.
+5.Crear endpoint en backend.
+6.Conectar formulario en frontend.
