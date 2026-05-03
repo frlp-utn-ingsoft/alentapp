@@ -47,7 +47,7 @@ Definición de los endpoints de consulta en el paquete compartido:
     member_id: string
 }
 ```
-##Componentes de Arquitectura Hexagonal
+## Componentes de Arquitectura Hexagonal
 
 * Domain:
 	* Puerto MedicalCertificateRepository: Interfaz que define los métodos findById(id), findAllByMember(memberId) y findActiveByMember(memberId).
