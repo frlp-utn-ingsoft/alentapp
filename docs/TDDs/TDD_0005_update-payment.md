@@ -60,7 +60,7 @@ Permitir a los administrativos corregir o modificar la información de un pago y
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Pago Inexistente            | Mensaje: "El pago ingresado no existe"        | 404 Not Found             |
 | Monto Inválido              | Mensaje: "El valor del pago debe ser un numero mayor a cero"| 400 Bad Request |
-| Cambio de Estado Inválido   | Mensaje: "El estado del pago solo puede pasar a 'Candelado', no de 'Pago' a 'Pendiente' o viceversa" | 400 Bad Request |
+| Cambio de Estado Inválido   | Mensaje: "El estado del pago solo puede pasar a 'Cancelado', no de 'Pago' a 'Pendiente' o viceversa" | 400 Bad Request |
 | Error en la Base de Datos   | Mensaje: "Error al procesar la operación, intente más tarde" | 500 Internal Server Error |
 
 ## Plan de Implementación
