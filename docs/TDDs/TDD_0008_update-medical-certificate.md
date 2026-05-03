@@ -88,6 +88,6 @@ Entidad `MEDICAL_CERTIFICATE`:
 4. Ejecutar validación de fechas:
    4.1. Determinar la **Fecha de Emisión Final**: si viene en el request, usar la nueva; si no, usar la almacenada en la BBDD.
    4.2. Determinar la **Fecha de Vencimiento Final**: si viene en el request, usar la nueva; si no, usar la almacenada en la BBDD.
-   4.3. Validar que la **Fecha de Vencimiento Final** sea estrictamente posterior a la **Fecha de Emisión Final**.
+   4.3. Validar que la **Fecha de Vncimiento Final** sea estrictamente posterior a la **Fecha de Emisión Final**.
 5. Persistir actualización en base de datos mediante `MedicalCertificateRepository`
 6. Retornar el certificado actualizado
