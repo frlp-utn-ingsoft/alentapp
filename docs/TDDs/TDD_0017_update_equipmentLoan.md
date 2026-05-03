@@ -19,8 +19,8 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 
 - El sistema debe validar que la nueva fecha ingresada sea futura a la fecha de prestamo
 - El sistema debe permitir cambiar el estado de `Prestado` a `Devuelto` o `Dañado` para finalizar el préstamo
-- Si un prestamo ya se encuentra finalizado (Retuned o Damaged), el sistema debe permitir alternar entre estos para corregir errores de carga manual
-- El sistema no debe permitir que un prestamo con estado Returned o Damaged vuelva al estado inicial Loaned para prevenir inconsistencias en los datos de la entidad. Si un socio quiere el material nuevamente se debe generar un nuevo prestamo.
+- Si un prestamo ya se encuentra finalizado (`Devuelto` o `Dañado`), el sistema debe permitir alternar entre estos para corregir errores de carga manual
+- El sistema no debe permitir que un prestamo con estado `Devuelto` o `Dañado` vuelva al estado inicial `Prestado` para prevenir inconsistencias en los datos de la entidad. Si un socio quiere el material nuevamente se debe generar un nuevo prestamo.
 - Una vez que el préstamo pasa a un estado final (`Devuelto` o `Dañado`), el sistema debe bloquear la edición de los campos `item_name` y `due_date`. Solo se permitirá modificar el campo `status` para correcciones.
 - Al finalizar, el sistema debe mostrar un mensaje de exito y retornar los datos actualizados
 
