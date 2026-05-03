@@ -25,7 +25,7 @@ Registrar el reingreso del material al inventario del club y dejar constancia de
 ## Diseño Técnico (RFC)
 
 ### Contrato de API (@alentapp/shared)
-* **Endpoint**: `PATCH /api/v1/equipament-loan/:id/status`
+* **Endpoint**: `PATCH /api/v1/equipment-loan/:id/status`
 * **Request Body** (UpdateLoanStatusRequest):
 ```ts
 {
