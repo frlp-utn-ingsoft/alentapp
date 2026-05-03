@@ -37,7 +37,7 @@ Permite eliminar un registro de prestamo de equipamiento de un socio, de esta fo
 
 Como se trata de una operacion DELETE no requiere enviar todos los datos del prestamo, solo con el id del prestamo se debe poder efectuar la operacion.
 
-- Endpoint: `DELETE /api/v1/equipment_loan/:id`
+- Endpoint: `DELETE /api/v1/equipment-loans/:id`
 - Request Body: `None`
 - Response: `204 No Content` en caso de exito.
 
