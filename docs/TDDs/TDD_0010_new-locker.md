@@ -1,15 +1,15 @@
 ---
-autor: [Luana Suarez]
-fecha: [2026-05-01]
-titulo: [Alta casillero]
+autor: Luana Suarez
+fecha: 2026-05-01
+titulo: Alta casillero
 ---
 
-# TDD-[0010]: [Alta casillero]
+# TDD-0010: Alta casillero
 
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-[Permitir que un administrador del club registre un nuevo casillero dentro del sistema Alentapp. Esta funcionalidad permite administrar los casilleros disponibles del club, evitando que existan casilleros duplicados y dejando cada nuevo casillero creado en un estado inicial válido para futuras operaciones.]
+Permitir que un administrador del club registre un nuevo casillero dentro del sistema Alentapp. Esta funcionalidad permite administrar los casilleros disponibles del club, evitando que existan casilleros duplicados y dejando cada nuevo casillero creado en un estado inicial válido para futuras operaciones.
 
 ### User Persona
 *   **Nombre**: [Administrador del club]
@@ -18,13 +18,13 @@ titulo: [Alta casillero]
 ### Criterios de Aceptación
 ### Criterios de Aceptación
 
-*   [El sistema deberá permitir registrar un nuevo casillero ingresando su número identificatorio.]
-*   [El sistema deberá validar que el campo `number` sea obligatorio.]
-*   [El sistema deberá validar que el campo `number` sea mayor a cero.]
-*   [El sistema deberá validar que no exista otro casillero registrado con el mismo `number`.]
-*   [Al finalizar la creación, el sistema deberá guardar el casillero con estado `Available`.]
-*   [Al finalizar la creación, el sistema deberá guardar el casillero como activo.]
-*   [Si el número de casillero ya existe, el sistema deberá rechazar la operación e informar el error correspondiente.]
+*   El sistema deberá permitir registrar un nuevo casillero ingresando su número identificatorio.
+*   El sistema deberá validar que el campo `number` sea obligatorio.
+*   El sistema deberá validar que el campo `number` sea mayor a cero.
+*   El sistema deberá validar que no exista otro casillero registrado con el mismo `number`.
+*   Al finalizar la creación, el sistema deberá guardar el casillero con estado `Available`.
+*   Al finalizar la creación, el sistema deberá guardar el casillero como activo.
+*   Si el número de casillero ya existe, el sistema deberá rechazar la operación e informar el error correspondiente.
 
 ## Diseño Técnico (RFC)
 
@@ -32,7 +32,7 @@ titulo: [Alta casillero]
 Se utilizará la entidad `Locker` para representar los casilleros físicos disponibles en el club.
 
 *   `id`: UUID. Identificador único del casillero.
-*   `number`: Number. Número identificatorio del casillero. Obligatorio, único y mayor a cero.
+*   `number`: int. Número identificatorio del casillero. Obligatorio, único y mayor a cero.
 *   `status`: String. Estado actual del casillero. Valor inicial: `Available`.
 *   `is_active`: Boolean. Indica si el casillero se encuentra activo. Valor por defecto: `true`.
 
@@ -48,6 +48,7 @@ Restricciones:
 *   `number` debe ser mayor a cero.
 *   `status` se inicializa en `Available`.
 *   `is_active` se inicializa en `true`.
+*   `member_id` se inicializa en `null`.
 
 ### Contrato de API (@alentapp/shared)
 
@@ -68,6 +69,7 @@ Restricciones:
     id: string;
     number: number;
     status: "Available" | "Assigned" | "Maintenance";
+    member_id: string | null;
     is_active: boolean;
 }
 ```
@@ -100,7 +102,12 @@ Restricciones:
 5. Implementar el repositorio de casilleros con Prisma.
 6. Implementar el endpoint `POST /api/v1/lockers`.
 7. Validar que `number` sea obligatorio y mayor a cero.
-8. Validar que no exista otro casillero con el mismo `number`.
-9. Agregar prueba de creación exitosa de casillero.
-10. Agregar prueba de error por número duplicado.
-11. Agregar prueba de error por número inválido.
+8. Validar que 'location' sea obligatoria
+9. Validar que no exista otro casillero con el mismo `number`.
+10. Crear el casillero con  `status` en `Available`.
+11. Crear el casillero con `member_id` en `null`.
+12. Crear el casillero con `is_active` en `true`.
+13. Agregar prueba de creación exitosa de casillero.
+14. Agregar prueba de error por número duplicado.
+15. Agregar prueba de error por número inválido.
+16. Agregar prueba de error por ubicación faltante.
