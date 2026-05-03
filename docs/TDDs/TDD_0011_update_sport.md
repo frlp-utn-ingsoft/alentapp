@@ -6,7 +6,7 @@ fecha: 2026-05-03
 titulo: Actualización de Deportes Existentes
 ---
 
-# TDD-0002: Actualización de Deportes Existentes
+# TDD-0011: Actualización de Deportes Existentes
 
 ## Contexto de Negocio (PRD)
 
