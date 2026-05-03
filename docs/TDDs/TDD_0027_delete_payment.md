@@ -6,7 +6,7 @@ fecha: 2026-05-03
 titulo: Baja Lógica de Payment
 ---
 
-# TDD-0026: Baja Lógica de Payment
+# TDD-0027: Baja Lógica de Payment
 
 ## Contexto de Negocio (PRD)
 

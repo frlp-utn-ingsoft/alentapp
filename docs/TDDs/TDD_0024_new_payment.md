@@ -6,7 +6,7 @@ fecha: 2026-05-03
 titulo: Alta de Payment.
 ---
 
-# TDD-0023: Alta de Payment
+# TDD-0024: Alta de Payment
 
 ## Contexto de Negocio (PRD)
 

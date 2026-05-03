@@ -6,7 +6,7 @@ fecha: 2026-05-03
 titulo: Modificación de Payment
 ---
 
-# TDD-0024: Modificación de Payment
+# TDD-0026: Modificación de Payment
 
 ## Contexto de Negocio (PRD)
 
