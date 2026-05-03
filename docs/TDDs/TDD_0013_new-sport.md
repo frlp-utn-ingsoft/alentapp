@@ -1,28 +1,26 @@
 ---
-autor: [Luana Suarez]
-fecha: [2026-05-02]
-titulo: [Alta deporte]
+autor: Luana Suarez
+fecha: 2026-05-02
+titulo: Alta deporte
 ---
 
-# TDD-[0013]: [Alta deporte]
+# TDD-0013: Alta deporte
 
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-[Permitir que un administrador del club registre un nievo deporte dentro del sistema Alentapp. Esta funcionalidad permite mantener actualizado el catalogo de deportes ofrecidos por el club, defendiendo su nombre, descripcion y cupo maximo disponible]
+Permitir que un administrador del club registre un nievo deporte dentro del sistema Alentapp. Esta funcionalidad permite mantener actualizado el catalogo de deportes ofrecidos por el club, defendiendo su nombre, descripcion y cupo maximo disponible
 
 ### User Persona
-*   **Nombre**: [Administrador del club]
-*   **Necesidad**: [Necesita registrar nueos deportes de forma ordenada, asegurando que cada deporte tenga un nombre identificatorio y un cupo maximo]
+*   **Nombre**: Administrador del club
+*   **Necesidad**: Necesita registrar nueos deportes de forma ordenada, asegurando que cada deporte tenga un nombre identificatorio y un cupo maximo
 
 ### Criterios de Aceptación
-*   [El sistema debera permitir registrar un nuevo deporte indicando 'name', 'descripcion' y 'max_capacity']
-*   [El sistema debera validar que el campo 'name' sea obligatorio]
-*   [El sistema debera validar que el campo `max_capacity` sea obligatorio y mayor que 0.]
+*   El sistema debera permitir registrar un nuevo deporte indicando 'name', 'descripcion' y 'max_capacity'
+*   El sistema debera validar que el campo 'name' sea obligatorio
+*   El sistema debera validar que el campo `max_capacity` sea obligatorio y mayor que 0.
 *   Al finalizar la creación, el sistema deberá guardar el deporte como activo.
 *   Una vez creado el deporte, el campo `name` no deberá ser modificado en futuras operaciones de actualización.
-
-## Diseño Técnico (RFC)
 
 ## Diseño Técnico (RFC)
 
@@ -39,6 +37,7 @@ Se utilizará la entidad `Sport` para representar los deportes disponibles dentr
 Restricciones:
 
 *   `name` debe ser obligatorio.
+*   `description` debe ser obligatoria.
 *   `max_capacity` debe ser mayor a cero.
 *   `is_active` se inicializa en `true` al crear un deporte.
 *   El campo `name` no podrá modificarse en futuras operaciones de actualización.
@@ -77,15 +76,15 @@ Restricciones:
 
 *   **Infrastructure**: Controlador HTTP para `POST /api/v1/sports`, implementación del repositorio de deportes utilizando Prisma y persistencia del nuevo deporte en base de datos.
 
-
 ## Casos de Borde y Errores
 
-| Escenario                         | Resultado Esperado                                  | Código HTTP      |
-| --------------------------------- | --------------------------------------------------- | ---------------- |
-| No se envía `name`                | Error indicando que el nombre es requerido           | 400 Bad Request  |
-| No se envía `max_capacity`        | Error indicando que el cupo máximo es requerido      | 400 Bad Request  |
-| `max_capacity` es menor o igual a cero | Error indicando que el cupo debe ser mayor a cero | 400 Bad Request  |
-| Error inesperado al guardar       | Error interno del servidor                           | 500 Server Error |
+| Escenario                              | Resultado Esperado                                  | Código HTTP      |
+| -------------------------------------- | --------------------------------------------------- | ---------------- |
+| No se envía `name`                     | Error indicando que el nombre es requerido           | 400 Bad Request  |
+| No se envía `description`              | Error indicando que la descripción es requerida      | 400 Bad Request  |
+| No se envía `max_capacity`             | Error indicando que el cupo máximo es requerido      | 400 Bad Request  |
+| `max_capacity` es menor o igual a cero | Error indicando que el cupo debe ser mayor a cero    | 400 Bad Request  |
+| Error inesperado al guardar            | Error interno del servidor                           | 500 Server Error |
 
 ## Plan de Implementación
 
@@ -96,8 +95,10 @@ Restricciones:
 5. Implementar el repositorio de deportes usando Prisma.
 6. Implementar el endpoint `POST /api/v1/sports`.
 7. Validar que `name` sea obligatorio.
-8. Validar que `max_capacity` sea obligatorio y mayor a cero.
-9. Crear el deporte con `is_active` en `true` por defecto.
-10. Agregar prueba de creación exitosa de deporte.
-11. Agregar prueba de error por `name` faltante.
-12. Agregar prueba de error por `max_capacity` inválido.
+8. Validar que `description` sea obligatoria.
+9. Validar que `max_capacity` sea obligatorio y mayor a cero.
+10. Crear el deporte con `is_active` en `true` por defecto.
+11. Agregar prueba de creación exitosa de deporte.
+12. Agregar prueba de error por `name` faltante.
+13. Agregar prueba de error por `description` faltante.
+14. Agregar prueba de error por `max_capacity` inválido
