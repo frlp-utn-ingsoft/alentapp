@@ -46,8 +46,8 @@ Se definirá la entidad "Discipline" con las siguientes propiedades:
 ```
 {
     reason: string;
-    start_date: string; 
-    end_date: string; 
+    start_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ)
+    end_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ)
     is_total_suspension: boolean;
     member_id: string;
 }
@@ -82,11 +82,12 @@ model Discipline {
 **Caso de Uso**: `NewDisciplineUseCase`.
 1. Validar los datos de entrada.
 2. Verificar que `end_date` sea estrictamente posterior a `start_date`.
-3. Verificar que el socio exista mediante su `member_id`.
-4. Verificar que no exista superposición con otras sanciones activas del mismo socio.
-5. Mapear el DTO a Entidad de Dominio.
-6. Persistir la entidad a través de `DisciplineRepository`.
-7. Retornar la sanción creada.
+3. Validar que `start_date` y `end_date` cumplan con el formato ISO 8601.
+4. Verificar que el socio exista mediante su `member_id`.
+5. Verificar que no exista superposición con otras sanciones activas del mismo socio.
+6. Mapear el DTO a Entidad de Dominio.
+7. Persistir la entidad a través de `DisciplineRepository`.
+8. Retornar la sanción creada.
 
 ## 4. Casos de Borde y Errores
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
@@ -94,6 +95,7 @@ model Discipline {
 | Socio inexistente     | "El socio no existe"       | 404 Not Found              |
 | Fecha de fin menor a fecha de inicio | "La fecha de fin debe ser estrictamente posterior a la fecha de inicio"              | 400 Bad Request           |
 | Campos obligatorios faltantes | "Todos los campos son requeridos" | 400 Bad Request |
+| Formato de fecha inválido | "Formato de fecha inválido" | 400 Bad Request |
 | Superposición de sanciones | "Ya existe una sanción activa en ese período" | 409 Conflict |
 | Error de conexión a DB     | "Error interno, reintente más tarde" | 500 Internal Server Error |
 

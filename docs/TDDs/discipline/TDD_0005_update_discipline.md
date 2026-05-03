@@ -47,8 +47,8 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 ```
 {
     reason: string (opcional);
-    start_date: string (opcional);
-    end_date: string (opcional);
+    start_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ), (opcional)
+    end_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ), (opcional)
     is_total_suspension: boolean (opcional);
 }
 ```
@@ -85,10 +85,11 @@ model Discipline {
 3. Si no existe o tiene `deleted_at` distinto de null, retornar error.
 4. Validar los datos de entrada.
 5. Si se modifican fechas, verificar que `end_date` sea estrictamente posterior a `start_date`.
-6. Verificar que no exista superposición con otras sanciones activas del mismo socio.
-7. Mapear el DTO a Entidad de Dominio.
-8. Persistir los cambios a través de `DisciplineRepository`.
-9. Retornar la sanción actualizada.
+6. Validar que `start_date` y `end_date` cumplan con el formato ISO 8601.
+7. Verificar que no exista superposición con otras sanciones activas del mismo socio.
+8. Mapear el DTO a Entidad de Dominio.
+9. Persistir los cambios a través de `DisciplineRepository`.
+10. Retornar la sanción actualizada.
 
 
 ## 4. Casos de Borde y Errores

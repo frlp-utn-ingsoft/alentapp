@@ -99,5 +99,6 @@ model Discipline {
 
 * Antes de eliminar, el frontend debería mostrar una confirmación al usuario para evitar borrados accidentales.
 * Esta operación realiza un borrado lógico: la sanción no se elimina físicamente de la base de datos, sino que se marca con `deleted_at`.
+* `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema. Cuando se asigna, se guarda como `DateTime` en formato ISO 8601 datetime.
 * Las operaciones sobre sanciones deben verse reflejadas en el estado disciplinario del socio.
 * El estado del socio debe recalcularse en función de las sanciones activas.
