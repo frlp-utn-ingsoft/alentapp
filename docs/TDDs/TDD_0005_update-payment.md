@@ -33,7 +33,7 @@ Permitir a los administrativos corregir o modificar la información de un pago y
 ## Diseño Técnico (RFC)
 
 ### Contrato de API (@alentapp/shared)
-- Endpoint: `PUT /api/v1/payment/:id`.
+- Endpoint: `PUT /api/v1/payments/:id`.
 - Request Body (CreatePaymentRequest):
 ```ts
 {
