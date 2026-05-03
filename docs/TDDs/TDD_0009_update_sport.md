@@ -3,10 +3,10 @@ id: 0009
 estado: Propuesto
 autor: Tomás Bellizzi
 fecha: 2026-05-01
-titulo: Modificación de Deporte Existentes (Sport)
+titulo: Modificación de Deportes Existentes (Sport)
 ---
 
-# TDD-0009: Modificación de Deporte Existentes
+# TDD-0009: Modificación de Deportes Existentes
 
 ## Contexto de Negocio (PRD)
 
