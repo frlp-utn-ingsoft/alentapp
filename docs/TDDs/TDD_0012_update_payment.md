@@ -25,7 +25,7 @@ Permitir a los administrativos corregir datos de un pago existente, como el mont
 - El sistema debe validar que el pago exista antes de intentar actualizarlo.
 - El sistema debe validar que, si se modifica `amount`, el nuevo valor sea mayor a cero.
 - El sistema debe validar que, si se modifica `month`, esté entre 1 y 12.
-- El sistema **no debe permitir** modificar el `status` desde este endpoint (el cambio de status se gestiona en TDD-0006).
+- El sistema **no debe permitir** modificar el `status` desde este endpoint (el cambio de status se gestiona en TDD-0013).
 - Si la edición es correcta, debe retornar los datos actualizados del pago.
 
 ## Diseño Técnico (RFC)
