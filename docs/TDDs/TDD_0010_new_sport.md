@@ -70,9 +70,9 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 ### Componentes de Arquitectura Hexagonal
 
-1. Puerto: SportRepository (Interface en el Dominio).
+1. Puerto: SportRepository (Método `create(id, data)`).
 2. Caso de Uso: CreateSport (Lógica que verifica si el nombre ya existe y si la capacidad maxima es mayor a 0 antes de llamar al repositorio).
-3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
+3. Adaptador de Salida: PostgresSportRepository (Creacion del registro usando el método `create` de Prisma)
 4. Adaptador de Entrada: SportController (Ruta HTTP).
 
 ## Casos de Borde y Errores
