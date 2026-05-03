@@ -12,7 +12,7 @@ titulo: Eliminación de Pagos Existentes
 
 ### Objetivo
 
-Permitir a los administrativos dar de baja de forma lógica los pagos existentes. En otras palabras, se debe permitir que los pagos pasen a estado 'Cancelado'.
+Permitir a los administrativos dar de baja los pagos existentes. En otras palabras, se debe permitir que los pagos pasen a estado 'Cancelado'.
 
 ### User Persona
 
@@ -21,51 +21,44 @@ Permitir a los administrativos dar de baja de forma lógica los pagos existentes
 
 ### Criterios de Aceptación
 
-- Yo como usuario quiero anular un pago para corregir errores de carga sin que el registro desaparezca del sistema.
+- Yo como usuario quiero eliminar los pagos asociados a un socio en específico. Necesito un mensaje de advertencia antes de borrar para no cometer equivocaciones irreparables.
 
 ### Escenario de éxito
 
-- Si el usuario modifica el estado de 'Pago' o 'Pendiente' a 'Cancelado', el sistema guarda el registro e informa que la baja se realizó con éxito.
+- Si el usuario solicita la baja de un pago, el sistema debe cambiar el estado de este a 'Cancelado' e informarlo mediante un mensaje de éxito.
 
 ### Escenario de fallo
 
-- Si el usuario intenta modificar algún dato relacionado al pago cuando este ya está en estado 'Cancelado', el sistema anula la operación y muestra en pantalla un mensaje de error. 
+- Si el usuario intenta dar de baja un pago con un ID inexistente, el sistema debe rechazar la operación e informar el error mediante un mensaje en pantalla. 
 
 ## Diseño Técnico (RFC)
 
 ### Contrato de API (@alentapp/shared)
 
-- Endpoint: `DELETE /api/v1/payments/:id`
-- Request Body (UpdatePaymentRequest): 
-
-```ts
-{
-    status?: 'Cancelado'
-}
-```
+- Endpoint: `DELETE /api/v1/payment/:id`
+- Request Body: `None`
+- Response: `204 No Content` en caso de éxito.
 
 ### Componentes de Arquitectura Hexagonal
 
-1. Puerto: PaymentRepository (metodo update(id, data)).
-2. Servicio de Dominio: `PaymentValidator`.
-3. Caso de Uso: DeletePayment.
-4. Adaptador de Salida: PostgresPaymentRepository (actualización usando el método `update` de Prisma).
-5. Adaptador de Entrada: PaymentController (Ruta HTTP, se extrae el id especificado en la url y mapea excepciones a códigos HTTP).
+1. Puerto: `PaymentRepository` (Método `delete(id)`).
+2. Caso de Uso: `DeletePaymentUseCase` (Comprueba existencia previa vía `findById` y delega la eliminación).
+3. Adaptador de Salida: `PostgresPaymentRepository` (Eliminación usando el método `delete` de Prisma).
+4. Adaptador de Entrada: `PaymentController` (Ruta HTTP que extrae el `id` y devuelve un status 204).
 
 ## Casos de Borde y Errores
 
-| Escenario                   | Resultado Esperado                            | Código HTTP               |
-| ----------------------------| --------------------------------------------- | ------------------------- |
-| Pago Inexistente            | Mensaje: "El pago ingresado no existe"        | 404 Not Found             |
-| Cambio de Estado Inválido   | Mensaje: "El estado del pago es actualmente 'Cancelado', no es posible modificarlo 'Pago' a 'Pendiente', la acción es irreversible" | 400 Bad Request |
-| Modificación de Datos Inválida | Mensaje: "Los datos del pago no pueden ser modificados porque se encuentra en estado 'Cancelado'"  | 400 Bad Request |
-| Error en la Base de Datos   | Mensaje: "Error al procesar la operación, intente más tarde" | 500 Internal Server Error |
-| Cambio a 'Cancelado'  | Mensaje: "Pago cancelado con éxito"    | 200 OK                    |
+| Escenario                  | Resultado Esperado                            | Código HTTP actual        |
+| -------------------------- | --------------------------------------------- | ------------------------- |
+| Pago inexistente           | Mensaje: "El pago no existe"                  | 400 Bad Request           |
+| Error de conexión a DB     | Mensaje: "Error al procesar la operación, intente más tarde" | 500 Internal Server Error |
+| Eliminación exitosa        | Respuesta vacía                               | 204 No Content            |
+
 
 ## Plan de Implementación
 
-1. Actualizar las interfaces en el paquete `@alentapp/shared` (`DeletePaymentRequest`).
-2. Ampliar el `PaymentRepository` con el método `update`.
-3. Implementar la lógica en `DeletePaymentUseCase` utilizando el `PaymentValidator` centralizado.
-4. Crear la ruta `DELETE` en el controlador y enlazarla a la app de Fastify.
-5. Consumir el endpoint desde el servicio de Frontend y reutilizar el modal de creación para permitir la edición.
+1. Ampliar el `PaymentRepository` y `PostgresPaymentRepository` con el método `delete`.
+2. Crear la lógica de negocio en `DeletePaymentUseCase`.
+3. Crear el endpoint `DELETE /api/v1/payment/:id` en el `PaymentController` y registrarlo en `app.ts`.
+4. Añadir el método `delete` al servicio Frontend (`payment.ts`).
+5. Enlazar el botón de eliminación en `PaymentView.tsx` agregando la confirmación del navegador (`window.confirm`) antes de hacer la llamada.
