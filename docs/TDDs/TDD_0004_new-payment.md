@@ -1,10 +1,10 @@
 ---
-autor: [Valentina Pértile de la Vega]
-fecha: [2026-05-01]
+autor: Valentina Pértile de la Vega
+fecha: 2026-05-01
 titulo: New Payment
 ---
 
-# TDD-[0004]: Crear Payment
+# TDD-0004: Crear Payment
 
 ## Contexto de Negocio (PRD)
 

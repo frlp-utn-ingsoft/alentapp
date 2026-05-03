@@ -1,10 +1,10 @@
 ---
-autor: [Valentina Pértile de la Vega]
-fecha: [2026-05-01]
+autor: Valentina Pértile de la Vega
+fecha: 2026-05-01
 titulo: Update Payment
 ---
  
-# TDD-[0005]: Actualizar Payment
+# TDD-0005: Actualizar Payment
  
 ## Contexto de Negocio (PRD)
  
