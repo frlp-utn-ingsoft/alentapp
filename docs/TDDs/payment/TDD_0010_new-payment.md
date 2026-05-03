@@ -59,6 +59,7 @@ Entidad `Payment`:
   member_id: string;
   amount: number;
   due_date: string;
+  status?: "Pending" | "Paid";
 }
 ```
 ### 2.3. Esquema de Persistencia
@@ -97,7 +98,7 @@ model Payment {
 3. Validar que `amount > 0`.
 4. Verifica que el due_date cumplan con el formato ISO 8601.
 5. Extraer month y date de due_date.
-6. Crear pago con estado inicial `Pending`.
+6. Crear pago con el status provisto o, en su defecto, inicializarlo en Pending.
 7. Persistir registro.
 8. Retornar pago creado.
 
