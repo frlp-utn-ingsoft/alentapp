@@ -49,9 +49,11 @@ Entidad `MEDICAL_CERTIFICATE`:
   doctor_license: string;
   member_id: string;
 }
-
 ```
-- **Response**: 
+
+- **Response:** `201 Created`
+- **Response Body**:
+```ts
 {
   id: string;
   issue_date: string;
@@ -60,8 +62,7 @@ Entidad `MEDICAL_CERTIFICATE`:
   is_invalidated: boolean;
   member_id: string;
 }
-
-201 Created
+```
 
 ### Componentes de Arquitectura Hexagonal
 - **Domain**: Regla de negocio: un solo certificado activo por socio.
@@ -78,11 +79,11 @@ Entidad `MEDICAL_CERTIFICATE`:
 ## Plan de Implementación
 
 1. Definir DTO `CreateMedicalCertificateDto`
-2. Validar fechas (`expiry_date` > `issue_date`)
+2. Validar fechas (`expiry_date` >= `issue_date`)
 3. Verificar existencia del `member_id`
 4. Buscar certificados activos del socio
-5. Invalidarlos (`is_invalidated` >= true)
+5. Invalidarlos (`is_invalidated` = true)
 6. Crear nuevo certificado (`is_invalidated` = false)
 7. Persistir en base de datos
-8. etornar certificado creado
+8. Retornar certificado creado
 

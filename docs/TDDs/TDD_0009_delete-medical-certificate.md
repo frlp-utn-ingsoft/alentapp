@@ -40,7 +40,6 @@ Entidad `MEDICAL_CERTIFICATE`:
 ### Contrato de API (@alentapp/shared)
 
 - **Endpoint**: `DELETE /api/v1/medical-certificates/:id`
-
 - **Response**:
 ```ts
 {
@@ -48,7 +47,6 @@ Entidad `MEDICAL_CERTIFICATE`:
 }
 
 ```
-`200 OK`
 
 ### Componentes de Arquitectura Hexagonal
 
@@ -59,7 +57,7 @@ Entidad `MEDICAL_CERTIFICATE`:
 ## Casos de Borde y Errores
 | Escenario	|Resultado Esperado	|Código HTTP|
 |---|---|---|
-|id inexistente|	Error: certificado no encontrado|404 Not Found|
+|`id` inexistente |	Error: certificado no encontrado | 404 Not Found|
 
 ## Plan de Implementación
 

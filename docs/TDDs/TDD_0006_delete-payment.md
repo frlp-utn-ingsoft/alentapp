@@ -42,8 +42,22 @@ Entidad existente `PAYMENT`:
 ### Contrato de API (@alentapp/shared)
 
 - **Endpoint**: `DELETE /api/v1/payments/:id`
-
+- **Request Body:** No aplica.
 - **Response**: `200 OK` con el payment actualizado (status = `Canceled`).
+- **Response Body**:
+
+```ts
+{
+  id: string;
+  amount: number;
+  month: number;
+  year: number;
+  status: "Canceled";
+  due_date: string;
+  payment_date: string | null;
+  member_id: string;
+}
+```
 
 ### Componentes de Arquitectura Hexagonal
 

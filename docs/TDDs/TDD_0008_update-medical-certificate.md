@@ -51,8 +51,9 @@ Entidad `MEDICAL_CERTIFICATE`:
   doctor_license?: string;
 }
 ```
-
-- **Response**:
+- **Response:** `200 OK`
+- **Response Body**:
+```ts
 {
   id: string;
   issue_date: string;
@@ -61,8 +62,7 @@ Entidad `MEDICAL_CERTIFICATE`:
   is_invalidated: boolean;
   member_id: string;
 }
-
-`200 OK` con el certificado médico actualizado
+```
 
 ### Componentes de Arquitectura Hexagonal
 
@@ -74,8 +74,8 @@ Entidad `MEDICAL_CERTIFICATE`:
 ## Casos de Borde y Errores
 |Escenario	|Resultado Esperado|	Código HTTP|
 |---|---|---|
-| ` id ` inexistente 	| Error: certificado no encontrado	| 400 Bad Request| 
-| ` expiry_date`  < ` issue_date` (validación directa)| Error: fecha de vencimiento no válida	| 400 Bad Request|
+| `id` inexistente 	| Error: certificado no encontrado	| 400 Bad Request| 
+| `expiry_date` <= `issue_date` (validación directa)| Error: fecha de vencimiento no válida	| 400 Bad Request|
 | Actualizar solo `issue_date` a una fecha posterior al vencimiento guardado en DB (validación cruzada) | Error: la fecha de emisión resultante no puede ser posterior al vencimiento actual | 400 Bad Request |
 
 

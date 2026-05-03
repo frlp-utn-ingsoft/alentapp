@@ -54,6 +54,22 @@ Entidad existente `PAYMENT`:
 }
 ```
 
+- **Response:** `201 Created`
+
+- **Response Body**:
+```ts
+{
+  id: string;
+  amount: number;
+  month: number;
+  year: number;
+  status: "Pending" | "Paid" | "Canceled";
+  due_date: string;
+  payment_date: string | null;
+  member_id: string;
+}
+```
+
 ### Componentes de Arquitectura Hexagonal
  
 - **Domain**: Entidad `Payment`. Regla: `status` inicial es `Pending`.
