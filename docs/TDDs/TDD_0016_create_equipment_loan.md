@@ -42,7 +42,7 @@ Se definira la entidad `Equipment_Loan` con las siguientes propiedades:
 
 ### Contrato de API (@alentapp/shared)
 [Definición de endpoints y tipos compartidos.]
-- Endpoint: `METHOD /api/v1/equipment_loan`
+- Endpoint: `POST /api/v1/equipment_loan`
 - Request Body (CreateEquipmentLoanRequest):
 ```ts
 {
@@ -64,9 +64,9 @@ Se definira la entidad `Equipment_Loan` con las siguientes propiedades:
 ## Casos de Borde y Errores
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
 | ----------------------------| --------------------------------------------- | ------------------------- |
-| Mimbro inexistente | Mensaje: "El usuario no existe" | 404 Not Found |
+| Miembro inexistente | Mensaje: "El usuario no existe" | 404 Not Found |
 | Fecha Prestamo posterior a Fecha Devolucion | Mensaje: "Fecha prestamo no puede ser posterior a Fecha Devolucion" | 400 Bad Request |
-| Miembro con categoria "Cadet" | Mensaje: "Solo se permite realizar prestamos a miembros con categoria Senior o Lifetime" | 409 Conflict |
+| Miembro con categoria "Cadet" | Mensaje: "Solo se permite realizar prestamos a miembros con categoria Senior o Lifetime" | 400 Bad Request |
 | Error en la Base de Datos | Mensaje: "Error al procesar la operacion, intente mas tarde" | 500 Internal Server Error |
 
 ## Plan de Implementación
