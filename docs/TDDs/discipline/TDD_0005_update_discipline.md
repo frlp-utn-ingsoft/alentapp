@@ -1,12 +1,12 @@
 ---
-id: 0002
+id: 0005
 estado: Propuesto
 autor: Santiago Gonzalez D'Angelo
 fecha: 2026-05-01
 titulo: Actualización de Sanciones Disciplinarias
 ---
 
-# TDD-0002: Actualización de Sanciones Disciplinarias
+# TDD-0005: Actualización de Sanciones Disciplinarias
 
 ## 1. Contexto de Negocio 
 

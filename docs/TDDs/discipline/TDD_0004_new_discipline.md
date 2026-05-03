@@ -1,12 +1,12 @@
 ---
-id: 0001
+id: 0004
 estado: Propuesto
 autor: Santiago Gonzalez D'Angelo
 fecha: 2026-04-30
 titulo: Registro de Sanciones Disciplinarias
 ---
 
-# TDD-0001: Registro de Sanciones Disciplinarias
+# TDD-0004: Registro de Sanciones Disciplinarias
 
 ## 1. Contexto de Negocio 
 

@@ -1,12 +1,12 @@
 ---
-id: 0003
+id: 0006
 estado: Propuesto
 autor: Santiago Gonzalez D'Angelo
 fecha: 2026-05-01
 titulo: Eliminación de Sanciones Disciplinarias
 ---
 
-# TDD-0003: Eliminación de Sanciones Disciplinarias
+# TDD-0006: Eliminación de Sanciones Disciplinarias
 
 ## 1. Contexto de Negocio 
 
