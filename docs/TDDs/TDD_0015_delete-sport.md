@@ -27,27 +27,56 @@ Esta funcionalidad permite quitar un deporte del uso operativo del sistema sin e
 *   Al finalizar la baja, el sistema deberá marcar el deporte como inactivo.
 *   Un deporte dado de baja no deberá aparecer como activo para futuras operaciones.
 *   Si el deporte no existe, el sistema deberá rechazar la operación e informar el error correspondiente.
+
 ## Diseño Técnico (RFC)
 
 ### Modelo de Datos
-[Descripción de cambios en Prisma o nuevas entidades.]
-*   `campo`: Tipo (Restricciones).
+
+Se utilizará la entidad `Sport` existente para representar los deportes del sistema.
+
+Para la baja de un deporte no se realizará eliminación física del registro. En su lugar, se actualizará el campo `is_active` a `false`.
+
+*   `id`: UUID. Identificador único del deporte.
+*   `name`: String. Nombre del deporte.
+*   `description`: String. Descripción del deporte.
+*   `max_capacity`: Number. Cupo máximo permitido.
+*   `is_active`: Boolean. Indica si el deporte se encuentra activo dentro del sistema.
+
+Restricciones:
+
+*   `id` debe corresponder a un deporte existente.
+*   La baja no debe eliminar físicamente el registro.
+*   Al dar de baja el deporte, `is_active` debe actualizarse a `false`.
 
 ### Contrato de API (@alentapp/shared)
-[Definición de endpoints y tipos compartidos.]
-*   **Endpoint**: `METHOD /api/v1/[recurso]`
+
+*   **Endpoint**: `DELETE /api/v1/sports/:id`
+
 *   **Request Body**:
+
+```ts
+{}
+```
+
+*   **Response Body**:
+
 ```ts
 {
-    // propiedades
+    id: string;
+    name: string;
+    description: string;
+    max_capacity: number;
+    is_active: boolean;
 }
 ```
 
 ### Componentes de Arquitectura Hexagonal
-[Cómo se distribuye la lógica en las capas.]
-*   **Domain**: [Entidades, Value Objects, Reglas de negocio]
-*   **Application**: [Casos de Uso, Puertos de Salida]
-*   **Infrastructure**: [Adaptadores, Controladores, Implementación de Repositorios]
+
+*   **Domain**: Entidad `Sport` y regla de negocio asociada a la baja lógica: un deporte dado de baja no se elimina físicamente, sino que se marca como inactivo.
+
+*   **Application**: Caso de uso `DeleteSportUseCase`, encargado de validar que el deporte exista y solicitar la actualización del campo `is_active` a `false`.
+
+*   **Infrastructure**: Controlador HTTP para `DELETE /api/v1/sports/:id`, implementación del repositorio de deportes utilizando Prisma y persistencia de la baja lógica en base de datos.
 
 ## Casos de Borde y Errores
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
