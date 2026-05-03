@@ -17,7 +17,7 @@ Digitalizar el registro de actividades deportivas ofrecidas por el club. Este re
 ### User Persona
 
 - Nombre: Jorge (Administrativo).
-- Necesidad: Registrar los deportes ofrecidos para luego poder llevar el registro de que socios practican que deportes. No debe poder existir más de una vez el mismo deporte, y una vez ingresado un deporte, no se debe poder renombrar el mismo.
+- Necesidad: Registrar los deportes ofrecidos para luego poder llevar el registro de que socios practican que deportes. No debe poder existir más de una vez el mismo deporte, y una vez ingresado un deporte, solo deben poder modificarse su descripción y/o cupo máximo.
 
 ### Criterios de Aceptación
 
