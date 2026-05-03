@@ -1,12 +1,12 @@
 ---
-id: 0017
+id: 0021
 estado: Propuesto
 autor: Leonel Piquet
 fecha: 2026-05-02
 titulo: Actualización de Certificado Médico
 ---
 
-# TDD-0017: Actualización de Certificado Médico
+# TDD-0021: Actualización de Certificado Médico
 
 ## Contexto de Negocio (PRD)
 
@@ -61,7 +61,7 @@ Definición del contrato para la actualización parcial (Patch/Put):
 | Escenario                                      | Resultado Esperado                                                        | Código HTTP     |     
 | -----------------------------------------------|---------------------------------------------------------------------------|-----------------| 
 | ID de certificado inexistente                  | Mensaje: "Certificado no encontrado"                                      | 404 Not Found   |      
-| Nueva fecha_vencimiento menor que fecha_emision| Mensaje: "La fecha de vencimiento no puede ser anterior a la de la emisión| 400 Bad Request |     
+| Nueva fecha_vencimiento menor que fecha_emision| Mensaje: "La fecha de vencimiento no puede ser anterior a la de la emisión| 400 Bad Request |   
 | Intento de modificar member_id                 | El campo debe ser ignorado o retornar error de validación                 | 400 Bad Request |
 |  Error de concurrencia en BD                   | Mensaje: "El registro fue modificado por otro usuario                     | 409 Conflict    |
 

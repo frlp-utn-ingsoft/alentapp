@@ -1,12 +1,12 @@
 ---
-id: 0018
+id: 0022
 estado: Propuesto
 autor: Leonel Piquet
 fecha: 2026-05-02
 titulo: Borrado Lógico de Certificado Médico
 ---
 
-# TDD-0018: Borrado Lógico de Certificado Médico
+# TDD-0022: Borrado Lógico de Certificado Médico
 
 ## Contexto de Negocio (PRD)
 

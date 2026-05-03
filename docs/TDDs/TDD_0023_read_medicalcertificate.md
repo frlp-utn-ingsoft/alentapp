@@ -1,12 +1,12 @@
 ---
-id: 0019
+id: 0023
 estado: Propuesto
 autor: Leonel Piquet
 fecha: 2026-05-03
 titulo: Consulta de Certificados Médicos
 ---
 
-# TDD-0019: Consulta de Certificados Médicos
+# TDD-0023: Consulta de Certificados Médicos
 
 ## Contexto de Negocio (PRD)
 
