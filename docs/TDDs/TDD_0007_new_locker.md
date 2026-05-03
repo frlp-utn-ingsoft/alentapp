@@ -24,7 +24,7 @@ Permitir a los administrativos crear el registro de lockers del gimnasio para po
 - Si el usuario crea el locker con los datos validos, el sistema debe registrarlo correctamente y mostrar el mensaje de éxito.
 
 ### Escenario de Fallo
-- Si el usuario ingresa un locker con `number` duplicado, inválido o con una combinación inválida de `status` o `memberId`, el sistema debe rechazar la creación y devolver el error correspondiente.
+- Si el usuario ingresa un locker con `number` duplicado, inválido o con una combinación inválida de `status` o `member_id`, el sistema debe rechazar la creación y devolver el error correspondiente.
 
 
 ## Diseño Técnico (RFC)
@@ -35,7 +35,7 @@ Se definirá la entidad `Locker` con las siguientes propiedades y restricciones:
 - `number`: Número de identificación física del locker, número entero y único.
 - `location`: Lugar donde se encuentra físicamente el locker. Cadena de texto.
 - `status`: Estado en el que se encuentra el locker, Enumeración(`Available`, `Occupied`, `Maintenance`).
-- `memberId`: Identificador del socio propietario del locker (UUID, clave foránea hacia `Member`).
+- `member_id`: Identificador del socio propietario del locker (UUID, clave foránea hacia `Member`).
 
 ### Contrato de API (@alentapp/shared)
 
@@ -47,7 +47,7 @@ Se definirá la entidad `Locker` con las siguientes propiedades y restricciones:
     number: number; // requerido, entero > 0, único
     location?: string;
     status?: 'Available' | 'Occupied' | 'Maintenance'; // opcional, default 'Available'
-    memberId?: string | null; // opcional
+    member_id?: string | null; // opcional
 }
 ```
 
@@ -62,12 +62,12 @@ Se definirá la entidad `Locker` con las siguientes propiedades y restricciones:
 | ------------------------------------------ | ------------------------------------------------------------| ------------------------- |
 | Número duplicado (`number`)                | Mensaje: "Ya existe un locker con ese número"               | 409 conflict              |
 | Número inválido (<= 0 o no entero)         | Mensaje: "`number` debe ser entero y mayor a cero"          | 400 Bad Request           |
-| `memberId` con formato inválido            | Mensaje: "`memberId` no válido"                             | 400 Bad Request           |
-| `memberId` no existe                       | Mensaje: "El miembro indicado no existe"                    | 404 Not Found             |
-| `memberId` ya tiene otro locker            | Mensaje: "El miembro ya posee un locker"                    | 422 Unprocessable entity  |
-| Estado `Available` con `memberId`          | Mensaje: "Estado `Available` no permite `memberId`"         | 422 Unprocessable entity  |
-| Estado `Occupied` sin `memberId`           | Mensaje: "Estado `Occupied` requiere `memberId`"            | 422 Unprocessable entity  |
-| Estado `Maintenance` con `memberId`        | Mensaje: "Estado `Maintenance` no permite `memberId`"       | 422 Unprocessable entity  |
+| `member_id` con formato inválido           | Mensaje: "`member_id` no válido"                            | 400 Bad Request           |
+| `member_id` no existe                      | Mensaje: "El miembro indicado no existe"                    | 404 Not Found             |
+| `member_id` ya tiene otro locker           | Mensaje: "El miembro ya posee un locker"                    | 422 Unprocessable entity  |
+| Estado `Available` con `member_id`         | Mensaje: "Estado `Available` no permite `member_id`"        | 422 Unprocessable entity  |
+| Estado `Occupied` sin `member_id`          | Mensaje: "Estado `Occupied` requiere `member_id`"           | 422 Unprocessable entity  |
+| Estado `Maintenance` con `member_id`       | Mensaje: "Estado `Maintenance` no permite `member_id`"      | 422 Unprocessable entity  |
 | Error de conexión a DB                     | Mensaje: "Error interno, reintente más tarde"               | 500 Internal Server Error |
 
 ## Plan de Implementación
