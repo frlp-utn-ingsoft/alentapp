@@ -50,7 +50,7 @@ Al tratarse de una operacion destructiva que solo requiere conocer el identifica
 | -------------------------- | --------------------------------------------- | ------------------------- |
 | Deporte inexistente          | Mensaje: "El deporte no existe"               | 404 Not Found           |
 | ID invalido | Mensaje: "El id informado no es valido" | 400 Bad Request |
-| Error de conexión a DB     | Mensaje: error del motor de base de datos     | 500 Internal Server Error |
+| Error de conexión a DB     | Mensaje: "Error interno, reintente más tarde"     | 500 Internal Server Error |
 | Eliminación exitosa        | Respuesta vacía                               | 204 No Content            |
 
 ## Plan de Implementación
