@@ -15,7 +15,7 @@ Permitir la anulación de un certificado médico en caso de que haya sido cargad
 
 ### User Persona
 *   **Nombre**: Administrador del Club.
-*   **Necesidad**: Desactivar un certificado médico de manera definitiva cuando el documento original es revocado o se detecta que no es válido, asegurando que el sistema bloquee automáticamente el acceso del socio[cite: 4].
+*   **Necesidad**: Desactivar un certificado médico de manera definitiva cuando el documento original es revocado o se detecta que no es válido, asegurando que el sistema bloquee automáticamente el acceso del socio.
 
 ### Criterios de Aceptación
 *   El sistema no debe realizar un borrado físico (DELETE) de la fila en la base de datos para mantener la integridad referencial.
@@ -48,11 +48,11 @@ Organización de la lógica según el estándar del monorepo:
     *   `PrismaMedicalCertificateRepository`: Implementación que ejecuta `prisma.medicalCertificate.update` seteando el flag `esta_validado: false`.
 
 ## Casos de Borde y Errores
-| Escenario                   | Resultado Esperado                            | Código HTTP               |
-| ----------------------------| --------------------------------------------- | ------------------------- |
-| ID inexistente              | Mensaje: "Certificado no encontrado"          | 404 Not Found             |
-| Certificado ya anulado      | El sistema confirma la operación exitosa (Idempotencia) | 204 No Content  |
-| Error de base de datos      | Mensaje: "Error al procesar la baja lógica"   | 500 Internal Server Error |
+| Escenario                   | Resultado Esperado                                      | Código HTTP               |
+| ----------------------------| ------------------------------------------------------- | ------------------------- |
+| ID inexistente              | Mensaje: "Certificado no encontrado"                    | 404 Not Found             |
+| Certificado ya anulado      | El sistema confirma la operación exitosa (Idempotencia) | 204 No Content            |
+| Error de base de datos      | Mensaje: "Error al procesar la baja lógica"             | 500 Internal Server Error |
 
 ## Plan de Implementación
 1.  Definir el endpoint de eliminación en el controlador del backend.
