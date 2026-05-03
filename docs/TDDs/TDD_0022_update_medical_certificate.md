@@ -84,6 +84,6 @@ Todos los campos son opcionales porque se trata de una actualizacion parcial.
 3. Implementar la logica en `UpdateMedicalCertificateUseCase`.
 4. Validar la regla de fechas con los datos finales del certificado.
 5. Implementar la actualizacion en `PostgresMedicalCertificateRepository`.
-6. Crear el endpoint `PUT /api/v1/medical-certificates/:id` en el `MedicalCertificateController`.
+6. Crear el endpoint `PATCH /api/v1/medical-certificates/:id` en el `MedicalCertificateController`.
 7. Agregar la edicion de certificados medicos en el Frontend.
 8. Agregar tests unitarios del caso de uso y tests de integracion del endpoint.
