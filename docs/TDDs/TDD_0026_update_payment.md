@@ -1,5 +1,5 @@
 ---
-id: 0024
+id: 0026
 estado: Propuesto
 autor: Lucas Legorburu
 fecha: 2026-05-03

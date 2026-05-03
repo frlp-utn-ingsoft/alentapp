@@ -1,9 +1,9 @@
 ---
-id: 0023
+id: 0024
 estado: Propuesto
 autor: Lucas Legorburu
 fecha: 2026-05-03
-titulo: Alta de Payment
+titulo: Alta de Payment.
 ---
 
 # TDD-0023: Alta de Payment
