@@ -53,7 +53,7 @@ Permitir consultar certificados medicos para conocer si un socio tiene un certif
 MedicalCertificateResponse[]
 ```
 
-- Endpoint: `GET /api/v1/members/:memberId/medical-certificate-status`
+- Endpoint: `GET /api/v1/members/:memberId/medical-certificates/active`
 - Response (`MemberMedicalCertificateStatusResponse`):
 
 ```ts
