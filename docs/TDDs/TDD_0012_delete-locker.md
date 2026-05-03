@@ -1,14 +1,7 @@
 ---
-autor: [Luana Suarez]
-fecha: [2026-05-02]
-titulo: [Baja del casillero]
----
-
-
----
 autor: Luana Suarez
-fecha: 2026-05-01
-titulo: Baja de casillero
+fecha: 2026-05-02
+titulo: Baja del casillero
 ---
 
 # TDD-0012: Baja de casillero
@@ -44,10 +37,18 @@ Para la baja de un casillero no se realizará eliminación física del registro.
 
 *   `id`: UUID. Identificador único del casillero.
 *   `number`: Int. Número identificatorio del casillero.
-*   `location`: String. Ubicación física o referencia del casillero dentro del club.
+*   `location`: String. Ubicación física del casillero dentro del club. Debe pertenecer a una lista de locaciones permitidas.
 *   `status`: String. Estado actual del casillero.
 *   `member_id`: UUID | null. Identificador del socio asignado al casillero.
 *   `is_active`: Boolean. Indica si el casillero se encuentra activo dentro del sistema.
+
+Locaciones permitidas para `location`:
+
+*   `Hall`
+*   `Vestibulo`
+*   `Pasillo`
+*   `Gimnasio`
+*   `Administracion`
 
 Restricciones:
 
