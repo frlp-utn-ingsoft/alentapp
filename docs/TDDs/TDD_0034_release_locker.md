@@ -32,11 +32,7 @@ Entidad `Locker`. No se requieren modificaciones estructurales en `schema.prisma
 
 ### Contrato de API (@alentapp/shared)
 *   **Endpoint**: `PATCH /api/v1/lockers/:id/release`
-*   **Request Body**: vacio {}
-```ts
-{
-}
-```
+*   **Request Body**: `None`
 *   **Response Body (LockerResponse)**:
 ```ts
 {
