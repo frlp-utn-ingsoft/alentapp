@@ -6,7 +6,7 @@ fecha: 2026-05-03
 titulo: Eliminación de Pagos Existentes
 ---
 
-# TDD-0003: Eliminación de Pagos Existentes
+# TDD-0006: Eliminación de Pagos Existentes
 
 ## Contexto de Negocio (PRD)
 
@@ -35,19 +35,12 @@ Permitir a los administrativos dar de baja de forma lógica los pagos existentes
 
 ### Contrato de API (@alentapp/shared)
 
-Al tratarse de una baja lógica y no físca, el metodo DELETE no se implementa; solamente se usa el método PUT.
-
-- Endpoint: `PUT /api/v1/payment/:id`
+- Endpoint: `DELETE /api/v1/payments/:id`
 - Request Body (UpdatePaymentRequest): 
 
 ```ts
 {
-    amount?: float;
-    month?: int;
-    year?: int;
-    due_date?: date;
-    payment_date?: datetime;
-    member_id?: string;
+    status?: 'Cancelado'
 }
 ```
 
@@ -55,7 +48,7 @@ Al tratarse de una baja lógica y no físca, el metodo DELETE no se implementa; 
 
 1. Puerto: PaymentRepository (metodo update(id, data)).
 2. Servicio de Dominio: `PaymentValidator`.
-3. Caso de Uso: UpdatePayment (orquesta la validación y llama al repositorio).
+3. Caso de Uso: DeletePayment.
 4. Adaptador de Salida: PostgresPaymentRepository (actualización usando el método `update` de Prisma).
 5. Adaptador de Entrada: PaymentController (Ruta HTTP, se extrae el id especificado en la url y mapea excepciones a códigos HTTP).
 
@@ -65,14 +58,14 @@ Al tratarse de una baja lógica y no físca, el metodo DELETE no se implementa; 
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Pago Inexistente            | Mensaje: "El pago ingresado no existe"        | 404 Not Found             |
 | Cambio de Estado Inválido   | Mensaje: "El estado del pago es actualmente 'Cancelado', no es posible modificarlo 'Pago' a 'Pendiente', la acción es irreversible" | 400 Bad Request |
-| Modificación de Datos Inválida | Mensaje: "Los datos del pago no pueden ser modificados porque se encuentra en estado 'Cancelado'" 
+| Modificación de Datos Inválida | Mensaje: "Los datos del pago no pueden ser modificados porque se encuentra en estado 'Cancelado'"  | 400 Bad Request |
 | Error en la Base de Datos   | Mensaje: "Error al procesar la operación, intente más tarde" | 500 Internal Server Error |
 | Cambio a 'Cancelado'  | Mensaje: "Pago cancelado con éxito"    | 200 OK                    |
 
 ## Plan de Implementación
 
-1. Actualizar las interfaces en el paquete `@alentapp/shared` (`UpdatePaymentRequest`).
+1. Actualizar las interfaces en el paquete `@alentapp/shared` (`DeletePaymentRequest`).
 2. Ampliar el `PaymentRepository` con el método `update`.
-3. Implementar la lógica en `UpdatePaymentUseCase` utilizando el `PaymentValidator` centralizado.
-4. Crear la ruta `PUT` en el controlador y enlazarla a la app de Fastify.
+3. Implementar la lógica en `DeletePaymentUseCase` utilizando el `PaymentValidator` centralizado.
+4. Crear la ruta `DELETE` en el controlador y enlazarla a la app de Fastify.
 5. Consumir el endpoint desde el servicio de Frontend y reutilizar el modal de creación para permitir la edición.
