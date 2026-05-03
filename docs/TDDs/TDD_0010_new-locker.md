@@ -16,7 +16,6 @@ Permitir que un administrador del club registre un nuevo casillero dentro del si
 *   **Necesidad**: [Registrar nuevos casilleros de manera ordenada, asegurando que cada casillero tenga un número único y pueda ser gestionado posteriormente por el sistema.]
 
 ### Criterios de Aceptación
-### Criterios de Aceptación
 
 *   El sistema deberá permitir registrar un nuevo casillero ingresando su número identificatorio.
 *   El sistema deberá validar que el campo `number` sea obligatorio.
@@ -32,9 +31,11 @@ Permitir que un administrador del club registre un nuevo casillero dentro del si
 Se utilizará la entidad `Locker` para representar los casilleros físicos disponibles en el club.
 
 *   `id`: UUID. Identificador único del casillero.
-*   `number`: int. Número identificatorio del casillero. Obligatorio, único y mayor a cero.
+*   `number`: Int. Número identificatorio del casillero. Obligatorio, único y mayor a cero.
+*   `location`: String. Ubicacion fisica o referencia del casillero dentro del club.
 *   `status`: String. Estado actual del casillero. Valor inicial: `Available`.
 *   `is_active`: Boolean. Indica si el casillero se encuentra activo. Valor por defecto: `true`.
+*   `member_id`: UUID | null. Identificador del socio asignado al casillero. Al crear un casillero nuevo, este campo se inicializa en `null`.
 
 Estados contemplados para `status`:
 
@@ -49,6 +50,7 @@ Restricciones:
 *   `status` se inicializa en `Available`.
 *   `is_active` se inicializa en `true`.
 *   `member_id` se inicializa en `null`.
+*   `location` debe ser obligatoria.
 
 ### Contrato de API (@alentapp/shared)
 
@@ -59,6 +61,7 @@ Restricciones:
 ```ts
 {
     number: number;
+    location: string;
 }
 ```
 
@@ -68,6 +71,7 @@ Restricciones:
 {
     id: string;
     number: number;
+    location: string;
     status: "Available" | "Assigned" | "Maintenance";
     member_id: string | null;
     is_active: boolean;
@@ -77,7 +81,7 @@ Restricciones:
 ### Componentes de Arquitectura Hexagonal
 
 
-*   **Domain**: Entidad `Locker` y reglas de negocio asociadas a la creación de casilleros: número obligatorio, número único, número mayor a cero y estado inicial `Available`.
+*   **Domain**: Entidad `Locker` y reglas de negocio asociadas a la creación de casilleros: número obligatorio, número único, número mayor a cero, estado inicial `Available` y un casillero sin socio asignado.
 
 *   **Application**: Caso de uso `CreateLockerUseCase`, encargado de validar los datos de entrada, verificar que no exista otro casillero con el mismo número y solicitar la persistencia del nuevo casillero.
 
@@ -85,11 +89,11 @@ Restricciones:
 
 ## Casos de Borde y Errores
 
-
 | Escenario                         | Resultado Esperado                                      | Código HTTP      |
 | --------------------------------- | ------------------------------------------------------- | ---------------- |
 | No se envía `number`              | Error indicando que el número de casillero es requerido | 400 Bad Request  |
 | `number` es menor o igual a cero  | Error indicando que el número debe ser mayor a cero     | 400 Bad Request  |
+| No se envía `location`            | Error indicando que la ubicación es requerida           | 400 Bad Request  |
 | Ya existe un casillero con ese número | Error indicando que el casillero ya existe          | 409 Conflict     |
 | Error inesperado al guardar       | Error interno del servidor                              | 500 Server Error |
 
