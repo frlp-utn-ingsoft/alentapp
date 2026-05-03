@@ -13,20 +13,23 @@ titulo: Registro de Pagos
 
 ### 1.1. Objetivo
 
-Permitir al sistema generar registros de pagos asociados a socios del club, dejando constancia de obligaciones económicas pendientes y habilitando su posterior gestión administrativa.
+Permitir al sistema generar registros de pagos asociados a socios del club, dejando constancia de obligaciones económicas pendientes, y habilitar al administrador a crear pagos manuales en casos excepcionales.
 
 ### 1.2. User Persona
 
-* **Rol**: Administrador
-* **Necesidad**: Visualizar pagos generados para socios y gestionar su estado cuando corresponda.
+* Rol: Administrador
+* Necesidad: Visualizar pagos generados, gestionar su estado y crear pagos manuales cuando corresponda.
 
 ### 1.3. Criterios de Aceptación
 
 * Como administrador, quiero que el sistema registre pagos para socios para mantener actualizado el estado financiero.
 
-- Escenario de éxito: Si el sistema genera un pago con datos válidos, debe crear el registro y dejarlo en estado Pending.
-- Escenario de éxito: Si el administrador registra el cobro, el sistema debe actualizar el estado a Paid.
-- Escenario de fallo: Si el pago pertenece a un socio inexistente, el sistema debe cancelar la operación e informar error.
+- Escenario de éxito: Si el sistema genera un pago con datos válidos para un socio existente, debe crear el registro en estado `Pending` y notificar el resultado exitoso.
+- Escenario de éxito: Si el sistema genera pagos para múltiples socios habilitados en un nuevo período, debe registrar cada pago correspondiente sin duplicados.
+- Escenario de éxito: Si el administrador carga manualmente un pago con datos válidos, el sistema debe registrarlo en estado Pending.
+- Escenario de fallo: Si el sistema intenta generar un pago para un socio inactivo, debe cancelar la operación para ese socio e informar el error.
+- Escenario de fallo: Si ya existe un pago registrado para el mismo socio y período, el sistema debe rechazar la duplicación y conservar el registro original.
+- Escenario de fallo: Si el administrador intenta crear manualmente un pago con monto inválido, el sistema debe rechazar la operación.
 
 ## 2. Diseño Técnico
 
@@ -40,7 +43,7 @@ Entidad `Payment`:
 * `month`: Mes del pago.
 * `year`: Año del pago.
 * `due_date`: Fecha de vencimiento.
-* `payment_day`: Fecha de pago.
+* `payment_date`: Fecha de pago.
 * `status`: Estado del pago (`Pending`, `Paid`, `Canceled`).
 * `created_at`: Fecha de creación.
 * `updated_at`: Fecha de última modificación.
@@ -92,15 +95,17 @@ model Payment {
 1. Validar datos de entrada.
 2. Verificar existencia del socio.
 3. Validar que `amount > 0`.
-4. Crear pago con estado inicial `Pending`.
-5. Persistir registro.
-6. Retornar pago creado.
+4. Verifica que el due_date cumplan con el formato ISO 8601.
+5. Extraer month y date de due_date.
+6. Crear pago con estado inicial `Pending`.
+7. Persistir registro.
+8. Retornar pago creado.
 
 ## 4. Casos de Borde y Errores
 
 | Escenario                  | Resultado Esperado                   | Código HTTP |
 | -------------------------- | ------------------------------------ | ----------- |
-| Socio inexistente          | El socio no existe                   | 404         |
+| Socio dado de baja          |  No se puede generar el pago porque el socio se encuentra dado de baja.                  | 409         |
 | Monto menor o igual a cero | Monto inválido                       | 400         |
 | Error de DB                | Error interno                        | 500         |
 
@@ -119,5 +124,5 @@ model Payment {
 
 * El historial financiero debe mantenerse íntegro.
 * Los pagos nuevos deben crearse en estado `Pending`.
-
+* El year y month son extraidos de due_date
 
