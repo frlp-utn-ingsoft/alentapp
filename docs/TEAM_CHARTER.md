@@ -1,0 +1,66 @@
+# Team Charter — Grupo
+
+> **Esta es la carta de acuerdo del equipo**. Define cómo trabajamos y qué esperamos de cada integrante.
+
+## 1. Identidad del Equipo
+
+- **Cátedra**: Ingeniería y Calidad de Software — UTN FRLP — 2026
+- **Trabajo Práctico**: TP Integrador (Alentapp)
+- **Repositorio**: `https://github.com/ValentinaPertile/alentapp`
+
+### Integrantes
+
+| Nombre | GitHub | Email | Rol principal | Entidad asignada |
+| --- | --- | --- | --- | --- |
+| Pertile de la Vega Valentina | ValentinaPertile | valentinapertile@hotmail.com | Desarrollo | **Payment, MedicalCertificate** |
+| Suarez Pavicich Maria Luana | Luana-suarez | mluanasuarez@gmail.com | Desarrollo | **Locker, Sport** |
+| Romero Olmo Macarena | Macarena-1973 | macarena.romero@alu.frlp.utn.edu.ar | Desarrollo | **Discipline, EquipmentLoan** |
+
+### Responsabilidades transversales
+
+| Rol | Responsabilidad | Asignado a |
+| --- | --- | --- |
+| Coordinadora de fork | Mantiene el repo del fork | Pertile de la Vega Valentina |
+| Reviewers | Verifica los TDDs antes del merge | Todas las integrantes |
+| Comunicación cátedra | Centraliza dudas y las hace en GitHub Discussions | Todas las integrantes |
+
+## 2. Comunicación
+
+- **Canal principal (sincrónico/informal)**: WhatsApp
+- **Canal de decisiones técnicas (asincrónico, dejado por escrito)**: comentarios en los Pull Requests del repositorio.
+- **Canal de dudas a la cátedra**: GitHub Discussions de la organización (https://github.com/orgs/frlp-utn-ingsoft/discussions/categories/q-a).
+- **Frecuencia de reuniones**: mínimo una vez por semana, días y horarios a confirmar.
+- **Tiempo máximo de respuesta esperado en el canal principal**: 24 hs.
+
+## 3. Disponibilidad
+
+| Integrante | Días que tiene disponibilidad para trabajar | Franja horaria habitual |
+| --- | --- | --- |
+| Pertile de la Vega Valentina | Todos los días | 8 hs a 17 hs |
+| Suarez Pavicich Maria Luana | Todos los días | 8 hs a 17 hs |
+| Romero Olmo Macarena | Todos los días | 8 hs a 17 hs |
+
+## 4. Toma de Decisiones
+
+- **Decisiones de implementación dentro de un TDD aprobado**: las toma quien implementa.
+- **Cambios al diseño (modificación de un TDD ya aprobado)**: requieren consenso del equipo.
+- **Empate en una votación**: decide la coordinadora del fork.
+
+## 5. Resolución de Conflictos
+
+Si surge un conflicto interpersonal o técnico que bloquea el avance:
+1. Se intenta resolver en el canal sincrónico, escuchando todas las posiciones.
+2. Si persiste, se realiza una reunión con el equipo completo.
+3. Si aún así no hay solución, se consulta a la cátedra como última instancia.
+
+Como principio general, separamos siempre el problema de la persona: criticamos código y diseños, no a quien los propuso.
+
+## 6. Acuerdo
+
+Al sumarse a este charter, las integrantes se comprometen a respetar el workflow, los estándares y los acuerdos de comunicación. Este documento puede modificarse mediante consenso del equipo en cualquier momento de la cursada; los cambios deben quedar registrados como un PR contra este archivo.
+
+| Integrante | Firma |
+| --- | --- |
+| Pertile de la Vega Valentina | Pertile de la Vega Valentina |
+| Suarez Pavicich Maria Luana | Suarez Pavicich Maria Luana |
+| Romero Olmo Macarena | Romero Olmo Macarena |
