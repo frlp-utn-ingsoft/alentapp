@@ -1,10 +1,10 @@
 ---
-autor: [Valentina Pértile de la Vega]
-fecha: [2026-05-01]
+autor: Valentina Pértile de la Vega
+fecha: 2026-05-01
 titulo: Update MedicalCertificate
 ---
 
-# TDD-[0008]: Actualizar MedicalCertificate
+# TDD-0008: Actualizar MedicalCertificate
 
 ## Contexto de Negocio (PRD)
 

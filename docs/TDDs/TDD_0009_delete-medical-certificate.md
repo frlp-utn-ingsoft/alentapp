@@ -1,10 +1,10 @@
 ---
-autor: [Valentina Pértile de la Vega]
-fecha: [2026-05-01]
+autor: Valentina Pértile de la Vega
+fecha: 2026-05-01
 titulo: Delete MedicalCertificate
 ---
 
-# TDD-[0009]: Eliminar MedicalCertificate
+# TDD-0009: Eliminar MedicalCertificate
 
 ## Contexto de Negocio (PRD)
 
