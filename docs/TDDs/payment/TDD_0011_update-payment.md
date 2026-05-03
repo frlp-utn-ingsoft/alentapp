@@ -5,7 +5,7 @@ estado: Propuesto
 autor: Melissa Braunstein
 fecha: 2026-05-03
 titulo: Actualización de Pagos
-------------------------------
+---
 
 # TDD-0011: Actualización de Pagos
 
@@ -26,8 +26,7 @@ Permitir a los administradores gestionar el ciclo de vida de los pagos, registra
 
 - Escenario de éxito: Si el usuario actualiza datos válidos de un pago pendiente, el sistema debe guardar los cambios y notificar al usuario.
 - Escenario de éxito: Si el usuario marca un pago pendiente como abonado, el sistema debe actualizar el estado a `Paid`.
-- Escenario de fallo: Si el usuario intenta modificar un pago inexistente, el sistema debe cancelar la operación e informar error.
-- Escenario de fallo: Si el usuario intenta modificar un pago eliminado, el sistema debe bloquear la operación.
+- Escenario de fallo: Si el usuario intenta modificar un pago cancelado, el sistema debe bloquear la operación.
 - Escenario de fallo: Si el usuario ingresa un monto inválido, el sistema debe rechazar la actualización.
 
 ## 2. Diseño Técnico
@@ -42,7 +41,7 @@ Entidad `Payment`:
 * `month`: Mes del pago.
 * `year`: Año del pago.
 * `due_date`: Fecha de vencimiento.
-* `payment_day`: Fecha de pago.
+* `payment_date`: Fecha de pago.
 * `status`: Estado del pago (`Pending`, `Paid`, `Canceled`).
 * `created_at`: Fecha de creación.
 * `updated_at`: Fecha de última modificación.
@@ -101,6 +100,7 @@ model Payment {
 3. Si no existe, retornar error.
 4. Validar Inmutabilidad: Si el estado actual es Paid o Canceled, rechazar edición..
 5. Validar request body.
+   * `Validar la due_date cumpla con el formato ISO 8601`
 6. Si se actualiza `amount`, verificar que sea mayor a cero.
 7. Validar transición de estado permitida:
    * `Pending -> Paid`
@@ -114,7 +114,7 @@ model Payment {
 | Escenario                     | Resultado Esperado            | Código HTTP |
 | ----------------------------- | ----------------------------- | ----------- |
 | Pago inexistente              | El pago no existe             | 404         |
-| Pago ya cancelado               | El pago fue eliminado         | 409         |
+| Pago ya cancelado               | El pago fue cancelado         | 409         |
 | Monto inválido                | Monto inválido                | 400         |
 | Request sin campos            | Debe enviar al menos un campo | 400         |
 | Transición de estado inválida | Cambio de estado no permitido | 409         |
