@@ -18,14 +18,13 @@ Permitir a los administrativos crear el registro de lockers del gimnasio para po
 *   **Necesidad**: Poder cargar el registro de lockers disponibles en el gimnasio para posteriormente llevar un mejor control de estos. Ver el estado de cada uno y asignarlo a un miembro.
 
 ### Criterios de Aceptación
-- El sistema debe validar que el número de locker sea único.
-- El sistema debe validar que el número de locker sea entero y mayor a cero.
-- Si no se informa `status`, el locker debe crearse por defecto con el estado `Available`.
-- Si `status` es `Available`, `memberId` debe ser `null`.
-- Si `status` es `Maintenance`, `memberId` debe ser `null`.
-- Si `status` es `Occupied`, `memberId` es obligatorio.
-- El locker en estado `Maintenance` no puede asignarse a ningún miembro.
-- Un miembro no puede tener más de un locker a la vez.
+- Como administrativo quiero poder registrar los lockers del club. Cargar su numero, estado, locación y poder asignarlo a un socio.
+
+### Escenario de Éxito
+- Si el usuario crea el locker con los datos validos, el sistema debe registrarlo correctamente y mostrar el mensaje de éxito.
+
+### Escenario de Fallo
+- Si el usuario ingresa un locker con `number` duplicado, inválido o con una combinación inválida de `status` o `memberId`, el sistema debe rechazar la creación y devolver el error correspondiente.
 
 
 ## Diseño Técnico (RFC)
@@ -58,14 +57,6 @@ Se definirá la entidad `Locker` con las siguientes propiedades y restricciones:
 3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
 4. Adaptador de Entrada: LockerController (Ruta HTTP).
 
-## Escenarios
-
-### Escenario de Éxito
-- Si el usuario crea el locker con los datos validos, el sistema debe registrarlo correctamente y mostrar el mensaje de éxito
-
-### Escenario de Fallo
-- Si el usuario ingresa un locker con `number` duplicado, inválido o con una combinación inválida de `status` o `memberId`, el sistema debe rechazar la creación y devolver el error correspondiente.
-
 ## Casos de Borde y Errores
 | Escenario                                  | Resultado Esperado                                          | Código HTTP               |
 | ------------------------------------------ | ------------------------------------------------------------| ------------------------- |
@@ -74,7 +65,9 @@ Se definirá la entidad `Locker` con las siguientes propiedades y restricciones:
 | `memberId` con formato inválido            | Mensaje: "`memberId` no válido"                             | 400 Bad Request           |
 | `memberId` no existe                       | Mensaje: "El miembro indicado no existe"                    | 404 Not Found             |
 | `memberId` ya tiene otro locker            | Mensaje: "El miembro ya posee un locker"                    | 422 Unprocessable entity  |
+| Estado `Available` con `memberId`          | Mensaje: "Estado `Available` no permite `memberId`"         | 422 Unprocessable entity  |
 | Estado `Occupied` sin `memberId`           | Mensaje: "Estado `Occupied` requiere `memberId`"            | 422 Unprocessable entity  |
+| Estado `Maintenance` con `memberId`        | Mensaje: "Estado `Maintenance` no permite `memberId`"       | 422 Unprocessable entity  |
 | Error de conexión a DB                     | Mensaje: "Error interno, reintente más tarde"               | 500 Internal Server Error |
 
 ## Plan de Implementación
