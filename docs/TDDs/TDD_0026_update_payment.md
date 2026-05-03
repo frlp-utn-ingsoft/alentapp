@@ -32,7 +32,7 @@ Permitir que un administrativo actualice información no crítica de un pago exi
 
 ### Modelo de Datos
 
-Se reutiliza la entidad `Payment` definida en TDD-0023. No se requieren cambios de esquema adicionales.
+Se reutiliza la entidad `Payment` definida en TDD-0024. No se requieren cambios de esquema adicionales.
 
 - `descripcion`: Cadena de texto opcional — único campo de texto editable.
 - `estado`: Enumeración `EstadoPago` — puede actualizarse solo de `Pendiente` a `Completado`.

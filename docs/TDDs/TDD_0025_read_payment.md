@@ -32,7 +32,7 @@ Permitir que un administrativo consulte el detalle de un pago puntual o el lista
 
 ### Modelo de Datos
 
-Se reutiliza la entidad `Payment` definida en TDD-0023. No se requieren cambios de esquema.
+Se reutiliza la entidad `Payment` definida en TDD-0024. No se requieren cambios de esquema.
 
 - La consulta por `id` devuelve el registro completo.
 - El listado soporta filtros opcionales aplicados como condiciones `WHERE` en Prisma (`miembro_id`, `estado`).
