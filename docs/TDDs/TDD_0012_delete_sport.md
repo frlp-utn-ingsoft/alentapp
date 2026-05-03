@@ -6,7 +6,7 @@ fecha: 2026-05-03
 titulo: Eliminación de Deportes Existentes
 ---
 
-# TDD-0003: Eliminación de Deportes Existentes
+# TDD-0012: Eliminación de Deportes Existentes
 
 ## Contexto de Negocio (PRD)
 
