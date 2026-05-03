@@ -36,13 +36,17 @@ Esta funcionalidad permite quitar un casillero del uso operativo del sistema sin
 *   Si el casillero no existe, el sistema deberá rechazar la operación e informar el error correspondiente.
 
 ## Diseño Técnico (RFC)
-
 ### Modelo de Datos
-[Se utilizara la entidad 'Locker' existente para representar los casilleros del sistema]
-Para la baja de un casillero no se realizara eliminacion fisica del registro. En su lugar se aplicara eliminacion logica, actualizando el campo 'is_active' a 'false'.
+
+Se utilizará la entidad `Locker` existente para representar los casilleros del sistema.
+
+Para la baja de un casillero no se realizará eliminación física del registro. En su lugar, se actualizará el campo `is_active` a `false`.
+
 *   `id`: UUID. Identificador único del casillero.
-*   `number`: Number. Número identificatorio del casillero.
+*   `number`: Int. Número identificatorio del casillero.
+*   `location`: String. Ubicación física o referencia del casillero dentro del club.
 *   `status`: String. Estado actual del casillero.
+*   `member_id`: UUID | null. Identificador del socio asignado al casillero.
 *   `is_active`: Boolean. Indica si el casillero se encuentra activo dentro del sistema.
 
 Restricciones:
@@ -50,8 +54,10 @@ Restricciones:
 *   `id` debe corresponder a un casillero existente.
 *   La baja no debe eliminar físicamente el registro.
 *   Al dar de baja el casillero, `is_active` debe actualizarse a `false`.
+*   Los campos `number`, `location`, `status` y `member_id` no se modifican en esta operación.
 
 ### Contrato de API (@alentapp/shared)
+
 *   **Endpoint**: `DELETE /api/v1/lockers/:id`
 
 *   **Request Body**:
@@ -66,7 +72,9 @@ Restricciones:
 {
     id: string;
     number: number;
+    location: string;
     status: "Available" | "Assigned" | "Maintenance";
+    member_id: string | null;
     is_active: boolean;
 }
 ```
@@ -75,7 +83,7 @@ Restricciones:
 
 *   **Domain**: Entidad `Locker` y regla de negocio asociada a la baja lógica: un casillero dado de baja no se elimina físicamente, sino que se marca como inactivo.
 
-*   **Application**: Caso de uso `DeleteLockerUseCase`, encargado de validar que el casillero exista y solicitar la actualización del campo `is_active` a `false`.
+*   **Application**: Caso de uso `DeleteLockerUseCase`, encargado de validar que el casillero exista, verificar que se encuentre activo y solicitar la actualización del campo `is_active` a `false`.
 
 *   **Infrastructure**: Controlador HTTP para `DELETE /api/v1/lockers/:id`, implementación del repositorio de casilleros utilizando Prisma y persistencia de la baja lógica en base de datos.
 
