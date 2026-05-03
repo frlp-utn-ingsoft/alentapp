@@ -51,7 +51,10 @@ Entidad existente `PAYMENT`:
 
 ### Componentes de Arquitectura Hexagonal
  
-- **Domain**: Entidad `Payment`. Hay que validar que estados estan permitidos, es decir, que reglas de transición se aceptan.
+- **Domain**: Entidad `Payment`. Hay que validar que estados estan permitidos, es decir, que reglas de transición se aceptan. Las mismas son:
+ 1. No se permite transicionar desde `Canceled` a ningún otro estado.
+ 2. Cuando el estado transiciona a `Paid`, el dominio setea automáticamente `payment_date` con el tiempo actual. El campo no lo modifica el usuario.
+
 - **Application**: Caso de uso `Updatepayment`. Puerto de salida `PaymentRepository`.
 - **Infrastructure**: `PaymentController` (PATCH). `PrismaPaymentRepository`.
 
@@ -62,12 +65,13 @@ Entidad existente `PAYMENT`:
 | `id` inexistente | Error: pago no encontrado | 404 Not Found |
 | `status` inválido | Error de validación | 400 Bad Request |
 | intento de cambiar desde `Canceled` | Error de regla de negocio | 400 Bad Request |
+| Transición a `Paid` | `payment_date` se setea automáticamente con el timestamp actual | 200 OK |
 
  
 ## Plan de Implementación
  
 1. Definir DTO `UpdatePaymentDto` en `@alentapp/shared`
 2. Implementar caso de uso `UpdatePayment` en Application
-3. Validar reglas de transicion de estados (no estar en `Canceled`)
-3. Implementar método `update` en `PrismaPaymentRepository`
-4. Implementar endpoint `PATCH /api/v1/payments/:id` 
+3. Validar reglas de transicion de estados (no permitir cambio desde `Canceled`; setear `payment_date` automáticamente al transicionar a `Paid`)
+4. Implementar método `update` en `PrismaPaymentRepository`
+5. Implementar endpoint `PATCH /api/v1/payments/:id`
