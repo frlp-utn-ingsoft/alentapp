@@ -47,16 +47,13 @@ Restricciones:
 *   `id` debe corresponder a un deporte existente.
 *   La baja no debe eliminar físicamente el registro.
 *   Al dar de baja el deporte, `is_active` debe actualizarse a `false`.
+*   Los campos `name`, `description` y `max_capacity` no se modifican en esta operación.
 
 ### Contrato de API (@alentapp/shared)
 
 *   **Endpoint**: `DELETE /api/v1/sports/:id`
 
-*   **Request Body**:
-
-```ts
-{}
-```
+*   **Request Body**: no aplica
 
 *   **Response Body**:
 
@@ -74,17 +71,17 @@ Restricciones:
 
 *   **Domain**: Entidad `Sport` y regla de negocio asociada a la baja lógica: un deporte dado de baja no se elimina físicamente, sino que se marca como inactivo.
 
-*   **Application**: Caso de uso `DeleteSportUseCase`, encargado de validar que el deporte exista y solicitar la actualización del campo `is_active` a `false`.
+*   **Application**: Caso de uso `DeleteSportUseCase`, encargado de validar que el deporte exista, verificar que se encuentre activo y solicitar la actualización del campo `is_active` a `false`.
 
 *   **Infrastructure**: Controlador HTTP para `DELETE /api/v1/sports/:id`, implementación del repositorio de deportes utilizando Prisma y persistencia de la baja lógica en base de datos.
 
 ## Casos de Borde y Errores
 
-| Escenario                     | Resultado Esperado                                  | Código HTTP      |
-| ----------------------------- | --------------------------------------------------- | ---------------- |
-| El deporte no existe          | Error indicando que el deporte no fue encontrado     | 404 Not Found    |
-| El deporte ya está inactivo   | Error indicando que el deporte ya fue dado de baja   | 409 Conflict     |
-| Error inesperado al guardar   | Error interno del servidor                           | 500 Server Error |
+| Escenario                   | Resultado Esperado                                  | Código HTTP      |
+| --------------------------- | --------------------------------------------------- | ---------------- |
+| El deporte no existe        | Error indicando que el deporte no fue encontrado     | 404 Not Found    |
+| El deporte ya está inactivo | Error indicando que el deporte ya fue dado de baja   | 409 Conflict     |
+| Error inesperado al guardar | Error interno del servidor                           | 500 Server Error |
 
 ## Plan de Implementación
 
