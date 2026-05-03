@@ -25,7 +25,7 @@ Permitir la corrección de errores de carga mediante el borrado físico de regis
 ## Diseño Técnico (RFC)
 
 ### Contrato de API (@alentapp/shared)
-* **Endpoint**: `DELETE /api/v1/equipament-loan/:id`
+* **Endpoint**: `DELETE /api/v1/equipment-loan/:id`
 * **Response** (Success): 204 No Content
 
 ### Componentes de Arquitectura Hexagonal

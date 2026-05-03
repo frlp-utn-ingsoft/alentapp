@@ -25,7 +25,15 @@ Proveer visibilidad sobre los recursos del club que están actualmente fuera de 
 ## Diseño Técnico (RFC)
 
 ### Contrato de API (@alentapp/shared)
-* **Endpoint**: `GET /api/v1/equipament-loan?status=Loaned`
+* **Endpoint**: `GET /api/v1/equipment-loan`
+* **Query Parameters** (GetLoansQuery):
+```ts
+{
+    status?: 'Loaned' | 'Returned' | 'Damaged';
+    search?: string; // Filtra por coincidencia parcial en nombre de socio o ítem
+}
+```
+(Ejemplo: `GET /api/v1/equipment-loan?status=Loaned&search=Alberto`)
 * **Response** (Success): 200 ok
 ```ts
 [

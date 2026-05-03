@@ -36,7 +36,7 @@ Entidad `EquipmentLoan`:
 * `member_id`: UUID (FK).
 
 ### Contrato de API (@alentapp/shared)
-* **Endpoint**: `POST /api/v1/equipament-loan`
+* **Endpoint**: `POST /api/v1/equipment-loan`
 * **Request Body** (CreateLoanRequest):
 ```ts
 {
