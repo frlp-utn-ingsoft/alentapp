@@ -44,12 +44,12 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 
 *   **Endpoint**: `PUT /api/v1/disciplines/:id`
 *   **Request Body**:
-```ts
+```
 {
-    reason?: string;
-    start_date?: string;
-    end_date?: string;
-    is_total_suspension?: boolean;
+    reason: string (opcional);
+    start_date: string (opcional);
+    end_date: string (opcional);
+    is_total_suspension: boolean (opcional);
 }
 ```
 
@@ -85,9 +85,10 @@ model Discipline {
 3. Si no existe o tiene `deleted_at` distinto de null, retornar error.
 4. Validar los datos de entrada.
 5. Si se modifican fechas, verificar que `end_date` sea estrictamente posterior a `start_date`.
-6. Mapear el DTO a Entidad de Dominio.
-7. Persistir los cambios a través de `DisciplineRepository`.
-8. Retornar la sanción actualizada.
+6. Verificar que no exista superposición con otras sanciones activas del mismo socio.
+7. Mapear el DTO a Entidad de Dominio.
+8. Persistir los cambios a través de `DisciplineRepository`.
+9. Retornar la sanción actualizada.
 
 
 ## 4. Casos de Borde y Errores
@@ -98,6 +99,7 @@ model Discipline {
 | Campos con formato inválido | "Formato de datos inválido" | 400 Bad Request |
 | Request sin campos para actualizar | "Debe enviar al menos un campo para actualizar" | 400 Bad Request |
 | Sanción eliminada | "No se puede modificar una sanción eliminada" | 409 Conflict |
+| Superposición de sanciones | "Ya existe una sanción activa en ese período" | 409 Conflict |
 | Error de conexión a DB | "Error interno, reintente más tarde" | 500 Internal Server Error |
 
 ## 5. Plan de Implementación
@@ -111,6 +113,8 @@ model Discipline {
 
 ## 6. Observaciones Adicionales
 
+* Aunque el endpoint utiliza `PUT`, la actualización se realiza de forma parcial, solo se modifican los campos enviados en el request.
 * No se permite modificar el `member_id` desde este endpoint para evitar reasignar sanciones entre socios.
 * No se permite modificar una sanción que ya ha sido eliminada. Atributo `deleted_at` distinto de null.
-
+* Las operaciones sobre sanciones deben verse reflejadas en el estado disciplinario del socio.
+* El estado del socio debe recalcularse en función de las sanciones activas.

@@ -91,7 +91,7 @@ model Discipline {
 
 1. Ampliar el puerto `DisciplineRepository` con los métodos `findById(id)` y `softDelete(id)`.
 2. Implementar el caso de uso `DeleteDisciplineUseCase`.
-3. Implementar la eliminación en `PostgresDisciplineRepository`.
+3. Implementar la eliminación lógica en `PostgresDisciplineRepository`.
 4. Crear la ruta `DELETE /api/v1/disciplines/:id` en `DisciplineController`.
 5. Conectar la funcionalidad en el frontend agregando confirmación previa a la eliminación.
 
@@ -99,3 +99,5 @@ model Discipline {
 
 * Antes de eliminar, el frontend debería mostrar una confirmación al usuario para evitar borrados accidentales.
 * Esta operación realiza un borrado lógico: la sanción no se elimina físicamente de la base de datos, sino que se marca con `deleted_at`.
+* Las operaciones sobre sanciones deben verse reflejadas en el estado disciplinario del socio.
+* El estado del socio debe recalcularse en función de las sanciones activas.
