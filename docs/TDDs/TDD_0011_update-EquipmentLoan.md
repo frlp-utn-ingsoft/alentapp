@@ -42,6 +42,7 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
     fecha_devolucion?: string;
     member_id?: string; 
 }
+```
 
 ### Componentes de Arquitectura Hexagonal
 

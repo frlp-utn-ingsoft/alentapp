@@ -52,6 +52,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
     fecha_devolucion: string; 
     member_id: string;
 }
+```
 
 ### Componentes de Arquitectura Hexagonal
 
