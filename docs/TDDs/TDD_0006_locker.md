@@ -1,6 +1,7 @@
 ---------------------------
 id:   0006         
-estado:  Propuesto     
+estado:  Propuesto 
+autor: German Altamirano    
 fecha:  2026-05-03      
 titulo:  Gestión de Casilleros del Club 
 ---------------------------
