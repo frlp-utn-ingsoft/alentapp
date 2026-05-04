@@ -28,8 +28,7 @@ Permitir registrar los prestamos de un equipamento a un socio, asegurando la tra
 ### 1.3 Criterios de Aceptacion
 
 - Como persona del club, quiero registrar un prestamo de equipamento para llevar un control de quien lo tiene.
-- Como personal del club, quiero asignar un equipamento disponible a un socio para permitir su uso temporal.
-- Como sistema, quiero registrar automáticamente la fecha del préstamo para asegurar trazabilidad.
+- Como sistema, quiero registrar automáticamente la fecha `loan_Date` del préstamo para asegurar trazabilidad.
 - Como personal del club, quiero recibir una confirmación al registrar el préstamo para asegurar que la operación fue exitosa.
 - Como sistema, quiero validar la categoría del socio para permitir préstamos solo a socios "Senior" o "Lifetime".
 
@@ -82,8 +81,6 @@ export interface EquipmentLoanRepository {
 
 }
 ```
-- `findLoanedByItemName`: Permite verificar si un equipamiento ya se encuentra prestado actualmente (estado "LOANED").
-
 
 ### 3.2 Logica de Caso de Uso
 
@@ -94,14 +91,12 @@ Describir paso a paso qué hace el sistema al recibir una petición para crear u
 3. Verificar la categoría del usuario:
    - Si es "Cadet" → rechazar operación.
    - Si es "Senior" o "Lifetime" → continuar.
-4. Verificar que el equipamiento exista.
-5. Comprobar que el equipamiento no se encuentre actualmente prestado.
-6. Mapear el DTO de entrada a la entidad de dominio `EquipmentLoan`.
-7. Asignar valores por defecto:
+4. Mapear el DTO de entrada a la entidad de dominio `EquipmentLoan`.
+5. Asignar valores por defecto:
    - `loan_Date`: fecha actual.
    - `status`: LOANED.
-8. Persistir la entidad a través del repositorio `EquipmentLoanRepository`.
-9. Retornar el préstamo creado como respuesta.
+6. Persistir la entidad a través del repositorio `EquipmentLoanRepository`.
+7. Retornar el préstamo creado como respuesta.
 
 ---
 
@@ -114,7 +109,7 @@ Describir paso a paso qué hace el sistema al recibir una petición para crear u
 | Usuario inexistente                    | Mensaje: "El usuario no existe"                                     | 404 Not Found            |
 | Usuario categoría "Cadet"              | Mensaje: "Los socios Cadet no pueden solicitar préstamos"           | 403 Forbidden            |
 | Equipamiento inexistente               | Mensaje: "El equipamiento no existe"                                | 404 Not Found            |
-| Equipamiento ya prestado (LOANED)      | Mensaje: "El equipamiento ya está en uso"                           | 409 Conflict             |
+| Prestamo registrado                    | Mensaje: "Prestamo registrado correctamente"                        | 200 OK                   |
 | Datos incompletos o inválidos          | Mensaje: "Datos inválidos"                                          | 400 Bad Request          |
 | Error de conexión a base de datos      | Mensaje: "Error interno, reintente más tarde"                       | 500 Internal Server Error|
 | Error inesperado del servidor          | Mensaje: "Error interno, reintente más tarde"                       | 500 Internal Server Error|
@@ -123,9 +118,7 @@ Describir paso a paso qué hace el sistema al recibir una petición para crear u
 
 ## 5. Observaciones
 
-- Validación de concurrencia: Existe el riesgo de que dos solicitudes simultáneas intenten prestar el mismo equipamiento. Se recomienda implementar una validación a nivel de base de datos (transacción o constraint) para evitar inconsistencias.
 - Índices en base de datos: Se recomienda indexar el campo itemName o el identificador del equipamiento para optimizar búsquedas al verificar si está prestado. Esto mejora la performance en consultas frecuentes.
 - Uso de enums para status: Definir los estados (LOANED, RETURNED, DAMAGED) como enum en lugar de strings sueltos reduce errores de tipeo y mejora la consistencia en todo el sistema.
-- Logging de operaciones: Registrar logs al crear un préstamo permite auditar acciones del sistema y detectar problemas en producción.
 
 ---
