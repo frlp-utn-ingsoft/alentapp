@@ -26,11 +26,10 @@ Permitir la modificación de un préstamo de equipamiento ya registrado, princip
 ### 1.3 Criterios de Aceptacion
 
 - Como personal del club, quiero modificar un préstamo para actualizar su estado.
-- Como personal del club, quiero registrar la devolución de un préstamo para liberar el equipamiento.
 - Como sistema, quiero validar que el préstamo exista antes de modificarlo.
 - Como sistema, quiero permitir cambiar el estado del préstamo entre: LOANED → RETURNED / DAMAGED
 - Como sistema, quiero impedir modificaciones sobre préstamos inexistentes.
-- Como sistema, quiero registrar automáticamente cambios relevantes (auditoría implícita).
+- Como personal administrativo, querio que la fecha `returnDate` se carge automaticamente al realizar la operacion.
 
 ---
 
@@ -105,6 +104,7 @@ Describir paso a paso qué hace el sistema al recibir una petición para modific
 | Estado inválido                        | Mensaje: "Estado inválidos"                                         | 400 Bad Request          |
 | Error de conexión a base de datos      | Mensaje: "Error interno, reintente más tarde"                       | 500 Internal Server Error|
 | Error inesperado del servidor          | Mensaje: "Error interno, reintente más tarde"                       | 500 Internal Server Error|
+| Prestamo cancelado                     | Mensaje: "Prestamo cancelado correctamente"                         | 200 OK                   |
 
 ---
 
