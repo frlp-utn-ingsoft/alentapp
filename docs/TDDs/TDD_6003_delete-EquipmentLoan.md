@@ -26,6 +26,7 @@ Permitir la cancelación o anulación de un préstamo de equipamiento en casos e
 - Como sistema, quiero mantener historial del préstamo aunque esté cancelado.
 - Como personal del club, quiero cancelar un préstamo para corregir errores operativos.
 - Como sistema, quiero impedir la cancelación de préstamos ya finalizados.
+- Como personal administrativo, querio que la fecha `returnDate` se carge automaticamente al realizar la operacion.
 
 ---
 
@@ -46,7 +47,7 @@ interface EquipmentLoan {
 
 ### 2.2 Contrato de API (@alentapp/shared)
 
-- Endpoint: DELETE /api/v1/equipment-loans/:id
+- Endpoint: PATCH/api/v1/equipment-loans/:id
 
 ---
 
@@ -81,6 +82,7 @@ export interface EquipmentLoanRepository {
 | Prestamo finalizado                    | Mensaje: "El préstamo ya fue finalizado y no puede cancelarse"      | 409 Conflict             |
 | Error de conexión a base de datos      | Mensaje: "Error interno, reintente más tarde"                       | 500 Internal Server Error|
 | Error inesperado del servidor          | Mensaje: "Error interno, reintente más tarde"                       | 500 Internal Server Error|
+| Prestamo cancelado                     | Mensaje: "Prestamo cancelado correctamente"                         | 200 OK                   |
 
 ---
 
