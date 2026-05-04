@@ -41,6 +41,9 @@ Se definirá la entidad `Payment` con las siguientes propiedades y restricciones
 `due_date`: Date (fecha de vencimiento).
 `payment_date`: Datetime, nullable.
 `member_id`: UUID (FK hacia Member).
+`created_at`: Datetime
+`updated_at`: Datetime
+`deleted_at`: Datetime?
 
 ### Contrato de API (@alentapp/shared)
 
