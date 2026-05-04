@@ -69,3 +69,15 @@ update(payment: Payment): Promise<Payment>;
 | Ya cancelado | 400  |
 | Error DB     | 500  |
 
+/*PLAN DE IMPLEMENTACION*/
+
+1- Confirmar que el modelo soporte el estado CANCELED (enum).
+2- Reutilizar DTO de actualización (UpdatePaymentDTO).
+3- Reutilizar métodos del repositorio (findById, update).
+4- Implementar el caso de uso cancelPayment:
+ Validar existencia
+ Validar que no esté ya cancelado
+5- Cambiar estado a CANCELED
+6- Exponer endpoint PATCH /api/v1/payments/:id (misma ruta que update).
+7- Implementar acción en frontend (botón “Cancelar”).
+8- Validar que no exista borrado físico (DELETE deshabilitado).

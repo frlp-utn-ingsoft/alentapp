@@ -76,3 +76,16 @@ update(payment: Payment): Promise<Payment>;
 | Cancelado | 400  |
 | Error DB  | 500  |
 
+/*PLAN DE IMPLEMENTACION*/
+
+1- Reutilizar esquema existente de Payment.
+2- Definir DTO UpdatePaymentDTO para cambio de estado (PAID).
+3- Extender el puerto PaymentRepository con métodos findById y update.
+4- Implementar en el repositorio la actualización del registro.
+5- Implementar el caso de uso payPayment:
+  Validar existencia
+  Validar que no esté pagado ni cancelado
+6- Actualizar estado a PAID
+7- Registrar paymentDate
+8- Exponer endpoint PATCH /api/v1/payments/:id.
+9- Implementar acción en frontend (botón “Pagar”).

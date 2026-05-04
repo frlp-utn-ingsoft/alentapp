@@ -173,5 +173,15 @@ export interface PaymentRepository {
 | Duplicado       | Ya existe cuota    | 409  |
 | Error DB        | Falla persistencia | 500  |
 
+/*PLAN DE IMPLEMENTACION*/
+1- Definir el esquema de persistencia (Payment) en Prisma incluyendo la restricción única (memberId + month + year) y correr la migración.
+2-Crear los tipos compartidos (CreatePaymentDTO, PaymentStatus).
+3- Definir la entidad Payment y el puerto PaymentRepository en la capa de dominio.
+4- Implementar el repositorio con métodos create y findByMemberAndPeriod.
+5- Implementar el caso de uso createPayment:
+ Validar datos (monto, mes, año)
+ Verificar duplicados
+6- Crear Payment en estado PENDING
+
 
 
