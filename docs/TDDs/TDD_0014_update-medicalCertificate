@@ -46,9 +46,10 @@ Entidad `MedicalCertificate`:
 ### Reglas de Negocio
 
 - Solo puede existir un certificado activo por socio.
-- La modificación no permitite cambiar el memberId.
-- La modificación no permitite cambiar la issueDate
-- Debe validar que expirationDate > issueDate.
+- La modificación no permitite cambiar el memberId, issueDate y doctorLicense
+- Debe validar que `expirationDate` > `issueDate`.
+- Si `isValidated` se actualiza a `true` Se debe invalidar automáticamente el certificado actualmente activo del socio (si existe).
+- Si `isValidated` se actualiza a `false` simplemente se actualiza el estado sin afectar a otros certificados.
 
 ### Contrato de API (@alentapp/shared)
 
@@ -58,27 +59,27 @@ Entidad `MedicalCertificate`:
 
 ```ts
 {
-    expirationDate: string; (ISO Date)
+    expirationDate?: string; (ISO Date)
+    isValidated?: boolean;
 }
 
 ### Componentes de Arquitectura Hexagonal
 
 1. Puerto: MedicalCertificateRepository (Interface en el Dominio).
-2. Caso de Uso: UpdateMedicalCertificate (Lógica que verifica la existencia del certificados, permitiendo modificar la fecha de expiracion).
+2. Caso de Uso: UpdateMedicalCertificate (Lógica que verifica la existencia del certificados, permitiendo modificar expirationDate o isValidated ).
 3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
 4. Adaptador de Entrada: MedicalCertificateController (Ruta HTTP).
 
-## Casos de Borde y Errores
 
 ## Casos de Borde y Errores
 
 | Escenario | Resultado Esperado | Código HTTP |
 |---|---|---|
 | Certificado inexistente | Mensaje: "Certificado no encontrado" | 404 Not Found |
-| expirationDate vacío o nulo | Mensaje: "La fecha de vencimiento es obligatoria" | 400 Bad Request |
 | expirationDate con formato inválido | Mensaje: "Formato de fecha inválido" | 400 Bad Request |
 | expirationDate menor o igual a issueDate | Mensaje: "La fecha de vencimiento debe ser posterior a la de emisión" | 400 Bad Request |
-| Certificado en estado Inactive | Se permite modificar la fecha sin cambiar el estado | 200 OK |
+| Certificado eliminado (`deletedAt != null`) | Mensaje: "Certificado no encontrado" | 400 Bad Request |
+| isValidated = true y ya existe otro activo | Se invalida el anterior y este pasa a activo | 200 OK |
 
 ## Plan de Implementación
 
