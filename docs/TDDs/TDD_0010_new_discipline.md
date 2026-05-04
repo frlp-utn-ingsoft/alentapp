@@ -30,7 +30,7 @@ interface Discipline {
     start_date: date; 
     end_date: date;
     is_total_suspension: boolean;
-    member_id: string; 
+    member: Member; 
     is_deleted: boolean; 
 }
 ```
@@ -53,13 +53,14 @@ interface Discipline {
 
 ```
 model Discipline {
-	Id String @id @default(uuid())
+	id String @id @default(uuid())
 	reason String
 	start_date DateTime
 	end_date DateTime
-	member_id: String
-	member Member? @relation (fields: [member.id], references: [id])
-	is_deleted boolean @default(false) 
+    is_total_suspension Boolean
+	member_id String
+	member Member @relation(fields: [member_id], references: [id])
+	is_deleted Boolean @default(false) 
 } 
 ```
 
@@ -67,7 +68,7 @@ model Discipline {
 
 ### Componentes de Arquitectura Hexagonal
 1. Puerto: DisciplineRepository (Interface en el Dominio).
-2. Caso de Uso: CreateDiscipline (Lógica que verifica si la sanción y el socio ya existen antes de llamar al repositorio, y validan las fechas ingresadas).
+2. Caso de Uso: CreateDiscipline (Lógica que verifica si el socio ya existe antes de llamar al repositorio, validan las fechas ingresadas, y verifica que la fecha de fin sea estrictamente mayor a la de inicio).
 3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
 4. Adaptador de Entrada: DisciplineController (Ruta HTTP).
 
