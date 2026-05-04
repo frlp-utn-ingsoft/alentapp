@@ -74,7 +74,7 @@ model MedicalCertificate {
 
 ### 3.1. Componentes de Arquitectura Hexagonal
 
-* **Puerto (Domain)**: `MedicalCertificateRepository` con método `findByMemberId(memberId)` y `save(certificate)`.
+* **Puerto (Domain)**: `MedicalCertificateRepository` con método `findByMemberId(memberId)`, `save(certificate)` y una operación para invalidar certificados activos a un socio.
 * **Adaptador de Entrada (Delivery)**: `MedicalCertificateController`, recibe la request HTTP y delega al caso de uso.
 * **Adaptador de Salida (Infrastructure)**: `PostgresMedicalCertificateRepository`, implementa la persistencia con Prisma.
 
@@ -112,3 +112,4 @@ model MedicalCertificate {
 
 * Todos los certificados nuevos deben iniciar con `is_validated = true`, considerándose válidos inmediatamente después de su registro administrativo.
 * La invalidación de certificados previos debe ocurrir dentro de la misma transacción de la creación del nuevo.
+* Se nombra la operación para invalidar certificados pero no está definida ya que no sabemos cómo será su implementación

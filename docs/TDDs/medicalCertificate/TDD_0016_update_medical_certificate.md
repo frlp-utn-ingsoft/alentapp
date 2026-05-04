@@ -75,7 +75,7 @@ model MedicalCertificate {
 
 ### 3.1. Componentes de Arquitectura Hexagonal
 
-* **Puerto (Domain)**: `MedicalCertificateRepository` con métodos `findById(id)` y `update(id, data)`.
+* **Puerto (Domain)**: `MedicalCertificateRepository` con métodos `findById(id)`, `update(id, data)` y una operación para invalidar certificados activos a un socio..
 * **Adaptador de Entrada (Delivery)**: `MedicalCertificateController`, recibe la request y delega al caso de uso.
 * **Adaptador de Salida (Infrastructure)**: `PostgresMedicalCertificateRepository`, implementa la persistencia.
 
@@ -114,3 +114,4 @@ model MedicalCertificate {
 
 * La actualización debe ser parcial (solo los campos enviados en el body deben modificarse).
 * La validación de la regla "un único certificado activo" es vital para mantener la integridad del sistema ante cambios de estado manuales.
+* Se nombra la operación para invalidar certificados pero no está definida ya que no sabemos cómo será su implementación
