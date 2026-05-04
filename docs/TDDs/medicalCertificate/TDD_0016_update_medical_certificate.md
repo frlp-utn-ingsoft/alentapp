@@ -39,7 +39,7 @@ Se utiliza la entidad `MedicalCertificate` con sus propiedades:
 * `doctor_license`: Cadena de texto.
 * `institution`: Cadena de texto.
 * `is_validated`: Booleano.
-* `member_id`: Identificador del socio (FK).
+* `member_id`: Identificador del socio asociado al certificado.
 
 ### 2.2. Contrato de API (@alentapp/shared)
 

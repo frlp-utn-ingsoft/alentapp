@@ -38,7 +38,7 @@ Se definirá la entidad `MedicalCertificate` con las siguientes propiedades:
 * `doctor_license`: Cadena de texto (Matrícula del médico).
 * `institution`: Cadena de texto (Institución que emite).
 * `is_validated`: Booleano (Indica si el certificado es el vigente y apto).
-* `member_id`: Identificador del socio (FK).
+* `member_id`: Identificador del socio asociado al certificado.
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
@@ -96,7 +96,7 @@ model MedicalCertificate {
 | Fechas inválidas | Error: Fecha de vencimiento inválida | 400 Bad Request |
 | Datos faltantes | Error: Campos obligatorios faltantes | 400 Bad Request |
 | Error de conexión | Error interno del servidor | 500 Internal Server Error |
-| Socio con certificado activo | Certificado previo invalidado, nuevo creado | 201 Created |
+| Registro exitoso | Socio con o sin certificado previo: el nuevo es creado y el anterior (si existiera) es invalidado | 201 Created |
 
 ## 5. Plan de Implementación
 

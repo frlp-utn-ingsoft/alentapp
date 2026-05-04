@@ -24,16 +24,21 @@ Permitir que el personal administrativo dé de baja un certificado médico del s
 * Como administrador, quiero dar de baja un certificado médico para que deje de ser considerado válido.
     - Escenario de éxito: "Si el usuario solicita la baja de un certificado, el sistema debe cambiar su estado a no validado".
     - Escenario de fallo: "Si el certificado indicado no existe, el sistema debe informar el error".
-    - Escenario de éxito (idempotencia): "Si el certificado ya está marcado como no validado, la operación debe completarse sin error".
+    - Escenario de fallo: "Si el certificado ya se encuentra marcado como no validado, el sistema debe informar que ya ha sido dado de baja".
 
 ## 2. Diseño Técnico
 
 ### 2.1. Modelo de Dominio
 
-Se utiliza la entidad `MedicalCertificate` existente:
+Se utiliza la entidad `MedicalCertificate` completa (aunque para esta operación solo se modifique el estado de validación):
 
 * `id`: Identificador único universal (UUID).
-* `is_validated`: Booleano (Se cambiará a `false` para representar la baja lógica).
+* `issue_date`: Fecha de emisión.
+* `expiry_date`: Fecha de vencimiento.
+* `doctor_license`: Cadena de texto.
+* `institution`: Cadena de texto.
+* `is_validated`: Booleano.
+* `member_id`: Identificador del socio asociado al certificado.
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
@@ -73,7 +78,7 @@ model MedicalCertificate {
 | Escenario | Resultado Esperado | Código HTTP |
 | :--- | :--- | :--- |
 | Certificado inexistente | Error: Certificado no encontrado | 404 Not Found |
-| Certificado ya invalidado | Operación exitosa (idempotente) | 204 No Content |
+| Certificado ya invalidado | Error: El certificado ya se encuentra dado de baja | 400 Bad Request |
 | Error de conexión a DB | Error interno del servidor | 500 Internal Server Error |
 | Eliminación exitosa | Respuesta vacía | 204 No Content |
 
