@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Eliminación de Disciplina
 ---
 
-# TDD-0018: Eliminación de Disciplina
+# TDD-0017: Eliminación de Disciplina
 
 ## Contexto de Negocio (PRD)
 

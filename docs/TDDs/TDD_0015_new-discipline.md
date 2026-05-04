@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Registro de Nueva Disciplina
 ---
 
-# TDD-0016: Registro de Nueva Disciplina
+# TDD-0015: Registro de Nueva Disciplina
 
 ## Contexto de Negocio (PRD)
 

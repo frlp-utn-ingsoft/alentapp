@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Eliminación de Préstamo de Equipamiento
 ---
 
-# TDD-0021: Eliminación de Préstamo de Equipamiento
+# TDD-0020: Eliminación de Préstamo de Equipamiento
 
 ## Contexto de Negocio (PRD)
 
