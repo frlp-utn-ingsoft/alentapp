@@ -36,7 +36,7 @@ No se permite pushear directamente a la rama `main`. Todas las contribuciones de
 
     **Estructura de commits**:
 
-        '<tipo-de-commit>[scope]: <descripcion>'
+        `<tipo-de-commit>[scope]: <descripcion>`
 
     Ejemplos:
         `feat(backend): add filter for cars`
@@ -60,12 +60,9 @@ No se permite pushear directamente a la rama `main`. Todas las contribuciones de
     Este repositorio utiliza templates estandarizados para Pull Requests.
     Los mismos se encuentran en:
 
-    ```
-    .github/PULL_REQUEST_TEMPLATE/
-    ```
-
     ### 📂 Templates disponibles
 
+    * `pull_request_template.md` → template generico
     * `feature.md` → nuevas funcionalidades
     * `fix.md` → corrección de bugs
     * `refactor.md` → mejoras internas sin cambio funcional
