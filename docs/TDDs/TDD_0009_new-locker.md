@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Alta de casillero
 ---
 
-# TDD-0010: Alta casillero
+# TDD-0009: Alta casillero
 
 ## Contexto de Negocio (PRD)
 

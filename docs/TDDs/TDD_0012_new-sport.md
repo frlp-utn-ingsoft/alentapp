@@ -4,7 +4,7 @@ fecha: 2026-05-02
 titulo: Alta deporte
 ---
 
-# TDD-0013: Alta deporte
+# TDD-0012: Alta deporte
 
 ## Contexto de Negocio (PRD)
 

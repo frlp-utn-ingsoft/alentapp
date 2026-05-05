@@ -4,7 +4,7 @@ fecha: 2026-05-02
 titulo: Baja del casillero
 ---
 
-# TDD-0012: Baja de casillero
+# TDD-0011: Baja de casillero
 
 ## Contexto de Negocio (PRD)
 

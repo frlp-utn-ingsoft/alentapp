@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Modificación de casillero
 ---
 
-# TDD-0011: Modificación de casillero
+# TDD-0010: Modificación de casillero
 
 ## Contexto de Negocio (PRD)
 

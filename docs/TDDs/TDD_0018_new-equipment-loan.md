@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Registro de Nuevo Préstamo de Equipamiento
 ---
 
-# TDD-0019: Registro de Nuevo Préstamo de Equipamiento
+# TDD-0018: Registro de Nuevo Préstamo de Equipamiento
 
 ## Contexto de Negocio (PRD)
 

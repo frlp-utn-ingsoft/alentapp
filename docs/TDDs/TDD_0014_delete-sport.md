@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Baja de deporte
 ---
 
-# TDD-0015: Baja de deporte
+# TDD-0014: Baja de deporte
 
 ## Contexto de Negocio (PRD)
 

@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Actualización de Préstamo de Equipamiento
 ---
 
-# TDD-0020: Actualización de Préstamo de Equipamiento
+# TDD-0019: Actualización de Préstamo de Equipamiento
 
 ## Contexto de Negocio (PRD)
 

@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Update MedicalCertificate
 ---
 
-# TDD-0008: Actualizar MedicalCertificate
+# TDD-0007: Actualizar MedicalCertificate
 
 ## Contexto de Negocio (PRD)
 

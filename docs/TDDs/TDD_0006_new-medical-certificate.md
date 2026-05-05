@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Create MedicalCertificate
 ---
 
-# TDD-0007: Crear MedicalCertificate
+# TDD-0006: Crear MedicalCertificate
 
 ## Contexto de Negocio (PRD)
 

@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Delete MedicalCertificate
 ---
 
-# TDD-0009: Eliminar MedicalCertificate
+# TDD-0008: Eliminar MedicalCertificate
 
 ## Contexto de Negocio (PRD)
 

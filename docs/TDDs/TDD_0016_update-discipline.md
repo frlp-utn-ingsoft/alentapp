@@ -4,7 +4,7 @@ fecha: 2026-05-01
 titulo: Actualización de Disciplina
 ---
 
-# TDD-0017: Actualización de Disciplina
+# TDD-0016: Actualización de Disciplina
 
 ## Contexto de Negocio (PRD)
 
