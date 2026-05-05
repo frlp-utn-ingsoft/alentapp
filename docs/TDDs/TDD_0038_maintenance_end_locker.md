@@ -24,9 +24,6 @@ Rehabilitar un casillero que se encontraba inhabilitado por refacciones, volvien
 
 ## Diseño Técnico (RFC)
 
-### Modelo de Datos
-Entidad `Locker`. No se requieren modificaciones en `schema.prisma`, solo la actualización del campo `status` a `Available` sobre un registro existente.
-
 ### Contrato de API (@alentapp/shared)
 *   **Endpoint**: `PATCH /api/v1/lockers/:id/maintenance/end`
 *   **Request Body**: `None`

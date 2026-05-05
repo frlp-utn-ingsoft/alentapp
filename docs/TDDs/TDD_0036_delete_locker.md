@@ -25,9 +25,6 @@ Permitir el borrado físico de un casillero del sistema en caso de que haya sido
 
 ## Diseño Técnico (RFC)
 
-### Modelo de Datos
-Entidad `Locker`. No se requieren modificaciones en `schema.prisma`. Se realizará un borrado físico (`delete`).
-
 ### Contrato de API (@alentapp/shared)
 *   **Endpoint**: `DELETE /api/v1/lockers/:id`
 *   **Request Body**: `None`

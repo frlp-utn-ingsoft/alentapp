@@ -24,9 +24,6 @@ Permitir la modificación de los datos físicos o identificatorios de un casille
 
 ## Diseño Técnico (RFC)
 
-### Modelo de Datos
-Entidad `Locker`. No se requieren modificaciones en `schema.prisma`. Se realizarán actualizaciones sobre un registro existente.
-
 ### Contrato de API (@alentapp/shared)
 *   **Endpoint**: `PATCH /api/v1/lockers/:id`
 *   **Request Body (UpdateLockerRequest)**:
