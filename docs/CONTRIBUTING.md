@@ -62,7 +62,6 @@ No se permite pushear directamente a la rama `main`. Todas las contribuciones de
 
     ### 📂 Templates disponibles
 
-    * `pull_request_template.md` → template generico
     * `feature.md` → nuevas funcionalidades
     * `fix.md` → corrección de bugs
     * `refactor.md` → mejoras internas sin cambio funcional
