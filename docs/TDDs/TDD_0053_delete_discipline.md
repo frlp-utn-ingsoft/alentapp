@@ -1,7 +1,7 @@
 ---
 id: "0053"
 estado: Propuesto
-autor: Tomas
+autor: Tomas Soler
 fecha: 2026-05-01
 titulo: Eliminacion de Sancion Disciplinaria
 ---

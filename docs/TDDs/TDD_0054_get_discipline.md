@@ -1,7 +1,7 @@
 ---
 id: "0054"
 estado: Propuesto
-autor: Tomas
+autor: Tomas Soler
 fecha: 2026-05-01
 titulo: Consulta de Sanciones Disciplinarias
 ---
