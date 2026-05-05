@@ -23,16 +23,17 @@ Esta funcionalidad permite corregir o actualizar la información de un casillero
 
 *   El sistema deberá permitir modificar un casillero existente.
 *   El sistema deberá validar que el casillero exista antes de actualizarlo.
+*   El sistema debera validar que el casillero no haya sido dado de baja, es decir  que 'deleted_at = null'
 *   El sistema deberá permitir modificar los campos `number`, `location`, `status` y `member_id`.
 *   El sistema deberá validar que el campo `number` sea obligatorio.
 *   El sistema deberá validar que el campo `number` sea mayor a cero.
+*   El sistema deberá validar que el campo `number` no pertenezca a otro casillero.
 *   El sistema deberá validar que el campo `location` sea obligatorio.
 *   El sistema deberá validar que el campo `location` pertenezca a una locación permitida.
-*   El sistema deberá validar que no exista otro casillero registrado con el mismo `number`, excluyendo el casillero que se está actualizando.
 *   El sistema deberá validar que el campo `status` tenga un valor permitido.
-*   El sistema deberá validar que, si `status` es `Assigned`, el campo `member_id` corresponda a un socio existente.
+*   Si `status = assigned`, el sistema debera validar que `member_id` corresponda a un socio y que no sea null
+*   Si `status = available` o `status = maintenance`, el sistema debera validar que `member_id = null`
 *   El sistema deberá impedir que un casillero sea asignado a un socio si su `status` es `Maintenance`.
-*   El sistema deberá validar que, si `status` es `Available` o `Maintenance`, el campo `member_id` sea `null`.
 *   Al finalizar la modificación, el sistema deberá guardar los nuevos datos del casillero.
 *   Si el casillero no existe, el sistema deberá rechazar la operación e informar el error correspondiente.
 
@@ -47,7 +48,7 @@ Se utilizará la entidad `Locker` existente para actualizar los datos básicos d
 *   `location`: String. Ubicación física del casillero dentro del club. Debe pertenecer a una lista de locaciones permitidas.
 *   `status`: String. Estado actual del casillero.
 *   `member_id`: UUID | null. Identificador del socio asignado al casillero.
-*   `is_active`: Boolean. Indica si el casillero se encuentra activo.
+*   `deleted_at`: Date | null. Fecha de baja lógica. No se modifica en esta operación.
 
 Locaciones permitidas para `location`:
 
@@ -62,18 +63,6 @@ Estados permitidos para `status`:
 *   `Available`: casillero disponible.
 *   `Assigned`: casillero asignado.
 *   `Maintenance`: casillero en mantenimiento.
-
-Restricciones:
-
-*   `id` debe corresponder a un casillero existente.
-*   `number` debe ser único.
-*   `number` debe ser mayor a cero.
-*   `location` debe ser obligatoria.
-*   `location` debe pertenecer a una locación permitida.
-*   `status` debe pertenecer a los estados permitidos.
-*   Si `status` es `Assigned`, `member_id` debe corresponder a un socio existente.
-*   Si `status` es `Maintenance`, `member_id` debe ser `null`.
-*   Si `status` es `Available`, `member_id` debe ser `null`.
 
 ### Contrato de API (@alentapp/shared)
 
@@ -96,20 +85,20 @@ Restricciones:
 {
     id: string;
     number: number;
-  location: "Hall" | "Vestibulo" | "Pasillo" | "Gimnasio" | "Administracion";
+    location: "Hall" | "Vestibulo" | "Pasillo" | "Gimnasio" | "Administracion";
     status: "Available" | "Assigned" | "Maintenance";
     member_id: string | null;
-    is_active: boolean;
+    deleted_at: string | null 
 }
 ```
 
 ### Componentes de Arquitectura Hexagonal
 
-*   **Domain**: Entidad `Locker` y reglas de negocio asociadas a la modificación de casilleros: número obligatorio, número único, número mayor a cero, ubicación obligatoria, ubicación perteneciente a una locación permitida, estado válido y asignación coherente del socio según el estado del casillero.
+*   **Domain**: Entidad `Locker` y reglas de negocio para modificar casilleros: número único, ubicación válida, estado permitido y asignación coherente del socio según el estado del casillero.
 
-*   **Application**: Caso de uso `UpdateLockerUseCase`, encargado de validar la existencia del casillero, verificar los datos recibidos, controlar que no exista otro casillero con el mismo número, validar la existencia del socio cuando corresponda y solicitar la actualización.
+*   **Application**: Caso de uso `UpdateLockerUseCase`, encargado de validar la existencia del casillero, verificar que no esté dado de baja, validar los datos recibidos y solicitar la actualización.
 
-*   **Infrastructure**: Controlador HTTP para `PUT /api/v1/lockers/:id`, implementación del repositorio de casilleros utilizando Prisma, consulta del socio asociado cuando se envía `member_id` y persistencia de los cambios en base de datos.
+*   **Infrastructure**: Controlador HTTP para `PUT /api/v1/lockers/:id`, consulta de socio cuando se envía `member_id` y repositorio de casilleros implementado con Prisma.
 
 ## Casos de Borde y Errores
 
@@ -133,25 +122,15 @@ Restricciones:
 
 1. Definir el contrato compartido para modificar casilleros en `@alentapp/shared`.
 2. Verificar que el modelo `Locker` exista en Prisma con los campos necesarios.
-3. Implementar la lógica de dominio para validar los datos modificables de `Locker`.
-4. Implementar el caso de uso `UpdateLockerUseCase`.
-5. Implementar en el repositorio la búsqueda de casillero por `id`.
-6. Implementar en el repositorio la validación de existencia de otro casillero con el mismo `number`, excluyendo el casillero que se está actualizando.
-7. Validar que `number` sea obligatorio y mayor a cero.
+3. Implementar el caso de uso `UpdateLockerUseCase`.
+4. Buscar el casillero por `id`.
+5. Validar que el casillero exista.
+6. Validar que `deleted_at = null`.
+7. Validar que `number` sea obligatorio, mayor a cero y no pertenezca a otro casillero.
 8. Validar que `location` sea obligatoria y pertenezca a una locación permitida.
 9. Validar que `status` tenga un valor permitido.
-10. Validar que el socio exista cuando se envía `member_id`.
-11. Impedir asignar un socio cuando el `status` es `Maintenance`.
-12. Exigir `member_id` cuando el `status` es `Assigned`.
-13. Exigir `member_id = null` cuando el `status` es `Available` o `Maintenance`.
-14. Actualizar los campos `number`, `location`, `status` y `member_id`.
-15. Implementar el endpoint `PUT /api/v1/lockers/:id`.
-16. Agregar prueba de modificación exitosa de casillero sin asignación.
-17. Agregar prueba de modificación exitosa asignando un socio.
-18. Agregar prueba de error por casillero inexistente.
-19. Agregar prueba de error por número duplicado.
-20. Agregar prueba de error por ubicación faltante.
-21. Agregar prueba de error por ubicación inválida.
-22. Agregar prueba de error por estado inválido.
-23. Agregar prueba de error al asignar un socio a un casillero en mantenimiento.
-24. Agregar prueba de error cuando `status` es `Assigned` y no se envía `member_id`.
+10. Validar la relación entre `status` y `member_id`.
+11. Validar que el socio exista cuando corresponda.
+12. Actualizar los campos `number`, `location`, `status` y `member_id`.
+13. Implementar el endpoint `PUT /api/v1/lockers/:id`.
+14. Agregar pruebas para modificación exitosa y casos de error.

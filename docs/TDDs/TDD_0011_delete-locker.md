@@ -23,8 +23,9 @@ Esta funcionalidad permite quitar un casillero del uso operativo del sistema sin
 
 *   El sistema deberá permitir dar de baja un casillero existente.
 *   El sistema deberá validar que el casillero exista antes de darlo de baja.
+*   El sistema debera validar que el casillero no haya sido dado de baja previamente.
 *   El sistema no deberá eliminar físicamente el casillero de la base de datos.
-*   Al finalizar la baja, el sistema deberá marcar el casillero como inactivo.
+*   Al finalizar la baja, el sistema debera registrar la fecha en el campo 'deleted _at'
 *   Un casillero dado de baja no deberá aparecer como disponible para futuras operaciones.
 *   Si el casillero no existe, el sistema deberá rechazar la operación e informar el error correspondiente.
 
@@ -33,29 +34,14 @@ Esta funcionalidad permite quitar un casillero del uso operativo del sistema sin
 
 Se utilizará la entidad `Locker` existente para representar los casilleros del sistema.
 
-Para la baja de un casillero no se realizará eliminación física del registro. En su lugar, se actualizará el campo `is_active` a `false`.
+Para la baja de un casillero no se realizará eliminación física del registro. En su lugar, se actualizará el campo i.
 
 *   `id`: UUID. Identificador único del casillero.
 *   `number`: Int. Número identificatorio del casillero.
 *   `location`: String. Ubicación física del casillero dentro del club. Debe pertenecer a una lista de locaciones permitidas.
 *   `status`: String. Estado actual del casillero.
 *   `member_id`: UUID | null. Identificador del socio asignado al casillero.
-*   `is_active`: Boolean. Indica si el casillero se encuentra activo dentro del sistema.
-
-Locaciones permitidas para `location`:
-
-*   `Hall`
-*   `Vestibulo`
-*   `Pasillo`
-*   `Gimnasio`
-*   `Administracion`
-
-Restricciones:
-
-*   `id` debe corresponder a un casillero existente.
-*   La baja no debe eliminar físicamente el registro.
-*   Al dar de baja el casillero, `is_active` debe actualizarse a `false`.
-*   Los campos `number`, `location`, `status` y `member_id` no se modifican en esta operación.
+*   `deleted_at`: Date | null. Fecha de baja lógica. Si es `null`, el casillero se considera activo.
 
 ### Contrato de API (@alentapp/shared)
 
@@ -72,35 +58,35 @@ Restricciones:
     location: "Hall" | "Vestibulo" | "Pasillo" | "Gimnasio" | "Administracion";
     status: "Available" | "Assigned" | "Maintenance";
     member_id: string | null;
-    is_active: boolean;
+    deleted_at: string | nul; //fromato yyyy-mm-dd
 }
 ```
 
 ### Componentes de Arquitectura Hexagonal
 
-*   **Domain**: Entidad `Locker` y regla de negocio asociada a la baja lógica: un casillero dado de baja no se elimina físicamente, sino que se marca como inactivo.
+*  **Domain**: Entidad `Locker` y regla de negocio asociada a la baja lógica: el casillero no se elimina físicamente, sino que se registra su fecha de baja en `deleted_at`.
 
-*   **Application**: Caso de uso `DeleteLockerUseCase`, encargado de validar que el casillero exista, verificar que se encuentre activo y solicitar la actualización del campo `is_active` a `false`.
+*   **Application**: Caso de uso `DeleteLockerUseCase`, encargado de validar la existencia del casillero, verificar que no haya sido dado de baja previamente y solicitar la actualización de `deleted_at`.
 
-*   **Infrastructure**: Controlador HTTP para `DELETE /api/v1/lockers/:id`, implementación del repositorio de casilleros utilizando Prisma y persistencia de la baja lógica en base de datos.
+*   **Infrastructure**: Controlador HTTP para `DELETE /api/v1/lockers/:id` y repositorio de casilleros implementado con Prisma.
 
 ## Casos de Borde y Errores
 
-| Escenario                     | Resultado Esperado                                  | Código HTTP      |
-| ----------------------------- | --------------------------------------------------- | ---------------- |
-| El casillero no existe        | Error indicando que el casillero no fue encontrado   | 404 Not Found    |
-| El casillero ya está inactivo | Error indicando que el casillero ya fue dado de baja | 409 Conflict     |
-| Error inesperado al guardar   | Error interno del servidor                           | 500 Server Error |
+| Escenario                        | Resultado Esperado                                     | Código HTTP      |
+| -------------------------------- | ------------------------------------------------------ | ---------------- |
+| El casillero no existe           | Error indicando que el casillero no fue encontrado      | 404 Not Found    |
+| El casillero ya fue dado de baja | Error indicando que el casillero ya tiene fecha de baja | 409 Conflict     |
+| Error inesperado al guardar      | Error interno del servidor                             | 500 Server Error |
 
 ## Plan de Implementación
+
 1. Definir el contrato compartido para la baja de casilleros en `@alentapp/shared`.
-2. Verificar que el modelo `Locker` tenga el campo `is_active`.
+2. Verificar que el modelo `Locker` tenga el campo `deleted_at`.
 3. Implementar el caso de uso `DeleteLockerUseCase`.
-4. Implementar en el repositorio la búsqueda de casillero por `id`.
-5. Validar que el casillero exista antes de darlo de baja.
-6. Validar que el casillero no se encuentre previamente inactivo.
-7. Actualizar el campo `is_active` a `false` usando Prisma.
+4. Buscar el casillero por `id`.
+5. Validar que el casillero exista.
+6. Validar que `deleted_at = null`.
+7. Actualizar `deleted_at` con la fecha actual.
 8. Implementar el endpoint `DELETE /api/v1/lockers/:id`.
-9. Agregar prueba de baja lógica exitosa.
-10. Agregar prueba de error por casillero inexistente.
-11. Agregar prueba de error por casillero ya inactivo.
+9. Filtrar en las consultas operativas los casilleros con `deleted_at` distinto de `null`.
+10. Agregar pruebas para baja lógica exitosa y casos de error.
