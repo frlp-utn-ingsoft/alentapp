@@ -1,0 +1,90 @@
+---
+id: 0013
+estado: Propuesto
+autor: Ruaro Francina
+fecha: 2026-05-01
+titulo: Modificación de Certificado Médico
+---
+
+# TDD-0013: Modificación de Certificado Médico
+
+## Contexto de Negocio (PRD)
+
+### Objetivo
+
+Permitir la modificacion de un certificado medico ya existente, respetando la regla de un único certificado activo por socio y, por temas legales no permitir la modificacion de los siguientes datos:
+-issueDate
+-doctorLicens
+
+### User Persona
+
+- Nombre: Gabriel (Administrativo).
+- Necesidad: Actualizar informacion de un certificado sin tener que crear uno nuevo.
+
+### Criterios de Aceptación
+
+- El sistema debe permitir modificar un certificado existente.
+- El sistema debe validar que el certificado exista.
+- El sistema debe validar que las fechas sean correctas.
+- No se debe permitir generar inconsistencias con la regla de un único certificado activo.
+- Al finalizar, se debe mostrar un mensaje de éxito.
+
+## Diseño Técnico (RFC)
+
+### Modelo de Datos
+
+Entidad `MedicalCertificate`:
+
+- `id`: Identificador único universal (UUID).
+- `issueDate`: Fecha de creación autogenerada.
+- `expiryDate`: Fecha cargada por el usuario.
+- `doctorLicense`: Cadena de texto.
+- `isValidated`: Booleano, 1 indica valido, 0 no valido.
+- `memberId`: Referencia al socio (UUID).
+- `deletedAt`: Fecha de borrado lógico (null si no está eliminado).
+
+### Reglas de Negocio
+
+- Solo puede existir un certificado activo por socio.
+- La modificación no permitite cambiar el memberId, issueDate y doctorLicense
+- Debe validar que `expirationDate` > `issueDate`.
+- Si `isValidated` se actualiza a `true` Se debe invalidar automáticamente el certificado actualmente activo del socio (si existe).
+- Si `isValidated` se actualiza a `false` simplemente se actualiza el estado sin afectar a otros certificados.
+
+### Contrato de API (@alentapp/shared)
+
+- Endpoint: `PUT /api/v1/medical-certificates/:id`
+
+- Request Body (UpdateMedicalCertificateRequest):
+
+```ts
+{
+    expirationDate?: string; (ISO Date)
+    isValidated?: boolean;
+}
+
+### Componentes de Arquitectura Hexagonal
+
+1. Puerto: MedicalCertificateRepository (Interface en el Dominio).
+2. Caso de Uso: UpdateMedicalCertificate (Lógica que verifica la existencia del certificados, permitiendo modificar expirationDate o isValidated ).
+3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
+4. Adaptador de Entrada: MedicalCertificateController (Ruta HTTP).
+
+
+## Casos de Borde y Errores
+
+| Escenario | Resultado Esperado | Código HTTP |
+|---|---|---|
+| Certificado inexistente | Mensaje: "Certificado no encontrado" | 404 Not Found |
+| expirationDate con formato inválido | Mensaje: "Formato de fecha inválido" | 400 Bad Request |
+| expirationDate menor o igual a issueDate | Mensaje: "La fecha de vencimiento debe ser posterior a la de emisión" | 400 Bad Request |
+| Certificado eliminado (`deletedAt != null`) | Mensaje: "Certificado no encontrado" | 400 Bad Request |
+| isValidated = true y ya existe otro activo | Se invalida el anterior y este pasa a activo | 200 OK |
+
+## Plan de Implementación
+
+1. Definir en el repositorio el método `updateExpirationDate(id, expirationDate)`.
+2. Validar la existencia del certificado antes de intentar modificarlo.
+3. Persistir el cambio en la base de datos.
+4. Exponer endpoint `PUT /api/v1/medical-certificates/:id`.
+5. Consumir el endpoint desde el servicio de Frontend.
