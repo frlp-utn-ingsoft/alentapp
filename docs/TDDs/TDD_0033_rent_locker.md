@@ -28,9 +28,6 @@ Permitir que un socio alquile un casillero específico, cambiando su estado a oc
 
 ## Diseño Técnico (RFC)
 
-### Modelo de Datos
-Entidad `Locker` y Entidad `Member` (Solo lectura para validación). No se requieren cambios en `schema.prisma`, solo actualizaciones sobre los registros existentes.
-
 ### Contrato de API (@alentapp/shared)
 *   **Endpoint**: `PATCH /api/v1/lockers/:id/rent`
 *   **Request Body (RentLockerRequest)**:

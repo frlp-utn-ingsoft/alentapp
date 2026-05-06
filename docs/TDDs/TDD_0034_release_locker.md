@@ -27,9 +27,6 @@ Permitir que un casillero actualmente ocupado sea liberado, desvinculándolo del
 
 ## Diseño Técnico (RFC)
 
-### Modelo de Datos
-Entidad `Locker`. No se requieren modificaciones estructurales en `schema.prisma`, solo actualización de datos de un registro existente.
-
 ### Contrato de API (@alentapp/shared)
 *   **Endpoint**: `PATCH /api/v1/lockers/:id/release`
 *   **Request Body**: `None`
