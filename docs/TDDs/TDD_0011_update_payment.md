@@ -12,18 +12,22 @@ titulo: Modificación de Pagos
 
 ### Objetivo
 
-Permitir la actualización de datos de un pago existente, principalmente para registrar su acreditación (cambio a "Paid") o corregir montos/fechas mientras se encuentra pendiente. Se aplica la regla de inmutabilidad para pagos finalizados.
+Permitir: 
+- Actualización de datos de un pago existente, principalmente para registrar su acreditación (cambio a "Paid") o corregir montos/fechas mientras se encuentra pendiente. Se aplica la regla de inmutabilidad para pagos finalizados.
+- Eliminación LOGICA de un pago, pasando `deleted_at` con la fecha/hora actual del servidor al momento de realizar la operación.
 
 ### User Persona
 
 Nombre: Anastasia (Tesorera/Administrativa).
-Necesidad: Corregir errores de carga o marcar manualmente un pago como acreditado cuando se confirma vía transferencia/efectivo, sin generar registros duplicados.
+Necesidad: Corregir errores de carga o marcar manualmente un pago como acreditado cuando se confirma vía transferencia/efectivo, sin generar registros duplicados. Eliminar un pago.
 
 ### Criterios de Aceptación
 
 - Solo se permite modificar pagos cuyo `status` sea "Pending".
 - Si el estado cambia a "Paid", el sistema debe autogenerar `payment_date` con la fecha/hora actual del servidor.
+- Si el `status` cambia a "Canceled", el sistema registra `deleted_at` con la fecha/hora actual del servidor.
 - Los campos `amount`, `month`, `year` y `due_date` son inmutables una vez el pago pasa a "Paid" o "Canceled".
+- No se permiten transiciones de estado ni modificaciones de campos si `deleted_at` ya está presente.
 - Al finalizar, el sistema retorna 200 OK con el objeto actualizado.
 
 ## Diseño Técnico (RFC)
@@ -39,7 +43,11 @@ Se utilizará el paquete compaortido para definir el cuerpo de la petición. Tod
 {
     amount?:    number;
     due_date?:  string;
-    status?:    'Pending' | 'Paid';
+    month?:     number;
+    year?:      number;
+    payment_date?: string;
+    status?:    'Pending' | 'Paid' | 'Canceled';
+    member_id?: string;
 }
 ```
 
@@ -55,10 +63,12 @@ Se utilizará el paquete compaortido para definir el cuerpo de la petición. Tod
 
 | Escenario                                       | Resultado Esperado                                            | Código HTTP               |
 | ----------------------------------------------- | ------------------------------------------------------------- | ------------------------- |
-| Pago ya está en estado "Paid" o "Canceled"      | Mensaje: "No se permiten modificaciones en pagos finalizados" | 409 Conflict              |
-| Intento de modificar `amount` con status "Paid" | Mensaje: "Campo inmutable para pagos acreditados"             | 400 Bad Request           |
+| Pago ya está en estado "Paid" o "Canceled"      | Mensaje: "Error: No se permiten modificaciones en pagos finalizados" | 409 Conflict              |
+| Intento de modificar `amount` con status "Paid" | Mensaje: "Error: Campo inmutable para pagos acreditados"             | 400 Bad Request           |
 | Cambio a "Paid" exitoso                         | `payment_date` se autocompleta y status cambia                | 200 OK                    |
-| ID de pago inexistente                          | Mensaje: "Pago no encontrado"                                 | 404 Not Found             |
+| ID de pago inexistente                          | Mensaje: "Error: Pago no encontrado"                          | 404 Not Found             |
+| Cambio a `Canceled` exitoso                     | `deleted_at` se autocompleta y status cambia                  | 200 OK                    |
+| Intento de modificar pago ya cancelado/eliminado lógicamente | Mensaje: "Error: No se permiten modificaciones en pagos cancelados"    | 409 Conflict              |
 | Error de conexión a DB                          | Mensaje: "Error interno, reintente más tarde"                 | 500 Internal Server Error |
 
 ## Plan de Implementación

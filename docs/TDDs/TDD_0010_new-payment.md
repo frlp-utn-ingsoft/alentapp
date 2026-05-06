@@ -33,17 +33,15 @@ Necesidad: Dar de alta cuotas mensuales o anuales de forma rápida y estructurad
 
 Se definirá la entidad `Payment` con las siguientes propiedades y restricciones:
 
-`id`: Identificador único universal (UUID).
-`amount`: Float (monto de la cuota/pago).
-`month`: Int (1-12).
-`year`: Int (ej. 2026).
-`status`: Enumeración (`Pending`, `Paid`, `Canceled`). Default: `Pending`.
-`due_date`: Date (fecha de vencimiento).
-`payment_date`: Datetime, nullable.
-`member_id`: UUID (FK hacia Member).
-`created_at`: Datetime
-`updated_at`: Datetime
-`deleted_at`: Datetime?
+- `id`: Identificador único universal (UUID).
+- `amount`: Float (monto de la cuota/pago).
+- `month`: Int (1-12).
+- `year`: Int (ej. 2026).
+- `status`: Enumeración (`Pending`, `Paid`, `Canceled`). Default: `Pending`.
+- `due_date`: Date (fecha de vencimiento).
+- `payment_date`: Datetime, nullable.
+- `member_id`: UUID (FK hacia Member).
+- `deleted_at`: Datetime?.
 
 ### Contrato de API (@alentapp/shared)
 
@@ -62,6 +60,21 @@ Definiremos los tipos en el paquete compartido:
 }
 ```
 
+- Response: 201 Created
+- Response Body:
+```
+{
+    id: string;
+    amount: number;
+    month: number;
+    year: number;
+    status: "Pending" | "Paid" | "Canceled";
+    due_date: string;
+    payment_date: string;
+    member_id: string;
+}
+```
+
 ### Componentes de Arquitectura Hexagonal
 
 1. Puerto: PaymentRepository (Interface en el Dominio).
@@ -73,10 +86,12 @@ Definiremos los tipos en el paquete compartido:
 
 | Escenario                        | Resultado Esperado                                    | Código HTTP               |
 | -------------------------------- | ----------------------------------------------------- | ------------------------- |
-| `member_id` no existe en BBDD    | Mensaje: "El socio especificado no existe"            | 404 Not Found             |
-| `amount` <= 0                    | Mensaje: "El monto debe ser mayor a cero"             | 400 Bad Request           |
-| `month` fuera de rango (1-12)    | Mensaje: "Mes inválido. Debe estar entre 1 y 12"      | 400 Bad Request           |
-| `year` fuera de rango (ej. 2026) | Mensaje: "Año inválido. Debe estar entre 1900 y 2100" | 400 Bad Request           |
+| `member_id` no existe en BBDD    | Mensaje: "Error: El socio especificado no existe"            | 404 Not Found             |
+| `amount` <= 0                    | Mensaje: "Error: El monto debe ser mayor a cero"             | 400 Bad Request           |
+| `amount` no numérico             | Mensaje: "Error: El monto debe ser un número"                | 400 Bad Request           |
+| `month` fuera de rango (1-12)    | Mensaje: "Error: Mes inválido. Debe estar entre 1 y 12"      | 400 Bad Request           |
+| `year` fuera de rango (ej. 2026) | Mensaje: "Error: Año inválido. Debe estar entre 1900 y 2100" | 400 Bad Request           |
+| Campos requeridos vacíos (amount, month, year, due_date, member_id) | Mensaje: "Error: Campos requeridos vacíos" | 400 Bad Request |
 | Error de conexión a DB           | Mensaje: "Error interno, reintente más tarde"         | 500 Internal Server Error |
 
 ## Plan de Implementación
