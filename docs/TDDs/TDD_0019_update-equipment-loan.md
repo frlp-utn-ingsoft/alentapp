@@ -28,6 +28,7 @@ Permitir 2 operaciones sobre un préstamo existente:
 - No se permite cambiar desde `Canceled` a otro estado.
 - Si el préstamo ya está en el estado solicitado, la operación es idempotente: no genera cambios y retorna el préstamo sin modificaciones.
 - Para eliminar lógicamente un préstamo, se debe enviar `status: "Canceled"` a través del endpoint PATCH.
+- Cuando el `status` transiciona a `Canceled` vía PATCH, el sistema setea automáticamente `canceled_at` con el timestamp actual; el usuario no puede modificarlo.
 
 ## Diseño Técnico (RFC)
 
@@ -36,6 +37,7 @@ Permitir 2 operaciones sobre un préstamo existente:
 Se extiende el enum `EquipmentLoanStatus` de la entidad `EquipmentLoan` definida en TDD-0018:
 
 - `status`: String, estado del préstamo (`Loaned`, `Returned`, `Damaged`, `Canceled`).
+- `canceled_at`: DateTime | null, fecha en que se canceló el préstamo. Se setea automáticamente cuando el status pasa a `Canceled`.
 
 ### Contrato de API (@alentapp/shared)
 
@@ -58,6 +60,7 @@ Se extiende el enum `EquipmentLoanStatus` de la entidad `EquipmentLoan` definida
     status: "Loaned" | "Returned" | "Damaged" | "Canceled";
     loan_date: string;
     due_date: string;
+    canceled_at: string | null;
     member_id: string;
 }
 ```
