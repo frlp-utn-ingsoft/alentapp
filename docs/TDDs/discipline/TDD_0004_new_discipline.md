@@ -46,8 +46,8 @@ Se definirá la entidad "Discipline" con las siguientes propiedades:
 ```
 {
     reason: string;
-    start_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ)
-    end_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ)
+    start_date: string en formato ISO 8601 datetime 
+    end_date: string en formato ISO 8601 datetime 
     is_total_suspension: boolean;
     member_id: string;
 }

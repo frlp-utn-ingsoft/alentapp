@@ -47,8 +47,8 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 ```
 {
     reason: string (opcional);
-    start_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ), (opcional)
-    end_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ), (opcional)
+    start_date: string en formato ISO 8601 datetime, (opcional)
+    end_date: string en formato ISO 8601 datetime, (opcional)
     is_total_suspension: boolean (opcional);
 }
 ```
