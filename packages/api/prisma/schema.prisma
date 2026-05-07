@@ -34,5 +34,35 @@ model Member {
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
 
+    enrollments Enrollment[]
+
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+}
+
+model Sport {
+    id                          String       @id @default(uuid())
+    name                        String
+    description                 String?
+    max_capacity                Int
+    additional_price            Float        @default(0)
+    requires_medical_certificate Boolean     @default(false)
+    deleted_at                  DateTime?
+
+    enrollments Enrollment[]
+
+    @@map("sports")
+}
+
+model Enrollment {
+    id              String   @id @default(uuid())
+    member_id       String
+    sport_id        String
+    enrollment_date DateTime @default(now())
+    is_active       Boolean  @default(true)
+
+    member Member @relation(fields: [member_id], references: [id])
+    sport  Sport  @relation(fields: [sport_id], references: [id])
+
+    @@unique([member_id, sport_id])
+    @@map("enrollments")
 }

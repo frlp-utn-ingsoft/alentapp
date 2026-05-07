@@ -31,3 +31,53 @@ export interface UpdateMemberRequest {
   category?: MemberCategory;
   status?: MemberStatus;
 }
+
+// ==========================================
+// Sport
+// ==========================================
+export interface SportDTO {
+  id: string; // UUID
+  name: string;
+  description: string | null;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+  deleted_at: string | null; // ISO Date String or null
+}
+
+export interface CreateSportRequest {
+  name: string;
+  description?: string | null;
+  max_capacity: number;
+  additional_price?: number;
+  requires_medical_certificate?: boolean;
+}
+
+export interface UpdateSportRequest {
+  description?: string | null;
+  max_capacity?: number;
+  additional_price?: number;
+  requires_medical_certificate?: boolean;
+}
+
+// ==========================================
+// Enrollment
+// ==========================================
+export interface EnrollmentDTO {
+  id: string; // UUID
+  member_id: string; // UUID
+  sport_id: string; // UUID
+  enrollment_date: string; // ISO Date String
+  is_active: boolean;
+  member_name?: string; // Populated in joins
+  sport_name?: string; // Populated in joins
+}
+
+export interface CreateEnrollmentRequest {
+  member_id: string; // UUID
+  sport_id: string; // UUID
+}
+
+export interface UpdateEnrollmentRequest {
+  is_active?: boolean;
+}
