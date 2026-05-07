@@ -36,7 +36,7 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 *   `start_date`: Fecha, obligatoria.
 *   `end_date`: Fecha, obligatoria.
 *   `is_total_suspension`: Booleano, obligatorio.
-*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema.
+*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción no fue eliminada.
 *   `member_id`: Identificador del socio sancionado, obligatorio.
 
 
@@ -99,6 +99,5 @@ model Discipline {
 
 * Antes de eliminar, el frontend debería mostrar una confirmación al usuario para evitar borrados accidentales.
 * Esta operación realiza un borrado lógico: la sanción no se elimina físicamente de la base de datos, sino que se marca con `deleted_at`.
-* `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema. Cuando se asigna, se guarda como `DateTime` en formato ISO 8601 datetime.
-* Las operaciones sobre sanciones deben verse reflejadas en el estado disciplinario del socio.
-* El estado del socio debe recalcularse en función de las sanciones activas.
+* `deleted_at`: fecha de eliminación lógica, opcional. Si es `null`, la sanción no fue eliminada.
+* Las sanciones eliminadas lógicamente no deben considerarse al consultar si un socio está suspendido.

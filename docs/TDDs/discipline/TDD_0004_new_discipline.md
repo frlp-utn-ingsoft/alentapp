@@ -35,7 +35,7 @@ Se definirá la entidad "Discipline" con las siguientes propiedades:
 *   `start_date`: Fecha, obligatoria.
 *   `end_date`: Fecha, obligatoria.
 *   `is_total_suspension`: Booleano, obligatorio.
-*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema.
+*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción no fue eliminada.
 *   `member_id`: Identificador del socio sancionado, obligatorio.
 
 
@@ -84,10 +84,9 @@ model Discipline {
 2. Verificar que `end_date` sea estrictamente posterior a `start_date`.
 3. Validar que `start_date` y `end_date` cumplan con el formato ISO 8601.
 4. Verificar que el socio exista mediante su `member_id`.
-5. Verificar que no exista superposición con otras sanciones activas del mismo socio.
-6. Mapear el DTO a Entidad de Dominio.
-7. Persistir la entidad a través de `DisciplineRepository`.
-8. Retornar la sanción creada.
+5. Mapear el DTO a Entidad de Dominio.
+6. Persistir la entidad a través de `DisciplineRepository`.
+7. Retornar la sanción creada.
 
 ## 4. Casos de Borde y Errores
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
@@ -96,7 +95,6 @@ model Discipline {
 | Fecha de fin menor a fecha de inicio | "La fecha de fin debe ser estrictamente posterior a la fecha de inicio"              | 400 Bad Request           |
 | Campos obligatorios faltantes | "Todos los campos son requeridos" | 400 Bad Request |
 | Formato de fecha inválido | "Formato de fecha inválido" | 400 Bad Request |
-| Superposición de sanciones | "Ya existe una sanción activa en ese período" | 409 Conflict |
 | Error de conexión a DB     | "Error interno, reintente más tarde" | 500 Internal Server Error |
 
 ## 5. Plan de Implementación
@@ -111,5 +109,4 @@ model Discipline {
 * Al crear una sanción, `deleted_at` debe inicializarse en `null`.
 * Las sanciones con `deleted_at` distinto de `null` no deben considerarse activas.
 * La consulta de si un socio está suspendido actualmente debería resolverse comparando la fecha actual con `start_date` y `end_date`.
-* Las operaciones sobre sanciones deben verse reflejadas en el estado disciplinario del socio.
-* El estado del socio debe recalcularse en función de las sanciones activas.
+
