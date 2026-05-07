@@ -25,6 +25,8 @@ Permitir que un administrativo modifique los datos de un casillero existente, in
 - Al asignar un socio, el `status` debe cambiar automáticamente a `Occupied`.
 - Al liberar un casillero (`member_id` = null), el `status` debe volver a `Available`.
 - Si el ID del casillero no existe, el sistema debe retornar un error.
+- Si un casillero pasa a estado `Maintenance` y tiene un socio asignado, 
+el sistema debe liberar automáticamente al socio (setear `member_id` a `null`).
 
 ---
 
@@ -86,6 +88,7 @@ Se actualiza el registro existente de `Locker`:
 | ID de casillero inexistente | Error: "No existe un casillero con ese ID" | 404 Not Found |
 | Campos inválidos en el body | Error de validación de schema | 400 Bad Request |
 | Error de conexión a la base de datos | Error: "Error interno, reintente más tarde" | 500 Internal Server Error |
+| Casillero `Occupied` pasa a `Maintenance` | Se libera el socio automáticamente y el casillero queda en `Maintenance` con `member_id` null | 200 OK |
 
 ---
 
