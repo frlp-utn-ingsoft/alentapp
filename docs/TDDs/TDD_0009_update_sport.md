@@ -21,6 +21,7 @@ Permitir al personal administrativo actualizar los datos editables de un deporte
 - El sistema debe permitir modificar únicamente los campos `description`, `max_capacity` y `additional_price`, y `requires_medical_certificate`.
 - El sistema **no debe permitir** modificar el campo `name`. Si se incluye en el body, debe ser ignorado o rechazado con un error explícito.
 - El sistema debe validar que `max_capacity`, si se incluye, siga siendo mayor a cero.
+- El sistema debe validar que`additional_price`, si se informa, sea mayor o igual a cero.
 - Si el deporte no existe, el sistema debe retornar un error claro.
 - El sistema debe retornar el recurso actualizado completo.
 
@@ -60,13 +61,14 @@ Campo **inmutable** (no editable post-creación):
 
 ## Casos de Borde y Errores
 
-| Escenario                               | Resultado Esperado                                              | Código HTTP       |
-|-----------------------------------------|-----------------------------------------------------------------|-------------------|
-| `id` no corresponde a ningún deporte    | Error con mensaje "Deporte no encontrado"                       | 404 Not Found     |
-| Se intenta modificar `name`             | Error con mensaje "El nombre del deporte no puede modificarse"  | 400 Bad Request   |
-| `max_capacity` es 0 o negativo          | Error de validación con mensaje descriptivo                     | 400 Bad Request   |
-| Body vacío (sin campos a actualizar)    | Error de validación: se requiere al menos un campo              | 400 Bad Request   |
-| Actualización exitosa                   | Retorna el deporte con los datos actualizados                   | 200 OK            |
+| Escenario                               | Resultado Esperado                                      | Código HTTP       |
+|-----------------------------------------|---------------------------------------------------------|-------------------|
+| `id` no corresponde a ningún deporte    | Mensaje: "Deporte no encontrado"                        | 404 Not Found     |
+| Se intenta modificar `name`             | Mensaje: "El nombre del deporte no puede modificarse"   | 400 Bad Request   |
+| `max_capacity` es 0 o negativo          | Mensaje: "La capacidad maxima debe ser mayor a cero"    | 400 Bad Request   |
+| `aditional_price` es negativo           | Mensaje: "El precio adicional debe ser mayor a cero"    | 400 Bad Request   |
+| Body vacío (sin campos a actualizar)    | Mensaje: "Se requiere al menos un campo para actualizar"| 400 Bad Request   |
+| Actualización exitosa                   | Retorna el deporte con los datos actualizados           | 200 OK            |
 
 ## Plan de Implementación
 1. Definir tipo `UpdateSportDto` en `@alentapp/shared` (sin el campo `name`).

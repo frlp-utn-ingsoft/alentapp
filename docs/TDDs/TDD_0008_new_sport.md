@@ -20,6 +20,7 @@ Permitir al personal administrativo del club registrar un nuevo deporte en el si
 ### Criterios de Aceptación
 - El sistema debe validar que el campo `name` es único; no se puede registrar un deporte con un nombre ya existente.
 - El sistema debe validar que `max_capacity` es un número entero estrictamente mayor a cero.
+El sistema debe validar que `additional_price` sea mayor o igual a cero.
 - El sistema debe persistir el nuevo deporte con todos sus campos y retornar el recurso creado con su `id` generado.
 - El campo `name` queda inmutable luego de la creación; solo se puede establecer en el alta.
 - El campo `requires_medical_certificate` debe tener un valor por defecto (`false`) si no se especifica.
@@ -61,10 +62,11 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 
 | Escenario                        | Resultado Esperado                                      | Código HTTP       |
 |----------------------------------|---------------------------------------------------------|-------------------|
-| `name` ya registrado             | Error de conflicto con mensaje "El deporte ya existe"   | 409 Conflict      |
-| `max_capacity` es 0 o negativo   | Error de validación con mensaje descriptivo             | 400 Bad Request   |
-| `max_capacity` no es entero      | Error de validación de tipo                             | 400 Bad Request   |
-| `name` ausente en el body        | Error de validación: campo requerido                    | 400 Bad Request   |
+| `name` ya registrado             | Mensaje: "El deporte ya existe"                         | 409 Conflict      |
+| `max_capacity` es 0 o negativo   | Mensaje: "La capacidad maxima debe ser mayor a cero"    | 400 Bad Request   |
+| `max_capacity` no es entero      | Mensaje: "La capacidad maxima debe ser un numero entero"| 400 Bad Request   |
+| `aditioanl_price` menor que cero | Mensaje: "El precio adicional debe ser mayor a cero"    | 400 Bad Request   |
+| `name` ausente en el body        | Mensaje: "El nombre del deporte es obligatorio"         | 400 Bad Request   |
 | Body vacío                       | Error de validación: campos requeridos faltantes        | 400 Bad Request   |
 
 ## Plan de Implementación
