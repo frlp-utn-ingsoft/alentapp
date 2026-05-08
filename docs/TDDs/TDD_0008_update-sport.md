@@ -84,11 +84,24 @@ Reglas de actualización:
 
 ## Componentes de Arquitectura Hexagonal
 
-1. **Puerto**: `SportRepository` (Método `update(id, data)` y `countEnrolled(sportId)`).
-2. **Servicio de Dominio**: `SportValidator` (Encargado de validar la inmutabilidad del nombre, que `max_capacity` sea mayor a cero, y que no sea menor que la cantidad de inscriptos).
-3. **Caso de Uso**: `UpdateSportUseCase` (Orquesta la validación, verifica la existencia del deporte mediante `findById`, y rechaza intentos de modificar campos no permitidos).
-4. **Adaptador de Salida**: `PostgresSportRepository` (Actualización usando el método `update` de Prisma y método `countEnrolled` para validar restricciones).
-5. **Adaptador de Entrada**: `SportController` (Ruta HTTP PATCH que extrae el `id` de la URL, valida que solo se modifiquen `description` y `maxCapacity`, y mapea excepciones a códigos HTTP).
+1. **Domain**:
+    - Entidad Sport.
+    - Servicio SportValidator.
+    - Regla de negocio: name es inmutable.
+    - Regla de negocio: max_capacity debe ser mayor a cero.
+    - Regla de negocio: max_capacity no puede quedar por debajo de la cantidad de inscriptos.
+2. **Application**:
+    - Puerto SportRepository.
+    - Caso de uso UpdateSportUseCase.
+    - Validación de existencia mediante findById.
+    - Validación de cantidad de inscriptos mediante countEnrolled(sportId).
+    - Rechazo explícito si el request intenta modificar campos no permitidos.
+3. **Infrastructure**:
+    - Adaptador PostgresSportRepository.
+    - Método update(id, data).
+    - Método countEnrolled(sportId).
+    - Controlador SportController.
+    - Ruta PATCH /api/v1/sports/:id.
 
 ## Casos de Borde y Errores
 
