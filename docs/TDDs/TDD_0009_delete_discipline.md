@@ -37,13 +37,7 @@ No se requieren cambios en el schema de Prisma. La entidad `Discipline` ya fue d
 
 - **Endpoint**: `DELETE /api/v1/disciplines/:id`
 - **Request Body**: No aplica.
-- **Response**:
-
-```ts
-{
-    message: string; // "Disciplina eliminada correctamente"
-}
-```
+- **Response**: `204 No Content` (sin body)
 
 ### Componentes de Arquitectura Hexagonal
 
