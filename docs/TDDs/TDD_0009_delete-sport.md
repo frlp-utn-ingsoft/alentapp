@@ -62,10 +62,23 @@ Reglas de baja:
 
 ## Componentes de Arquitectura Hexagonal
 
-1. **Puerto**: `SportRepository` (Métodos `delete(id)` y `countEnrolled(sportId)`).
-2. **Caso de Uso**: `DeleteSportUseCase` (Comprueba existencia previa vía `findById`, valida que no haya inscriptos mediante `countEnrolled`, y delega la eliminación).
-3. **Adaptador de Salida**: `PostgresSportRepository` (Eliminación usando el método `delete` de Prisma y método `countEnrolled` para validar restricciones).
-4. **Adaptador de Entrada**: `SportController` (Ruta HTTP DELETE que extrae el `id`, valida que no existan inscriptos, y devuelve un status 204).
+1. **Domain**:
+    - Entidad Sport.
+    - Regla de negocio: no se puede eliminar un deporte con inscriptos.
+    - Regla de negocio: solo se elimina un deporte existente.
+2. **Application**:
+    - Puerto SportRepository.
+    - Caso de uso DeleteSportUseCase.
+    - Validación de existencia mediante findById.
+    - Validación de inscriptos mediante countEnrolled(sportId).
+3. **Infrastructure**:
+    - Adaptador PostgresSportRepository.
+    - Método delete(id).
+    - Método countEnrolled(sportId).
+    - Controlador SportController.
+    - Ruta DELETE /api/v1/sports/:id.
+    - Confirmación visual en frontend.
+
 
 ## Casos de Borde y Errores
 
