@@ -8,6 +8,22 @@ import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
+import { DeleteSportUseCase } from './application/DeleteSportUseCase.js';
+import { SportController } from './delivery/SportController.js';
+
+import { PostgresEnrollmentRepository } from './infrastructure/PostgresEnrollmentRepository.js';
+import { EnrollmentValidator } from './domain/services/EnrollmentValidator.js';
+import { CreateEnrollmentUseCase } from './application/CreateEnrollmentUseCase.js';
+import { GetEnrollmentsUseCase } from './application/GetEnrollmentsUseCase.js';
+import { UpdateEnrollmentUseCase } from './application/UpdateEnrollmentUseCase.js';
+import { DeleteEnrollmentUseCase } from './application/DeleteEnrollmentUseCase.js';
+import { EnrollmentController } from './delivery/EnrollmentController.js';
+
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -28,6 +44,9 @@ export function buildApp() {
         credentials: true,
     });
 
+    // ==========================================
+    // Members
+    // ==========================================
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
     
@@ -47,6 +66,52 @@ export function buildApp() {
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
+    // ==========================================
+    // Sports
+    // ==========================================
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator(sportRepo);
+
+    const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
+    const getSportsUseCase = new GetSportsUseCase(sportRepo);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
+    const deleteSportUseCase = new DeleteSportUseCase(sportRepo);
+
+    const sportController = new SportController(
+        createSportUseCase,
+        getSportsUseCase,
+        updateSportUseCase,
+        deleteSportUseCase
+    );
+
+    server.get('/api/v1/sports', sportController.getAll.bind(sportController));
+    server.post('/api/v1/sports', sportController.create.bind(sportController));
+    server.put('/api/v1/sports/:id', sportController.update.bind(sportController));
+    server.delete('/api/v1/sports/:id', sportController.delete.bind(sportController));
+
+    // ==========================================
+    // Enrollments
+    // ==========================================
+    const enrollmentRepo = new PostgresEnrollmentRepository();
+    const enrollmentValidator = new EnrollmentValidator(enrollmentRepo, memberRepo, sportRepo);
+
+    const createEnrollmentUseCase = new CreateEnrollmentUseCase(enrollmentRepo, enrollmentValidator);
+    const getEnrollmentsUseCase = new GetEnrollmentsUseCase(enrollmentRepo);
+    const updateEnrollmentUseCase = new UpdateEnrollmentUseCase(enrollmentRepo);
+    const deleteEnrollmentUseCase = new DeleteEnrollmentUseCase(enrollmentRepo);
+
+    const enrollmentController = new EnrollmentController(
+        createEnrollmentUseCase,
+        getEnrollmentsUseCase,
+        updateEnrollmentUseCase,
+        deleteEnrollmentUseCase
+    );
+
+    server.get('/api/v1/enrollments', enrollmentController.getAll.bind(enrollmentController));
+    server.post('/api/v1/enrollments', enrollmentController.create.bind(enrollmentController));
+    server.put('/api/v1/enrollments/:id', enrollmentController.update.bind(enrollmentController));
+    server.delete('/api/v1/enrollments/:id', enrollmentController.delete.bind(enrollmentController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
