@@ -84,22 +84,23 @@ Response esperada: 201 Created
 
 ## Componentes de Arquitectura Hexagonal
 
-1. **Puerto**: `SportRepository` (Interface en el Dominio).
-   - Método: `findByName(name)` para validar unicidad del nombre.
-   - Métodos CRUD: `create()`, `findById()`, `findAll()`, `update()`, `delete()`.
-2. **Servicio de Dominio**: `SportValidator` (Encargado de validar la inmutabilidad del nombre, que `max_capacity` sea mayor a cero, y que no sea menor que la cantidad de inscriptos).
-3. **Caso de Uso**: `CreateSportUseCase` (Lógica que verifica, utilizando el servicio SportValidator, si el nombre ya existe y valida integridad de datos antes de llamar al repositorio).
-   - Validaciones:
-     - Nombre único mediante `findByName(name)`.
-     - Max capacity > 0.
-     - Precio adicional >= 0.
-     - Datos de entrada antes de persistir.
-4. **Adaptador de Salida**: `PostgresSportRepository` (Implementación real en BD con Prisma).
-   - Persistencia de Sports en tabla `sports`.
-
-5. **Adaptador de Entrada**: `SportController` (Ruta HTTP).
-   - Endpoint: `POST /api/v1/sports`.
-   - Mapeo de excepciones a códigos HTTP.
+1. **Domain**:
+    - Entidad Sport.
+    - Servicio de dominio SportValidator (valida nombre único, max_capacity > 0, precio no negativo).
+    - Regla de negocio: name debe ser único.
+    - Regla de negocio: name queda inmutable después de la creación.
+    - Regla de negocio: max_capacity debe ser mayor a cero.
+    - Validación de precio adicional no negativo.
+2. **Application**:
+    - Puerto SportRepository.
+    - Caso de uso CreateSportUseCase.
+    - Validación de nombre único mediante findByName(name).
+    - Validación de datos de entrada antes de persistir.
+3. **Infrastructure**:
+    - Adaptador PostgresSportRepository.
+    - Implementación con Prisma.
+    - Controlador SportController.
+    - Ruta POST /api/v1/sports.
 
 ## Casos de Borde y Errores
 
