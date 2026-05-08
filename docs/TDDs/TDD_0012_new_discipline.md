@@ -38,6 +38,7 @@ Se definirá la entidad `Discipline` con las siguientes propiedades y restriccio
 * `endDate`: Fecha (datetime) de fin (debe ser posterior a `startDate`).
 * `isTotalSuspension`: Booleano.
 * `memberId`: UUID (clave foránea a Member).
+* `deletedAt`: Fecha (datetime) de eliminación lógica. `null` indica que la sanción se encuentra activa en el sistema.
 
 ### Contrato de API (@alentapp/shared)
 
