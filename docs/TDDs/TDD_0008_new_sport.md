@@ -20,7 +20,7 @@ Permitir al personal administrativo del club registrar un nuevo deporte en el si
 ### Criterios de Aceptación
 - El sistema debe validar que el campo `name` es único; no se puede registrar un deporte con un nombre ya existente.
 - El sistema debe validar que `max_capacity` es un número entero estrictamente mayor a cero.
-El sistema debe validar que `additional_price` sea mayor o igual a cero.
+- El sistema debe validar que `additional_price` sea mayor o igual a cero.
 - El sistema debe persistir el nuevo deporte con todos sus campos y retornar el recurso creado con su `id` generado.
 - El campo `name` queda inmutable luego de la creación; solo se puede establecer en el alta.
 - El campo `requires_medical_certificate` debe tener un valor por defecto (`false`) si no se especifica.
