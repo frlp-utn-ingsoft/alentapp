@@ -21,7 +21,7 @@ Permitir a los administrativos visualizar el listado completo de sanciones/suspe
 - El sistema debe devolver el listado completo de sanciones existentes en la base de datos.
 - El sistema debe permitir consultar una sancion por su `id`.
 - Si la sancion solicitada no existe, debe devolver un error claro.
-- La respuesta debe incluir todos los atributos de la sancion, incluido el `miembro_id`.
+- La respuesta debe incluir todos los atributos de la sancion, incluido el `memberId`.
 - El sistema debe permitir filtrar sanciones por socio.
 - El sistema debe permitir identificar sanciones activas.
 
@@ -40,11 +40,11 @@ Se exponen dos endpoints de lectura: uno para el listado completo y otro para el
 ```ts
 {
   id: string;
-  motivo: string;
-  fechaInicio: string;   // ISO Date String (YYYY-MM-DD)
-  fechaFin: string;      // ISO Date String (YYYY-MM-DD)
-  esSuspensionTotal: boolean;
-  miembro_id: string;
+  reason: string;
+  startDate: string;   // ISO 8601 DateTime
+  endDate: string;      // ISO 8601 DateTime
+  isTotalSuspension: boolean;
+  memberId: string;
 }
 ```
 
@@ -58,10 +58,10 @@ Se exponen dos endpoints de lectura: uno para el listado completo y otro para el
 
 | Escenario                                    | Resultado Esperado                            | Código HTTP               |
 | -------------------------------------------- | ----------------------------------------------| --------------------------|
-| Listado sin disciplinas cargadas             | Array vacío `[]`                              | 200 OK                    |
-| Consulta exitosa de listado                  | Array con todas las disciplinas               | 200 OK                    |
-| Consulta exitosa por `id`                    | Objeto con los datos de la disciplina         | 200 OK                    |
-| Disciplina inexistente al consultar por `id` | Mensaje: "La disciplina solicitada no existe" | 404 Not Found             |
+| Listado sin sanciones cargadas               | Array vacío `[]`                              | 200 OK                    |
+| Consulta exitosa de listado                  | Array con todas las sanciones                 | 200 OK                    |
+| Consulta exitosa por `id`                    | Objeto con los datos de la sancion            | 200 OK                    |
+| Sancion inexistente al consultar por `id`    | Mensaje: "La sancion solicitada no existe"    | 404 Not Found             |
 | Error de conexión a DB                       | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |
 
 ## Plan de Implementación

@@ -32,11 +32,11 @@ Permitir modificar sanciones existentes asegurando la integridad de las fechas y
 Se utilizará la entidad `Discipline` con las siguientes propiedades:
 
 * `id`: Identificador único universal (UUID).
-* `motivo`: Cadena de texto.
-* `fechaInicio`: Fecha (datetime) de inicio.
-* `fechaFin`: Fecha (datetime) de fin (debe ser posterior a `fechaInicio`).
-* `esSuspensionTotal`: Booleano.
-* `miembro_id`: UUID (clave foránea a Member).
+* `reason`: Cadena de texto.
+* `startDate`: Fecha (datetime) de inicio.
+* `fechaFin`: Fecha (datetime) de fin (debe ser posterior a `startDate`).
+* `isTotalSuspension`: Booleano.
+* `memberId`: UUID (clave foránea a Member).
 
 ### Contrato de API (@alentapp/shared)
 
@@ -47,16 +47,16 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 ```ts
 {
-    motivo?: string;
-    fechaInicio?: string; // ISO Date String (YYYY-MM-DD)
-    fechaFin?: string; // ISO Date String (YYYY-MM-DD)
-    esSuspensionTotal?: boolean;
+    reason?: string;
+    startDate?: string; // ISO 8601 DateTime
+    fechaFin?: string; // ISO 8601 DateTime
+    isTotalSuspension?: boolean;
 }
 ```
 
 ### Componentes de Arquitectura Hexagonal
 
-1. Puerto: DisciplineRepository (Interface en el Dominio).
+1. Puerto: IDisciplineRepository (Interface en el Dominio).
 2. Caso de Uso: UpdateDiscipline (Lógica que valida existencia y fechas).
 3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
 4. Adaptador de Entrada: DisciplineController (Ruta HTTP).
@@ -66,7 +66,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 | Escenario               | Resultado Esperado                                           | Código HTTP               |
 | ----------------------- | ------------------------------------------------------------ | ------------------------- |
 | Sanción inexistente     | Mensaje: "Sanción no encontrada"                             | 404 Not Found             |
-| fechaFin ≤ fechaInicio  | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request           |
+| fechaFin ≤ startDate    | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request           |
 | Error de conexión a DB  | Mensaje: "Error interno, reintente más tarde"                | 500 Internal Server Error |
 
 ## Plan de Implementación
