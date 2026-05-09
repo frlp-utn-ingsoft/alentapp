@@ -44,14 +44,6 @@ Se definirá la entidad `Sport` con las siguientes propiedades y restricciones:
 - `additional_price`: Importe extra al costo de la cuota social. Debe ser cero o mayor a cero.
 - `requires_medical_certificate`: Registra si se requiere certificado medico para practicar dicho deporte. (Booleano)
 
-A demas se definirá la entidad `Enrollment` para vincular `Member` y `Sport` con las siguientes propiedades y restricciones:
-
-- `id`: Identificador único universal (UUID).
-- `member_id`: Identificador de un socio que practica o practicó un deporte dado. (UUID, clave foránea hacia `Member`)
-- `sport_id`: Identificador de un deporte practicado por un socio. (UUID, clave foránea hacia `Sport`)
-- `enrollment_date`: Fecha en la que el socio empezó a practicar el deporte. (datetime)
-- `is_active`: Registra si el socio actualmente practica el deporte. (Booleano)
-
 ### Contrato de API (@alentapp/shared)
 
 Definiremos los tipos en el paquete compartido para asegurar sincronización:
@@ -86,7 +78,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 ## Plan de Implementación
 
-1. Definir esquema de persistencia y correr migración: crear la tabla Sport y la tabla intermedia `Enrollment` con los campos correspondientes, incluyendo contraint `UNIQUE` para `name`, y correr la migración.
+1. Definir esquema de persistencia y correr migración: crear la tabla Sport con los campos correspondientes, incluyendo contraint `UNIQUE` para `name`, y correr la migración.
 2. Crear tipos en shared y puerto en el Dominio.
 3. Implementar el repositorio y el caso de uso: Implementar lógica de para verificar que `max_capacity` sea mayor a cero y `additional_price` sea igual o mayor a cero.
 4. Crear formulario en React y conectar con el endpoint del backend.
