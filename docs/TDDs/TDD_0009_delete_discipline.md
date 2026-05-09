@@ -1,6 +1,6 @@
 ---
 id: 0009
-estado: Pendiente
+estado: Aprobado
 autor: Mateo Lafalce
 fecha: 2026-05-01
 titulo: Eliminación de Sanciones Disciplinarias
