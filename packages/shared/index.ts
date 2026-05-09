@@ -81,3 +81,32 @@ export interface CreateEnrollmentRequest {
 export interface UpdateEnrollmentRequest {
   is_active?: boolean;
 }
+
+// ==========================================
+// Payment
+// ==========================================
+export type PaymentStatus = 'Pending' | 'Paid' | 'Canceled';
+
+export interface PaymentDTO {
+  id: string;
+  amount: number;
+  month: number;
+  year: number;
+  status: PaymentStatus;
+  due_date: string; // ISO Date String (YYYY-MM-DD)
+  payment_date: string | null;
+  member_id: string;
+}
+
+export interface CreatePaymentRequest {
+  amount: number;
+  month: number;
+  year: number;
+  due_date: string; // ISO Date String (YYYY-MM-DD)
+  member_id: string;
+}
+
+export interface UpdatePaymentRequest {
+  status: 'Paid';
+  payment_date: string; // ISO 8601 (YYYY-MM-DDTHH:mm:ssZ)
+}
