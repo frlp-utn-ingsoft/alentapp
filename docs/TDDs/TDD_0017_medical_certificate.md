@@ -1,12 +1,12 @@
 ---
-id: 0005
+id: 0017
 estado: Propuesto
 autor: Luciana Martino
 fecha: 2026-05-03
 titulo: Gestión de Certificados Médicos
 ---
 
-# TDD-0005: Gestión de Certificados Médicos
+# TDD-0017: Gestión de Certificados Médicos
 
 ## Contexto de Negocio (PRD)
 
