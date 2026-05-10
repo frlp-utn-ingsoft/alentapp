@@ -58,7 +58,8 @@ Permitir a los administrativos corregir o modificar la fecha de inscripción y/o
 
 | Escenario                  | Resultado Esperado                            | Código HTTP actual        |
 | -------------------------- | --------------------------------------------- | ------------------------- |
-| Inscripción inexistente        | Mensaje: "La inscripción no existe"               | 400 Bad Request           |
+| Sin campos para actualizar | Mensaje: "Debe indicar al menos un campo a modificar" | 400 Bad Request   |
+| Inscripción inexistente        | Mensaje: "La inscripción no existe"               | 404 Not Found           |
 | `member_id` presente en el request body | Mensaje: "No se puede editar el socio asociado"    | 409 Conflict        |
 | `sport_id` presente en el request body | Mensaje: "No se puede editar el deporte asociado"    | 409 Conflict        |
 | Error de conexión a DB     | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |
