@@ -18,6 +18,19 @@ vi.mock('../infrastructure/PostgresMemberRepository.js', () => {
     };
 });
 
+vi.mock('../infrastructure/PostgresDisciplineRepository.js', () => {
+    return {
+        PostgresDisciplineRepository: class {
+            async create(data: any) { return { id: '1', ...data }; }
+            async findById() { return null; }
+            async findByMemberId() { return []; }
+            async findActiveTotalSuspensionByMemberId() { return null; }
+            async update(id: string, data: any) { return { id, ...data }; }
+            async delete() { return; }
+        }
+    };
+});
+
 describe('Member API Integration Tests', () => {
     let app: FastifyInstance;
 
