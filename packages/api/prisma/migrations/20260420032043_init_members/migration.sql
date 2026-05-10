@@ -6,7 +6,7 @@ CREATE TYPE "MemberStatus" AS ENUM ('Activo', 'Moroso', 'Suspendido');
 
 -- CreateTable
 CREATE TABLE "members" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "dni" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,

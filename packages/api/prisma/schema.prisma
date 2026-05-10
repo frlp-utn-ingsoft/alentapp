@@ -25,7 +25,7 @@ enum MemberStatus {
 }
 
 model Member {
-    id          String         @id @default(uuid())
+    id          String         @id @default(uuid()) @db.Uuid
     dni         String         @unique
     name        String
     email       String         @unique
@@ -39,12 +39,12 @@ model Member {
 }
 
 model Discipline {
-    id                  String   @id @default(uuid())
+    id                  String   @id @default(uuid()) @db.Uuid
     reason              String
     start_date          DateTime
     end_date            DateTime
     is_total_suspension Boolean
-    member_id           String
+    member_id           String   @db.Uuid
     member              Member   @relation(fields: [member_id], references: [id], onDelete: Cascade)
 
     @@index([member_id])
