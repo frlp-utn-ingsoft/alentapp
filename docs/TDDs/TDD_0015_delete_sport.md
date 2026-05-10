@@ -12,12 +12,12 @@ titulo: Eliminación de Deportes Existentes
 
 ### Objetivo
 
-Permitir a los administrativos eliminar permanentemente un deporte del sistema cuando este deja de ser ofrecido por el club, manteniendo el catálogo de actividades limpio y actualizado.
+Permitir a los administrativos dar de baja un deporte del sistema cuando este deja de ser ofrecido por el club, manteniendo el catálogo de actividades limpio y actualizado.
 
 ### User Persona
 
 - **Nombre**: Alberto (Tesorero/Administrativo).
-- **Necesidad**: Dar de baja un deporte que fue cargado por error o que el club dejó de ofrecer. Necesita una advertencia antes de confirmar el borrado para evitar eliminaciones accidentales, ya que la operación es irreversible.
+- **Necesidad**: Dar de baja un deporte que fue cargado por error o que el club dejó de ofrecer. Necesita una advertencia antes de confirmar el borrado para evitar eliminaciones accidentales.
 
 ### Criterios de Aceptación
 
@@ -60,11 +60,12 @@ No se requieren tipos nuevos en el paquete compartido. Se reutiliza SportDTO, de
 
 ## Casos de Borde y Errores
 
-| Escenario              | Resultado Esperado                        | Código HTTP actual        |
-| ---------------------- | ----------------------------------------- | ------------------------- |
-| Deporte inexistente    | Mensaje: "El deporte no existe"           | 404 Not Found             |
-| Eliminación exitosa    | Respuesta vacía                           | 204 No Content            |
-| Error de conexión a DB | Mensaje: error del motor de base de datos | 500 Internal Server Error |
+| Escenario                           | Resultado Esperado                                                             | Código HTTP actual        |
+| ----------------------------------- | ------------------------------------------------------------------------------ | ------------------------- |
+| Deporte inexistente o ID incorrecto | Mensaje: "El deporte no encontrado"                                            | 404 Not Found             |
+| Deporte ya eliminado lógicamente    | "El deporte ya fue dado de baja"                                               | 409 Conflict              |
+| Baja logica exitosa                 | `SportDTO` con `deleted_at` poblado; el deporte desaparece de listados activos | 200 Ok                    |
+| Error de conexión a DB              | Mensaje: "error interno, intentar nuevamente"                                  | 500 Internal Server Error |
 
 ## Plan de Implementación
 
