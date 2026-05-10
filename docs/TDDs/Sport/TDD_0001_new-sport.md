@@ -16,7 +16,7 @@ Permitir el registro de nuevos deportes en el sistema, garantizando que el depor
 
 ### User Persona
 
-*   **Nombre**: Administrador
+*   **Nombre**: Juan Perez (Administrador)
 *   **Necesidad**: Como administrador, quiero registrar un nuevo deporte en el sistema para que los socios puedan inscribirse en él, asegurando que la capacidad máxima sea un valor válido mayor a cero. 
 
 ### Criterios de Aceptación

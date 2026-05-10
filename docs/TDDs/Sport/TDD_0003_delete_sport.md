@@ -16,7 +16,7 @@ Permitir a los administrativos eliminar un deporte del sistema, removiendo su re
 
 ### User Persona
 
-*   **Nombre**: Administrador
+*   **Nombre**: Juan Perez (Administrador)
 *   **Necesidad**: Como administrador, quiero eliminar un deporte cargado por error o que ya no se dicta en el club, contando con una advertencia previa para evitar eliminaciones accidentales.
 
 ### Criterios de Aceptación
