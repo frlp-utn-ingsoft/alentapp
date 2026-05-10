@@ -1,18 +1,22 @@
 import { 
+  Table,
   Button, 
   Heading, 
   HStack, 
+  IconButton,
   Stack, 
   Text, 
   Box,
   Flex,
-  Input
+  Input,
+  Center,
+  Spinner
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw } from "react-icons/lu";
+import { LuPlus, LuCheck, LuX, LuRefreshCw } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import { membersService } from "../services/members";
 import { paymentsService } from "../services/payments";
-import type { MemberDTO, CreatePaymentRequest } from "@alentapp/shared";
+import type { MemberDTO, PaymentDTO, CreatePaymentRequest } from "@alentapp/shared";
 import { 
   DialogRoot, 
   DialogContent, 
@@ -34,7 +38,9 @@ import {
 } from "../components/ui/select";
 
 export function PaymentsView() {
+  const [payments, setPayments] = useState<PaymentDTO[]>([]);
   const [members, setMembers] = useState<MemberDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   
   // State for the modal
@@ -49,6 +55,18 @@ export function PaymentsView() {
     due_date: new Date().toISOString().split('T')[0],
     member_id: "",
   });
+
+  const fetchPayments = async () => {
+    setIsLoading(true);
+    try {
+      const data = await paymentsService.getAll();
+      setPayments(data);
+    } catch (err: any) {
+      console.error("Error al cargar los pagos", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchMembers = async () => {
     setIsLoadingMembers(true);
@@ -104,8 +122,7 @@ export function PaymentsView() {
     try {
       await paymentsService.create(formData);
       setIsDialogOpen(false);
-      alert("Pago registrado con éxito");
-      // Aquí dispararíamos el refresh de la tabla en el paso 12
+      fetchPayments();
     } catch (err: any) {
       alert(err.message || "Error al registrar el pago");
     } finally {
@@ -113,9 +130,51 @@ export function PaymentsView() {
     }
   };
 
+  const handleConfirmPayment = async (id: string) => {
+    if (window.confirm("¿Confirmar que el pago ha sido recibido?")) {
+        try {
+            await paymentsService.confirm(id, {
+                status: 'Paid',
+                payment_date: new Date().toISOString(),
+            });
+            fetchPayments();
+        } catch (err: any) {
+            alert(err.message || "Error al confirmar el pago");
+        }
+    }
+  };
+
+  const handleCancelPayment = async (id: string) => {
+    if (window.confirm("¿Estás seguro de cancelar este pago? Esta acción es irreversible.")) {
+        try {
+            await paymentsService.cancel(id);
+            fetchPayments();
+        } catch (err: any) {
+            alert(err.message || "Error al cancelar el pago");
+        }
+    }
+  };
+
   useEffect(() => {
+    fetchPayments();
     fetchMembers();
   }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'Paid': return 'green';
+        case 'Canceled': return 'red';
+        default: return 'orange';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+        case 'Paid': return 'Pagado';
+        case 'Canceled': return 'Cancelado';
+        default: return 'Pendiente';
+    }
+  };
 
   return (
     <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
@@ -128,6 +187,9 @@ export function PaymentsView() {
             </Text>
           </Stack>
           <HStack gap="3">
+            <Button variant="outline" onClick={fetchPayments} disabled={isLoading}>
+              <LuRefreshCw /> Actualizar
+            </Button>
             <Button colorPalette="blue" size="md" onClick={openCreateModal}>
               <LuPlus /> Registrar Pago
             </Button>
@@ -229,10 +291,77 @@ export function PaymentsView() {
             borderRadius="xl" 
             boxShadow="sm" 
             borderWidth="1px" 
-            p="10"
-            textAlign="center"
+            overflow="hidden"
+            minH="300px"
         >
-            <Text color="fg.muted">Selecciona "Registrar Pago" para iniciar.</Text>
+            {isLoading ? (
+                <Center h="300px">
+                    <Spinner size="xl" color="blue.500" />
+                </Center>
+            ) : payments.length === 0 ? (
+                <Center h="300px">
+                    <Text color="fg.muted">No hay pagos registrados.</Text>
+                </Center>
+            ) : (
+                <Table.Root size="md" variant="line">
+                    <Table.Header bg="bg.muted/50">
+                        <Table.Row>
+                            <Table.ColumnHeader py="4">Socio</Table.ColumnHeader>
+                            <Table.ColumnHeader py="4">Monto</Table.ColumnHeader>
+                            <Table.ColumnHeader py="4">Periodo</Table.ColumnHeader>
+                            <Table.ColumnHeader py="4">Vencimiento</Table.ColumnHeader>
+                            <Table.ColumnHeader py="4">Estado</Table.ColumnHeader>
+                            <Table.ColumnHeader py="4" textAlign="end">Acciones</Table.ColumnHeader>
+                        </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                        {payments.map((p) => (
+                            <Table.Row key={p.id}>
+                                <Table.Cell fontWeight="semibold">{p.member_name}</Table.Cell>
+                                <Table.Cell>${p.amount.toLocaleString()}</Table.Cell>
+                                <Table.Cell>{p.month}/{p.year}</Table.Cell>
+                                <Table.Cell>{p.due_date}</Table.Cell>
+                                <Table.Cell>
+                                    <Box 
+                                        display="inline-block" 
+                                        px="2" py="0.5" 
+                                        borderRadius="md" 
+                                        bg={`${getStatusColor(p.status)}.50`} 
+                                        color={`${getStatusColor(p.status)}.700`} 
+                                        fontSize="xs" fontWeight="bold"
+                                    >
+                                        {getStatusLabel(p.status)}
+                                    </Box>
+                                </Table.Cell>
+                                <Table.Cell textAlign="end">
+                                    {p.status === 'Pending' && (
+                                        <HStack gap="2" justify="flex-end">
+                                            <IconButton 
+                                                size="sm" 
+                                                variant="ghost" 
+                                                colorPalette="green" 
+                                                aria-label="Confirmar pago"
+                                                onClick={() => handleConfirmPayment(p.id)}
+                                            >
+                                                <LuCheck />
+                                            </IconButton>
+                                            <IconButton 
+                                                size="sm" 
+                                                variant="ghost" 
+                                                colorPalette="red" 
+                                                aria-label="Cancelar pago"
+                                                onClick={() => handleCancelPayment(p.id)}
+                                            >
+                                                <LuX />
+                                            </IconButton>
+                                        </HStack>
+                                    )}
+                                </Table.Cell>
+                            </Table.Row>
+                        ))}
+                    </Table.Body>
+                </Table.Root>
+            )}
         </Box>
       </Stack>
     </DialogRoot>
