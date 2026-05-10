@@ -28,8 +28,6 @@ Permitir al área administrativa eliminar un deporte del sistema cuando ya no se
 
 ### Modelo de Datos
 
-La entidad `Sport` se relaciona con `Enrollment` mediante `sport_id`. Sus atributos son:
-
 - `id`: Identificador único universal (UUID).
 - `name`: Cadena de texto, único e inmutable despues de la creación.
 - `description`: Cadena de texto.
@@ -59,7 +57,7 @@ En `@alentapp/shared` se definirá el contrato mínimo necesario para que backen
 | ------------------------------------| -----------------------------------------------------------------------| ------------------------- |
 | Deporte inexistente                 | Mensaje: "El deporte no existe"                                        | 404 Not Found             |
 | Deporte con inscripciones asociadas | Mensaje: "No se puede eliminar un deporte con inscripciones asociadas" | 409 Conflict              |
-| Error de conexion a DB              | Mensaje: error interno del motor de base de datos                      | 500 Internal Server Error |
+| Error de conexion a DB              | Mensaje: "Error interno, reintente más tarde"                          | 500 Internal Server Error |
 | Eliminación exitosa                 | Respuesta vacía                                                        | 204 No Content            |
 
 ## Plan de Implementación

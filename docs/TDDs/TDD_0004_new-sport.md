@@ -37,10 +37,6 @@ Se definirá la entidad `Sport` con las siguientes propiedades y restricciones:
 - `additional_price`: Número decimal.
 - `requires_medical_certificate`: Booleano.
 
-Relación principal:
-
-- `Sport` tiene relación 1 a N con `Enrollment` mediante `sport_id`.
-
 ### Contrato de API (@alentapp/shared)
 
 En `@alentapp/shared` se definirán los contratos para sincronizar frontend y backend.
