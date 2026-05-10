@@ -58,7 +58,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización ent
 export interface SportDTO {
     id: string; //UUID
     name: string; //Nombre único del deporte
-    description: string; //Descripción del deporte
+    description?: string; //Descripción del deporte
     max_capacity: number; //Cupo máximo, debe ser > 0
     additional_price: number; //Precio adicional debe ser >= 0
     requires_medical_certificate: boolean; //Indica si requiere certificado médico
@@ -67,7 +67,7 @@ export interface SportDTO {
 
 export interface CreateSportRequest {
     name: string;
-    description: string;
+    description?: string;
     max_capacity: number;
     additional_price: number;
     requires_medical_certificate: boolean;
