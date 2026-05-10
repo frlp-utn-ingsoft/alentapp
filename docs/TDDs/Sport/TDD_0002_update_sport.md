@@ -16,7 +16,7 @@ Permitir la modificación parcial de un deporte existente en el sistema, restrin
 
 ### User Persona
 
-*   **Nombre**: Administrador
+*   **Nombre**: Juan Perez (Administrador)
 *   **Necesidad**: Como administrador, quiero modificar la descripción y el cupo máximo de un deporte ya registrado, sin alterar su nombre original para mantener la información del deporte actualizada.
 
 
@@ -75,7 +75,7 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Los 
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Deporte no existe | Mensaje: "El deporte indicado no se encuentra registrado" | 404 Not Found |
 | Capacidad máxima inválida | Mensaje: "La capacidad máxima debe ser mayor a cero" | 400 Bad Request |
-| Se envía un campo no permitido (`name`) | Mensaje: "El nombre del deporte no puede modificarse" | 400 Bad Request |
+| Se envía un campo no permitido | Mensaje: "Solo se permite modificar description y max_capacity" | 400 Bad Request |
 | Error de conexión a DB | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |        |
 
 ## Plan de Implementación
