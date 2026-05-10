@@ -35,9 +35,9 @@ No se realizan cambios en el esquema. Se utiliza la entidad `Sport` existente.
 
 ### Contrato de API (@alentapp/shared)
 
-Se utilizará el paquete compartido para definir el cuerpo de la petición. Los campos editables son opcionales ya que se trata de una actualización parcial. El campo `name` es inmutable y no forma parte del contrato de actualización (PATCH a nivel de negocio, aunque el endpoint implemente PUT).
+Se utilizará el paquete compartido para definir el cuerpo de la petición. Los campos editables son opcionales ya que se trata de una actualización parcial mediante `PATCH`. El campo `name` es inmutable y no forma parte del contrato de actualización.
 
-*   **Endpoint**: `PUT /api/v1/sport/:id`
+*   **Endpoint**: `PATCH /api/v1/sport/:id`
 *   **Request Body**:
 ```ts
 {
