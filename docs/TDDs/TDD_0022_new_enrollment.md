@@ -25,7 +25,7 @@ Digitalizar el registro de inscripciones de socios a deportes ofrecidos.
 
 ### Escenario de Exito
 
-- Si el usuario completa el formulario de registro con los campos Miembro, Inscripcion activa y fecha de inscripcion con datos válidos, y el deporte tiene cupo disponible, entonces el sistema registra la nueva inscripción e informa al usuario con un mensaje de exito.
+- Si el usuario completa el formulario de registro con los campos Miembro, Deporte, Inscripcion activa y fecha de inscripcion con datos válidos, y el deporte tiene cupo disponible, entonces el sistema registra la nueva inscripción e informa al usuario con un mensaje de exito.
 
 ### Escenario de Fallo
 
@@ -71,8 +71,8 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 | Escenario                             | Resultado Esperado                                                            | Código HTTP               |
 | ------------------------------------- | ----------------------------------------------------------------------------  | ------------------------- |
-| Socio ya inscripto al deporte                  | Mensaje: "Ya existe una inscripcion del socio a este deporte"                                | 409 Conflict              |
-| Capacidad máxima igual a las inscripciones actuales    | Mensaje: "Capacidad máxima del deporte excedida"                                          | 409 Conflict |
+| Socio ya inscripto al deporte         | Mensaje: "Ya existe una inscripcion del socio a este deporte"                 | 409 Conflict              |
+| Capacidad máxima igual a las inscripciones actuales    | Mensaje: "Capacidad máxima del deporte excedida"             | 409 Conflict              |
 | Error de conexión a DB                | Mensaje: "Error interno, reintente más tarde"                                 | 500 Internal Server Error |
 
 ## Plan de Implementación
