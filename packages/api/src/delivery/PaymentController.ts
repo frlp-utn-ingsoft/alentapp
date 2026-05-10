@@ -15,6 +15,7 @@ export class PaymentController {
 
     async getAll(_request: FastifyRequest, reply: FastifyReply) {
         try {
+            console.log("Fetching all payments...");
             const payments = await this.getPaymentsUseCase.execute();
             return reply.status(200).send({ data: payments });
         } catch (error: any) {
@@ -27,6 +28,7 @@ export class PaymentController {
         reply: FastifyReply,
     ) {
         try {
+            console.log("Creating payment:", request.body);
             const payment = await this.createPaymentUseCase.execute(request.body);
             return reply.status(201).send({ data: payment });
         } catch (error: any) {
@@ -47,6 +49,7 @@ export class PaymentController {
     ) {
         try {
             const { id } = request.params;
+            console.log("Confirming payment:", id, request.body);
             const payment = await this.updatePaymentUseCase.execute(id, request.body);
             return reply.status(200).send({ data: payment });
         } catch (error: any) {

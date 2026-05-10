@@ -42,6 +42,7 @@ export function PaymentsView() {
   const [members, setMembers] = useState<MemberDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // State for the modal
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -58,11 +59,13 @@ export function PaymentsView() {
 
   const fetchPayments = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const data = await paymentsService.getAll();
       setPayments(data);
     } catch (err: any) {
       console.error("Error al cargar los pagos", err);
+      setError(err.message || "Error al cargar los pagos");
     } finally {
       setIsLoading(false);
     }
@@ -195,6 +198,13 @@ export function PaymentsView() {
             </Button>
           </HStack>
         </Flex>
+
+        {error && (
+            <Box p="4" bg="red.50" color="red.700" borderRadius="md" border="1px solid" borderColor="red.200">
+                <Text fontWeight="bold">Error:</Text>
+                <Text>{error}</Text>
+            </Box>
+        )}
 
         {/* Modal para registrar pago */}
         <DialogContent>

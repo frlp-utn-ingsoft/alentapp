@@ -29,7 +29,7 @@ export const paymentsService = {
   },
 
   async confirm(id: string, data: UpdatePaymentRequest): Promise<PaymentDTO> {
-    const response = await fetch(`${API_URL}/payment/${id}`, {
+    const response = await fetch(`${API_URL}/payment/${id}/confirm`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

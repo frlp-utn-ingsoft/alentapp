@@ -46,7 +46,7 @@ export function buildApp() {
 
     server.register(cors, {
         origin: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     });
@@ -139,7 +139,7 @@ export function buildApp() {
 
     server.post('/api/v1/payment', paymentController.create.bind(paymentController));
     server.get('/api/v1/payment', paymentController.getAll.bind(paymentController));
-    server.patch('/api/v1/payment/:id', paymentController.confirm.bind(paymentController));
+    server.patch('/api/v1/payment/:id/confirm', paymentController.confirm.bind(paymentController));
     server.patch('/api/v1/payment/:id/cancel', paymentController.cancel.bind(paymentController));
 
     server.get('/', async (req, rep) => {
