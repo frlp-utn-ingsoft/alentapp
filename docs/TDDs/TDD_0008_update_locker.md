@@ -20,14 +20,14 @@ Permitir a los administrativos corregir o modificar la información de un locker
 - Necesidad: Modificar datos de los lockers rápidamente desde el panel de administracion. Por ejemplo, asignar un socio para que sea el propietario del locker, poner este en mantenimiento o cambiar su locación.
 
 ### Criterios de Aceptación
-- Como administrativo quiero poder editar los lockers del club. Cambiar estado, locación y poder asignar o desasignar a un socio.
-- El sistema no debe permitir editar el número del locker una vez creado.
+- Como administrativo quiero poder editar los lockers del club. Cambiar número, estado, locación y poder asignar o desasignar a un socio.
+- El sistema debe permitir editar el número del locker siempre que el nuevo número no esté en uso por otro locker.
 
 ### Escenario de Éxito
 - Si el usuario edita el locker con los datos validos, el sistema debe actualizarlo correctamente y mostrar el mensaje de éxito.
 
 ### Escenario de Fallo
-- Si el usuario ingresa una combinación inválida de `status` o `member_id`  el sistema debe rechazar la creación y devolver el error correspondiente.
+- Si el usuario intenta cambiar el número a uno ya asignado a otro locker o ingresa una combinación inválida de `status` o `member_id`, el sistema debe rechazar la actualización y devolver el error correspondiente.
 
 ## Diseño Técnico (RFC)
 
@@ -38,6 +38,7 @@ Permitir a los administrativos corregir o modificar la información de un locker
 
 ```ts
 {
+    number?: number;
     location?: string;
     status?: 'Available' | 'Occupied' | 'Maintenance';
     member_id?: string | null; // opcional
@@ -55,6 +56,7 @@ Permitir a los administrativos corregir o modificar la información de un locker
 ## Casos de Borde y Errores
 | Escenario                                  | Resultado Esperado                                          | Código HTTP               |
 | ------------------------------------------ | ------------------------------------------------------------| ------------------------- |
+| `number` duplicado                         | Mensaje: "Ya existe un locker con ese número"               | 409 Conflict              |
 | `member_id` con formato inválido           | Mensaje: "`member_id` no válido"                            | 400 Bad Request           |
 | `member_id` no existe                      | Mensaje: "El miembro indicado no existe"                    | 404 Not Found             |
 | `member_id` ya tiene otro locker           | Mensaje: "El miembro ya posee un locker"                    | 422 Unprocessable entity  |
