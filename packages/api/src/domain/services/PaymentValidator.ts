@@ -1,7 +1,11 @@
 import { MemberRepository } from '../MemberRepository.js';
+import { PaymentRepository } from '../PaymentRepository.js';
 
 export class PaymentValidator {
-    constructor(private readonly memberRepo: MemberRepository) {}
+    constructor(
+        private readonly memberRepo: MemberRepository,
+        private readonly paymentRepo: PaymentRepository
+    ) {}
 
     validateAmount(amount: number): void {
         if (amount === undefined || amount === null) {
@@ -37,6 +41,30 @@ export class PaymentValidator {
         const member = await this.memberRepo.findById(memberId);
         if (!member) {
             throw new Error('No existe un socio con ese ID');
+        }
+    }
+
+    async validateCanUpdate(id: string): Promise<void> {
+        const payment = await this.paymentRepo.findById(id);
+        if (!payment) throw new Error('No existe un pago con ese ID');
+
+        if (payment.status === 'Paid') {
+            throw new Error('El pago ya fue confirmado y no puede modificarse');
+        }
+        if (payment.status === 'Canceled') {
+            throw new Error('El pago está cancelado y no puede modificarse');
+        }
+    }
+
+    async validateCanCancel(id: string): Promise<void> {
+        const payment = await this.paymentRepo.findById(id);
+        if (!payment) throw new Error('No existe un pago con ese ID');
+
+        if (payment.status === 'Paid') {
+            throw new Error('No se puede cancelar un pago ya confirmado');
+        }
+        if (payment.status === 'Canceled') {
+            throw new Error('El pago ya se encuentra cancelado');
         }
     }
 }

@@ -23,6 +23,12 @@ import { GetEnrollmentsUseCase } from './application/GetEnrollmentsUseCase.js';
 import { UpdateEnrollmentUseCase } from './application/UpdateEnrollmentUseCase.js';
 import { DeleteEnrollmentUseCase } from './application/DeleteEnrollmentUseCase.js';
 import { EnrollmentController } from './delivery/EnrollmentController.js';
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
+import { PaymentValidator } from './domain/services/PaymentValidator.js';
+import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
+import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
+import { CancelPaymentUseCase } from './application/CancelPaymentUseCase.js';
+import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -112,6 +118,25 @@ export function buildApp() {
     server.post('/api/v1/enrollments', enrollmentController.create.bind(enrollmentController));
     server.put('/api/v1/enrollments/:id', enrollmentController.update.bind(enrollmentController));
     server.delete('/api/v1/enrollments/:id', enrollmentController.delete.bind(enrollmentController));
+
+    // ==========================================
+    // Payments
+    // ==========================================
+    const paymentRepo = new PostgresPaymentRepository();
+    const paymentValidator = new PaymentValidator(memberRepo, paymentRepo);
+    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, paymentValidator);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
+    const cancelPaymentUseCase = new CancelPaymentUseCase(paymentRepo, paymentValidator);
+
+    const paymentController = new PaymentController(
+        createPaymentUseCase,
+        updatePaymentUseCase,
+        cancelPaymentUseCase
+    );
+
+    server.post('/api/v1/payment', paymentController.create.bind(paymentController));
+    server.patch('/api/v1/payment/:id', paymentController.confirm.bind(paymentController));
+    server.patch('/api/v1/payment/:id/cancel', paymentController.cancel.bind(paymentController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
