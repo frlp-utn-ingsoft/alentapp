@@ -37,7 +37,7 @@ Permitir a los administrativos dar de baja permanentemente un deporte del sistem
 
 Al tratarse de una operación destructiva que solo requiere conocer el identificador, no se envía cuerpo en la petición HTTP.
 
-- Endpoint: `DELETE /api/v1/sport/:id`
+- Endpoint: `DELETE /api/v1/sports/:id`
 - Request Body: `None`
 - Response: `204 No Content` en caso de éxito.
 
@@ -60,6 +60,6 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 
 1. Ampliar el `SportRepository` y `PostgresSportRepository` con el método `delete`.
 2. Crear la lógica de negocio en `DeleteSportUseCase`.
-3. Crear el endpoint `DELETE /api/v1/sport/:id` en el `SportController` y registrarlo en `app.ts`.
+3. Crear el endpoint `DELETE /api/v1/sports/:id` en el `SportController` y registrarlo en `app.ts`.
 4. Añadir el método `delete` al servicio Frontend (`sports.ts`).
 5. Enlazar el botón de eliminación en `SportsView.tsx` agregando la confirmación del navegador (`window.confirm`) antes de hacer la llamada.
