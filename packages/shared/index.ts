@@ -31,3 +31,38 @@ export interface UpdateMemberRequest {
   category?: MemberCategory;
   status?: MemberStatus;
 }
+
+// ==========================================
+// Discipline
+// ==========================================
+export interface DisciplineDTO {
+  id: string; // UUID
+  reason: string;
+  startDate: string; // ISO Date String
+  endDate: string; // ISO Date String
+  isTotalSuspension: boolean;
+  memberId: string;
+}
+
+export type DisciplineResponse = DisciplineDTO;
+
+export interface CreateDisciplineRequest {
+  reason: string;
+  startDate: string; // ISO Date String
+  endDate: string; // ISO Date String
+  isTotalSuspension: boolean;
+  memberId: string;
+}
+
+export interface UpdateDisciplineRequest {
+  reason?: string;
+  startDate?: string; // ISO Date String
+  endDate?: string; // ISO Date String
+  isTotalSuspension?: boolean;
+}
+
+export interface MemberDisciplineStatusResponse {
+  memberId: string;
+  isSuspended: boolean;
+  activeTotalSuspension?: DisciplineResponse;
+}
