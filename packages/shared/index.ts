@@ -96,6 +96,7 @@ export interface PaymentDTO {
   due_date: string; // ISO Date String (YYYY-MM-DD)
   payment_date: string | null;
   member_id: string;
+  member_name?: string; // Opcional para joins
 }
 
 export interface CreatePaymentRequest {

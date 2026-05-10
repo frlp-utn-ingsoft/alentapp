@@ -58,6 +58,22 @@ export class PostgresPaymentRepository implements PaymentRepository {
         return this.mapToDTO(payment as unknown as DBPayment);
     }
 
+    async findAll(): Promise<PaymentDTO[]> {
+        const payments = await prisma.payment.findMany({
+            include: {
+                member: true,
+            },
+            orderBy: {
+                due_date: 'desc',
+            },
+        });
+
+        return payments.map(p => ({
+            ...this.mapToDTO(p as unknown as DBPayment),
+            member_name: (p as any).member.name,
+        }));
+    }
+
     private mapToDTO(payment: DBPayment): PaymentDTO {
         return {
             id: payment.id,

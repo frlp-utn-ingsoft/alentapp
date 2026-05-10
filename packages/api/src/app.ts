@@ -26,6 +26,7 @@ import { EnrollmentController } from './delivery/EnrollmentController.js';
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
+import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
 import { CancelPaymentUseCase } from './application/CancelPaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
@@ -125,16 +126,19 @@ export function buildApp() {
     const paymentRepo = new PostgresPaymentRepository();
     const paymentValidator = new PaymentValidator(memberRepo, paymentRepo);
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, paymentValidator);
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
     const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
     const cancelPaymentUseCase = new CancelPaymentUseCase(paymentRepo, paymentValidator);
 
     const paymentController = new PaymentController(
         createPaymentUseCase,
+        getPaymentsUseCase,
         updatePaymentUseCase,
         cancelPaymentUseCase
     );
 
     server.post('/api/v1/payment', paymentController.create.bind(paymentController));
+    server.get('/api/v1/payment', paymentController.getAll.bind(paymentController));
     server.patch('/api/v1/payment/:id', paymentController.confirm.bind(paymentController));
     server.patch('/api/v1/payment/:id/cancel', paymentController.cancel.bind(paymentController));
 

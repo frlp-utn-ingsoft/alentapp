@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreatePaymentUseCase } from '../application/CreatePaymentUseCase.js';
+import { GetPaymentsUseCase } from '../application/GetPaymentsUseCase.js';
 import { UpdatePaymentUseCase } from '../application/UpdatePaymentUseCase.js';
 import { CancelPaymentUseCase } from '../application/CancelPaymentUseCase.js';
 import { CreatePaymentRequest, UpdatePaymentRequest } from '@alentapp/shared';
@@ -7,9 +8,19 @@ import { CreatePaymentRequest, UpdatePaymentRequest } from '@alentapp/shared';
 export class PaymentController {
     constructor(
         private readonly createPaymentUseCase: CreatePaymentUseCase,
+        private readonly getPaymentsUseCase: GetPaymentsUseCase,
         private readonly updatePaymentUseCase: UpdatePaymentUseCase,
         private readonly cancelPaymentUseCase: CancelPaymentUseCase,
     ) {}
+
+    async getAll(_request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const payments = await this.getPaymentsUseCase.execute();
+            return reply.status(200).send({ data: payments });
+        } catch (error: any) {
+            return reply.status(500).send({ error: error.message });
+        }
+    }
 
     async create(
         request: FastifyRequest<{ Body: CreatePaymentRequest }>,
