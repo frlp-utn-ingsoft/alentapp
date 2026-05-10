@@ -6,7 +6,7 @@ fecha: 2026-05-09
 titulo: Eliminación de Inscripciones Existentes
 ---
 
-# TDD-0012: Eliminación de Inscripciones Existentes
+# TDD-0024: Eliminación de Inscripciones Existentes
 
 ## Contexto de Negocio (PRD)
 
