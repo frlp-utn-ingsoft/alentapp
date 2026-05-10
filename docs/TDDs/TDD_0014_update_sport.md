@@ -66,6 +66,7 @@ export interface UpdateSportRequest {
 | Escenario                       | Resultado Esperado                                       | Código HTTP actual        |
 | ------------------------------- | -------------------------------------------------------- | ------------------------- |
 | Deporte inexistente             | Mensaje: "El deporte no existe"                          | 404 Not Found             |
+| Deporte eliminado lógicamente   | Mensaje: "No se puede modificar un deporte eliminado"    | 409 Conflict              |
 | `max_capacity` igual a cero     | Mensaje: "La capacidad máxima debe ser mayor a cero"     | 400 Bad Request           |
 | `max_capacity` negativo         | Mensaje: "La capacidad máxima debe ser mayor a cero"     | 400 Bad Request           |
 | Body vacío (sin campos válidos) | No se realiza ningún cambio, se retorna el estado actual | 200 OK                    |
@@ -73,16 +74,12 @@ export interface UpdateSportRequest {
 
 ## Plan de Implementación
 
-1. Agregar `SportDTO` y `CreateSportRequest` al paquete `@alentapp/shared` (`packages/shared/index.ts`).
-2. Modificar el esquema de persistencia (`schema.prisma`): agregar el modelo `Sport`, incluyendo `deleted_at` como campo nullable para soportar baja lógica.
-3. Ejecutar la migración de base de datos con el nombre `create_sports_table`.
-4. Crear el puerto `SportRepository.ts` en `src/domain/` con los métodos necesarios para el ciclo de vida de `Sport`: `create`, `findById`, `findByName`, `findAll`, `update` y `softDelete`.
-5. Crear el servicio de dominio `SportValidator.ts` en `src/domain/services/`, encapsulando las reglas: `name` obligatorio y único, `max_capacity` > 0, `additional_price` >= 0.
-6. Implementar `NewSportUseCase.ts` en `src/application/`.
-7. Implementar `PostgresSportRepository.ts` en `src/infrastructure/`, con método `create` y mapeo a `SportDTO`.
-8. Crear `SportController.ts` en `src/delivery/` con el método `create` y mapeo de errores.
-9. Registrar las dependencias y la ruta `POST /api/v1/sports` en `src/app.ts`.
-10. Agregar el método `create` al servicio frontend.
-11. Crear o actualizar la vista de deportes con el formulario de alta.
-12. Escribir tests unitarios para el caso de uso.
-13. Escribir tests de integración para el endpoint `POST /api/v1/sports`.
+1. Crear el tipo `UpdateSportRequest` en `@alentapp/shared`, incluyendo únicamente los campos editables: `description`, `max_capacity`, `additional_price` y `requires_medical_certificate`.
+2. Agregar el método `update(id, data)` al puerto `SportRepository` y asegurar que exista un método `findById(id)` para validar la existencia del deporte y su estado de baja lógica.
+3. Implementar las validaciones de dominio para impedir la modificación de `name`, validar que `max_capacity` sea mayor a cero, que `additional_price` sea mayor o igual a cero y que no se modifiquen deportes eliminados lógicamente.
+4. Implementar `UpdateSportUseCase`, verificando existencia del deporte, que esté activo (`deleted_at` en `null`), body no vacío, campos permitidos y reglas de negocio antes de persistir.
+5. Implementar el método `update` en `PostgresSportRepository` usando Prisma.
+6. Implementar el endpoint `PATCH /api/v1/sports/:id` en `SportController` y registrarlo en Fastify.
+7. Crear o reutilizar el formulario/modal de edición en React, deshabilitando o excluyendo el campo `name`.
+8. Escribir tests unitarios para el caso de uso: deporte inexistente, deporte eliminado, intento de modificar `name`, `max_capacity` inválido, `additional_price` inválido, body vacío y actualización exitosa.
+9. Escribir tests de integración para el endpoint.
