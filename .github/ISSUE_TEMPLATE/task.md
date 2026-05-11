@@ -38,5 +38,5 @@ assignees: ""
 ## Condiciones para cerrar
 
 - [ ] Tareas concretas completadas
-- [ ] PR aprobado con 2 approvals y mergeado
+- [ ] PR aprobado con 1 approvals y mergeado
 - [ ] Documentación actualizada si aplica

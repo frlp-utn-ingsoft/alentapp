@@ -51,4 +51,4 @@ assignees: ""
 - [ ] Bug reproducido y confirmado
 - [ ] Fix implementado y verificado manualmente
 - [ ] Tests que cubren el caso fallido escritos y pasando
-- [ ] PR aprobado con 2 approvals y mergeado
+- [ ] PR aprobado con 1 approvals y mergeado
