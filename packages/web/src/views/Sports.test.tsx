@@ -21,7 +21,7 @@ describe('SportsView', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   it('debe mostrar el estado de carga y luego renderizar una tabla vacía', async () => {
