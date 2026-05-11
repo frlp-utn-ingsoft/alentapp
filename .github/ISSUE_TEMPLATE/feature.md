@@ -46,5 +46,5 @@ Como **___**, quiero **___**, para **___**.
 
 - [ ] Criterios de aceptación cumplidos
 - [ ] Tests automatizados escritos y pasando
-- [ ] PR aprobado con 2 approvals y mergeado
+- [ ] PR aprobado con 1 approvals y mergeado
 - [ ] Documentación actualizada si aplica
