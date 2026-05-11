@@ -4,7 +4,7 @@ const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/ap
 
 export const sportsService = {
   async create(data: CreateSportRequest): Promise<SportDTO> {
-    const response = await fetch(`${API_URL}/sport`, {
+    const response = await fetch(`${API_URL}/deportes`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,4 +18,15 @@ export const sportsService = {
     const result = await response.json();
     return result.data;
   },
+
+  
+  async getAll(): Promise<SportDTO[]> {
+    const response = await fetch(`${API_URL}/deportes`);
+    if (!response.ok) {
+      throw new Error('Error al obtener los deportes');
+    }
+    const result = await response.json();
+    return result.data;
+  },
+
 };
