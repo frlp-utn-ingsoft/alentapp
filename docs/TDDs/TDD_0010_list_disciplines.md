@@ -1,6 +1,6 @@
 ---
 id: 0010
-estado: Pendiente
+estado: Aprobado
 autor: Mateo Lafalce
 fecha: 2026-05-01
 titulo: Listado y Consulta de Sanciones Disciplinarias
