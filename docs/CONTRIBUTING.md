@@ -59,14 +59,6 @@ No se permite pushear directamente a la rama `main`. Todas las contribuciones de
 ### 2.6.  **Pull Request (PR)**: 
 
     Este repositorio utiliza templates estandarizados para Pull Requests.
-    Los mismos se encuentran en:
-
-    ### 📂 Templates disponibles
-
-    * `feature.md` → nuevas funcionalidades
-    * `fix.md` → corrección de bugs
-    * `refactor.md` → mejoras internas sin cambio funcional
-    * `docs.md` → cambios en documentación
 
     ### 🧭 Cómo usarlos
 
@@ -81,8 +73,6 @@ No se permite pushear directamente a la rama `main`. Todas las contribuciones de
     * Asociar el PR a un issue cuando corresponda (`Closes #ID` o `Refs #ID`)
 
     ### 📝 Template por defecto
-
-    Si no se selecciona uno específico, se utilizará:
 
     ```
     .github/pull_request_template.md
