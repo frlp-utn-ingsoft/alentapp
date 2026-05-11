@@ -1,8 +1,8 @@
 ---
 id: 0019
-estado: Pendiente
+estado: Aprobado
 autor: Delozano Matias
-fecha: 2026-05-03
+fecha: 2026-05-09
 titulo: Actualización de Certificado Médico
 ---
 
