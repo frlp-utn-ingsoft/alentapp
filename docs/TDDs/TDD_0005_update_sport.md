@@ -64,7 +64,7 @@ En `@alentapp/shared` se definirán los contratos para mantener el tipado compar
 | Deporte inexistente              | Mensaje: "El deporte no existe"                                     | 404 Not Found             |
 | `max_capacity` menor o igual a 0 | Mensaje de validación: "La capacidad debe ser mayor a cero"         | 400 Bad Request           |
 | Intento de modificar `name`      | Mensaje de validación: "El nombre del deporte no puede modificarse" | 400 Bad Request           |
-| Error de conexión a DB           | Mensaje: "Error interno, reintente mas tarde"                       | 500 Internal Server Error |
+| Error de conexión a DB           | Mensaje: "Error interno, reintente más tarde"                       | 500 Internal Server Error |
 
 ## Plan de Implementacion
 
