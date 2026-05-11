@@ -6,7 +6,7 @@ fecha: 2026-05-05
 titulo: Eliminación de Deportes
 ---
 
-# TDD-0018: Eliminación de Deportes
+# TDD-0009: Eliminación de Deportes
 
 ## Contexto de Negocio (PRD)
 

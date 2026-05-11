@@ -6,7 +6,7 @@ fecha: 2026-05-05
 titulo: Registro de Deportes
 ---
 
-# TDD-0016: Registro de Nuevos Deportes
+# TDD-0007: Registro de Nuevos Deportes
 
 ## Contexto de Negocio (PRD)
 
