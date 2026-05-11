@@ -7,6 +7,15 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
+import { PostgresDisciplineRepository } from './infrastructure/PostgresDisciplineRepository.js';
+import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
+import { CreateDisciplineUseCase } from './application/NewDisciplineUseCase.js';
+import { GetDisciplineUseCase } from './application/GetDisciplineUseCase.js';
+import { ListMemberDisciplinesUseCase } from './application/ListMemberDisciplinesUseCase.js';
+import { GetMemberDisciplineStatusUseCase } from './application/GetMemberDisciplineStatusUseCase.js';
+import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.js';
+import { DeleteDisciplineUseCase } from './application/DeleteDisciplineUseCase.js';
+import { DisciplineController } from './delivery/DisciplineController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -30,11 +39,19 @@ export function buildApp() {
 
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
+    const disciplineRepo = new PostgresDisciplineRepository();
+    const disciplineValidator = new DisciplineValidator();
     
     const createMemberUseCase = new CreateMemberUseCase(memberRepo, memberValidator);
     const getMembersUseCase = new GetMembersUseCase(memberRepo);
     const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
     const deleteMemberUseCase = new DeleteMemberUseCase(memberRepo);
+    const createDisciplineUseCase = new CreateDisciplineUseCase(disciplineRepo, memberRepo, disciplineValidator);
+    const getDisciplineUseCase = new GetDisciplineUseCase(disciplineRepo, disciplineValidator);
+    const listMemberDisciplinesUseCase = new ListMemberDisciplinesUseCase(disciplineRepo, memberRepo);
+    const getMemberDisciplineStatusUseCase = new GetMemberDisciplineStatusUseCase(disciplineRepo, memberRepo);
+    const updateDisciplineUseCase = new UpdateDisciplineUseCase(disciplineRepo, disciplineValidator);
+    const deleteDisciplineUseCase = new DeleteDisciplineUseCase(disciplineRepo, disciplineValidator);
 
     const memberController = new MemberController(
         createMemberUseCase, 
@@ -42,11 +59,25 @@ export function buildApp() {
         updateMemberUseCase,
         deleteMemberUseCase
     );
+    const disciplineController = new DisciplineController(
+        createDisciplineUseCase,
+        getDisciplineUseCase,
+        listMemberDisciplinesUseCase,
+        getMemberDisciplineStatusUseCase,
+        updateDisciplineUseCase,
+        deleteDisciplineUseCase
+    );
 
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+    server.get('/api/v1/disciplines/:id', disciplineController.getById.bind(disciplineController));
+    server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
+    server.put('/api/v1/disciplines/:id', disciplineController.update.bind(disciplineController));
+    server.delete('/api/v1/disciplines/:id', disciplineController.delete.bind(disciplineController));
+    server.get('/api/v1/members/:memberId/disciplines', disciplineController.getByMember.bind(disciplineController));
+    server.get('/api/v1/members/:memberId/discipline-status', disciplineController.getMemberStatus.bind(disciplineController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
