@@ -1,6 +1,6 @@
 import { SportRepository } from '../domain/SportRepository.js';
 import { SportValidator } from '../domain/services/SportValidator.js';
-import { SportDTO } from '@alentapp/shared';
+import { CreateSportRequest, SportDTO } from '@alentapp/shared';
 
 export class CreateSportUseCase {
     constructor(
@@ -8,7 +8,7 @@ export class CreateSportUseCase {
         private readonly sportValidator: SportValidator
     ) {}
 
-    async execute(data: Omit<SportDTO, 'id'>): Promise<SportDTO> {
+    async execute(data: CreateSportRequest ): Promise<SportDTO> {
         // 1. Validaciones de negocio (centralizadas)
         this.sportValidator.validateMaxCapacity(data.max_capacity);
         await this.sportValidator.validateNameIsUnique(data.name);
