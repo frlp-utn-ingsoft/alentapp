@@ -81,8 +81,6 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Capacidad máxima inválida     | Mensaje: "La capacidad máxima debe ser mayor a cero"       | 400 Bad Request              |
 | Nombre ya existente | Mensaje: "Ya existe un deporte con ese nombre"         | 409 Conflict          |
-| Nombre sin definir  | Mensaje: "El nombre del deporte es obligatorio"         | 400 Bad Request          |
-| Capacidad máxima sin definir  | Mensaje: "La capacidad máxima es obligatoria"         | 400 Bad Request          |
 | Error de conexión a DB     | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |       |
 
 ## Plan de Implementación
