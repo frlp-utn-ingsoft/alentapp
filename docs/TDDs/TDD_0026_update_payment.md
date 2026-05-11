@@ -12,21 +12,29 @@ titulo: Modificación de Payment
 
 ### Objetivo
 
-Permitir que un administrativo actualice información no crítica de un pago existente, como su descripción o la confirmación de su estado, preservando la integridad del monto original y bloqueando cualquier modificación sobre pagos ya cancelados.
+Permitir que un administrativo actualice información no crítica de un pago existente, como su descripción o la confirmación de su estado como pagado (`Paid`), preservando la integridad del monto original y bloqueando cualquier modificación sobre pagos cancelados por baja lógica (`deletedAt != null`) o sobre pagos ya finalizados en ese estado de negocio.
 
 ### User Persona
 
 - **Nombre**: Laura (Administrativa de Tesorería).
-- **Necesidad**: Corregir la descripción de un pago mal registrado o confirmar un pago pendiente como completado, sin alterar el monto ni comprometer el historial de pagos del club.
+- **Necesidad**: Corregir la descripción de un pago mal registrado o confirmar un pago pendiente como pagado (`Paid`), sin alterar el monto ni comprometer el historial de pagos del club.
 
 ### Criterios de Aceptación
 
 - El sistema debe validar que el pago exista antes de intentar modificarlo.
-- No se permite modificar un pago cuyo `estado` sea `Cancelado`.
-- El campo `monto` es inmutable: no puede modificarse bajo ninguna circunstancia.
-- Solo se permiten las transiciones de estado `Pendiente → Completado`. No se permite retroceder un estado (ej. `Completado → Pendiente`).
-- Los campos editables son: `descripcion` y `estado` (únicamente hacia `Completado`).
-- Al finalizar con éxito, el sistema debe retornar el objeto `Payment` actualizado.
+- No se permite modificar un pago dado de baja lógica (`deletedAt != null`; ver TDD-0027) ni un pago cuyo `status` sea `Canceled` (consistente con baja aplicada).
+- El campo `amount` es inmutable: no puede modificarse bajo ninguna circunstancia.
+- **Transiciones válidas de `status` mediante este caso de uso (HTTP `PUT`):** solo `Pending → Paid`.
+- **Transiciones no cubiertas por `PUT`:**
+  - `Pending → Canceled` se gestiona **exclusivamente** mediante la baja lógica (`DELETE`, TDD-0027).
+- **Transiciones inválidas:**
+  - `Paid → Pending`
+  - `Paid → Canceled` (para mantener la implementación simple: no existe anulación posterior de un pago ya marcado como `Paid`)
+  - `Canceled → Pending` y `Canceled → Paid`
+  - cualquier cambio cuando el registro tiene baja lógica (`deletedAt != null`).
+- Una vez aplicada baja lógica (`deletedAt`), el pago no puede modificarse ni reactivarse desde este caso de uso.
+- Los campos editables mediante `PUT` son: `description` y `status`, y solo se permite establecer `status` en `Paid` cuando el pago está en `Pending`.
+- Al finalizar con éxito, el sistema debe retornar el payment actualizado dentro de `{ "data": ... }`.
 
 ## Diseño Técnico (RFC)
 
@@ -34,21 +42,24 @@ Permitir que un administrativo actualice información no crítica de un pago exi
 
 Se reutiliza la entidad `Payment` definida en TDD-0024. No se requieren cambios de esquema adicionales.
 
-- `descripcion`: Cadena de texto opcional — único campo de texto editable.
-- `estado`: Enumeración `EstadoPago` — puede actualizarse solo de `Pendiente` a `Completado`.
-- `monto`: Decimal — **inmutable**, el sistema debe ignorar o rechazar cualquier intento de modificación.
+- `description`: Cadena de texto opcional — único campo de texto editable.
+- `status`: Enumeración `PaymentStatus` — en actualización desde `Pending` solo puede pasar a `Paid` mediante este flujo.
+- `amount`: Inmutable — el sistema debe ignorar o rechazar cualquier intento de modificación.
+- `deletedAt`: Si no es `null`, el uso de `PUT` debe fallar conforme reglas anteriores.
 
 ### Contrato de API (@alentapp/shared)
 
-Definiremos los tipos en el paquete compartido para asegurar sincronización:
+Definiremos los tipos en el paquete compartido para asegurar sincronización.
 
-- **Endpoint**: `PUT /api/v1/pagos/:id`
-- **Request Body** (`ActualizarPagoRequest`):
+**Éxito:** `{ "data": ... }`. **Errores:** `{ "error": "<mensaje en español>" }`.
+
+- **Endpoint**: `PUT /api/v1/payments/:id`
+- **Request Body** (`UpdatePaymentRequest`):
 
 ```ts
 {
-    descripcion?: string; // Opcional. Nuevo concepto del pago.
-    estado?: 'Completado'; // Opcional. Solo se acepta "Completado" como nuevo valor.
+    description?: string; // Opcional. Nuevo concepto del pago.
+    status?: "Paid";      // Opcional. Solo válido cuando el estado actual es "Pending".
 }
 ```
 
@@ -56,40 +67,61 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 ```ts
 {
-    id: string;
-    monto: number;
-    descripcion: string | null;
-    estado: 'Pendiente' | 'Completado';
-    fechaPago: string;
-    miembro_id: string;
-    creadoEl: string;
-    actualizadoEl: string;
+    data: {
+        id: string;
+        amount: number;
+        description: string | null;
+        status: "Pending" | "Paid";
+        paymentDate: string;
+        memberId: string;
+        deletedAt: string | null;
+        createdAt: string;
+        updatedAt: string;
+    };
 }
 ```
 
 ### Componentes de Arquitectura Hexagonal
 
-1. Puerto: PaymentRepository (Interfaz en el Dominio).
-2. Caso de Uso: UpdatePayment (Lógica que valida existencia, rechaza pagos `Cancelado`, valida transiciones de `estado` y descarta cambios sobre `monto`).
-3. Adaptador de Salida: Adaptador de persistencia en BD (implementación con Prisma).
-4. Adaptador de Entrada: PaymentController (Ruta HTTP `PUT /api/v1/pagos/:id`).
+- **Domain**:
+  - Entidad `Payment`.
+  - Enum `PaymentStatus`.
+  - Reglas: inmutabilidad de `amount`, transiciones válidas `Pending → Paid` para `PUT`, rechazo cuando `deletedAt != null` o `status === "Canceled"` o intentos fuera de transición admitida.
+- **Application**:
+  - Caso de uso `UpdatePaymentUseCase`.
+  - Puerto de salida `IPaymentRepository` (`findById`, `update`).
+- **Infrastructure**:
+  - `PaymentController` (entrada HTTP `PUT /api/v1/payments/:id`).
+  - `PaymentPrismaRepository`.
+  - Mapeadores DTO si hacen falta.
 
 ## Casos de Borde y Errores
 
-| Escenario                                        | Resultado Esperado                                    | Código HTTP              |
-| ------------------------------------------------ | ----------------------------------------------------- | ------------------------ |
-| `id` del pago no existe                          | Mensaje: "El pago indicado no existe"                 | 404 Not Found            |
-| El pago tiene `estado: Cancelado`                | Mensaje: "No se puede modificar un pago cancelado"    | 409 Conflict             |
-| Se intenta modificar `monto`                     | Mensaje: "El monto de un pago no puede modificarse"   | 400 Bad Request          |
-| Transición de estado inválida (`Completado → Pendiente`) | Mensaje: "Transición de estado no permitida"   | 422 Unprocessable Entity |
+| Escenario                                        | Resultado Esperado                                    | Código HTTP               |
+| ------------------------------------------------ | ----------------------------------------------------- | ------------------------- |
+| `id` del pago no existe                          | Mensaje: "El pago indicado no existe"                 | 404 Not Found             |
+| Registro con baja lógica (`deletedAt != null`)    | Mensaje: "No se puede modificar un pago cancelado"   | 409 Conflict             |
+| El `status` actual es `Canceled`                 | Mensaje: "No se puede modificar un pago cancelado"      | 409 Conflict             |
+| Se intenta modificar `amount` en el body         | Mensaje: "El monto de un pago no puede modificarse"    | 400 Bad Request           |
+| Transición inválida (p. ej. `Paid → Pending`)  | Mensaje: "Transición de estado no permitida"           | 422 Unprocessable Entity  |
+| Se intenta `Paid → Canceled` vía esta API       | Mensaje: "Transición de estado no permitida"           | 422 Unprocessable Entity   |
 | Body vacío (sin campos editables)                | Mensaje: "Debe proveer al menos un campo para actualizar" | 400 Bad Request      |
 | Error de conexión a DB                          | Mensaje: "Error interno, reintente más tarde"          | 500 Internal Server Error |
 
 ## Plan de Implementación
 
-1. Crear el tipo `ActualizarPagoRequest` en `@alentapp/shared`.
-2. Agregar la lógica de validación de transiciones de `estado` en la entidad de dominio `Payment`.
-3. Implementar el caso de uso `UpdatePayment` en la capa de aplicación.
-4. Agregar el método `update` en el repositorio Prisma.
-5. Crear el endpoint `PUT /api/v1/pagos/:id` en `PaymentController`.
+1. Crear el tipo `UpdatePaymentRequest` en `@alentapp/shared` y alinear `PaymentResponse`.
+2. Incorporar en la entidad de dominio `Payment` las reglas de transición de estado y rechazo ante `deletedAt` o `Canceled`.
+3. Implementar `UpdatePaymentUseCase` en la capa de aplicación.
+4. Extender `IPaymentRepository`/`PaymentPrismaRepository` con persistencia controlada (`update`).
+5. Crear el endpoint `PUT /api/v1/payments/:id` en `PaymentController`.
 6. Conectar el formulario de edición del frontend con el nuevo endpoint.
+
+## Cambios respecto de la versión anterior
+
+- Transiciones documentadas (`Pending → Paid`; `Pending → Canceled` solo por `DELETE`; bloqueos de `Paid`/baja aplicada/`Canceled`).
+- DTO `UpdatePaymentRequest`, endpoint `PUT /api/v1/payments/:id`, respuesta en `data`.
+- Reglas coherentes con baja lógica: rechazo ante `deletedAt != null`; sin anular `Paid` por esta historia.
+- Nomenclatura en inglés, `PaymentStatus` con valores `Paid` (confirmado).
+- Hexagonal Domain/Application/Infrastructure formalizado con `UpdatePaymentUseCase` e `IPaymentRepository`.
+
