@@ -86,3 +86,9 @@ export interface CreateLoanRequest {
   item_name: string;
   due_date: string; // ISO Date String
 }
+
+export interface GetLoansQuery {
+  status?: 'Loaned' | 'Returned' | 'Damaged';
+  search?: string;
+}
+
