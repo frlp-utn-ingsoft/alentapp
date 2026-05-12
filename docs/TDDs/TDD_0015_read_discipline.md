@@ -29,33 +29,57 @@ Permitir a los administrativos visualizar el listado completo de sanciones/suspe
 
 ### Contrato de API (@alentapp/shared)
 Se exponen dos endpoints de lectura: uno para el listado completo y otro para el detalle individual.
-
-- **Endpoint (listado):** `GET /api/v1/disciplines`
-- **Response 200 OK** (`DisciplineResponse[]`)
+**Éxito:** el cuerpo JSON usa `{ "data": ... }`. **Errores:** `{ "error": "<mensaje en español>" }`.
+**Consulta por ID:**
 
 - **Endpoint (detalle):** `GET /api/v1/disciplines/:id`
 - **Response 200 OK** (`DisciplineResponse`)
 
-**Query Params opcionales:**
+**Estructura de respuesta (`DisciplineResponse`):**
+```ts
+{
+    data: {
+        id: string;
+        reason: string;
+        startDate: string;
+        endDate: string;
+        isTotalSuspension: boolean;
+        memberId: string;
+        deletedAt: string | null;
+        createdAt: string;      // ← AGREGAR
+        updatedAt: string;      // ← AGREGAR
+    }
+}
+```
+**Listado con filtros opcionales:**
+
+- **Endpoint (listado):** `GET /api/v1/disciplines`
+- **Response 200 OK** (`DisciplineResponse[]`)
+- **Query Params opcionales:**
 - `memberId`: UUID del socio (filtrar por socio específico)
 - `onlyActive`: boolean (si es true, retorna solo sanciones activas; default: false)
 
 **Estructura de respuesta (`DisciplineResponse`):**
+
 ```ts
 {
-  id: string;
-  reason: string;
-  startDate: string;   // ISO 8601 DateTime
-  endDate: string;      // ISO 8601 DateTime
-  isTotalSuspension: boolean;
-  memberId: string;
-  deletedAt: string | null;  // null = activa, fecha = desactivada
+    data: Array<{
+        id: string;
+        reason: string;
+        startDate: string;
+        endDate: string;
+        isTotalSuspension: boolean;
+        memberId: string;
+        deletedAt: string | null;
+        createdAt: string;
+        updatedAt: string;
+    }>
 }
 ```
 Nota: Las sanciones con deletedAt != null (desactivadas) pueden ser consultadas pero no editadas ni reactivadas desde el UPDATE endpoint.
 
 ### Componentes de Arquitectura Hexagonal
-1. **Puerto:** `IDisciplineRepository` (Métodos `findAll()` y `findById(id)`).
+1. **Puerto:** `IDisciplineRepository` (Métodos `findAll(filters?)` y `findById(id)`).
 2. **Caso de Uso:** `GetDisciplinesUseCase` (Devuelve el listado completo) y `GetDisciplineByIdUseCase` (Comprueba existencia y devuelve el detalle).
 3. **Adaptador de Salida:** `PostgresDisciplineRepository` (Lectura usando los métodos `findMany` y `findUnique` de Prisma).
 4. **Adaptador de Entrada:** `DisciplineController` (Rutas HTTP que devuelven los resultados serializados).

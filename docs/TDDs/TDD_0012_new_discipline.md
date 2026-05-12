@@ -39,10 +39,12 @@ Se definirá la entidad `Discipline` con las siguientes propiedades y restriccio
 * `isTotalSuspension`: Booleano.
 * `memberId`: UUID (clave foránea a Member).
 * `deletedAt`: Fecha (datetime) de eliminación lógica. `null` indica que la sanción se encuentra activa en el sistema.
+* `createdAt`: Fecha (datetime) de creación (autogenerada).
+* `updatedAt`: Fecha (datetime) de última actualización (autogenerada).
 
 ### Contrato de API (@alentapp/shared)
-
 Definiremos los tipos en el paquete compartido para asegurar sincronización:
+**Éxito:** el cuerpo JSON usa `{ "data": ... }`. **Errores:** `{ "error": "<mensaje en español>" }`.
 
 * Endpoint: `POST /api/v1/disciplines`
 * Request Body (CreateDisciplineRequest):
@@ -54,6 +56,23 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
     endDate: string; // ISO 8601 DateTime
     isTotalSuspension: boolean;
     memberId: string;
+}
+```
+* Response 201 Created:
+
+```ts
+{
+    data: {
+        id: string;
+        reason: string;
+        startDate: string; // ISO 8601 DateTime
+        endDate: string; // ISO 8601 DateTime
+        isTotalSuspension: boolean;
+        memberId: string;
+        deletedAt: string | null;
+        createdAt: string; // ISO 8601 DateTime
+        updatedAt: string; // ISO 8601 DateTime
+    }
 }
 ```
 
@@ -69,7 +88,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 | Escenario               | Resultado Esperado                                           | Código HTTP               |
 | ----------------------  | ------------------------------------------------------------ | ------------------------- |
 | endDate ≤ startDate     | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request           |
-| Socio inexistente       | Mensaje: "Socio no encontrado"                               | 404 Not Found             |
+| Socio inexistente       | Mensaje: "El socio indicado no existe"                       | 404 Not Found             |
 | Datos incompletos       | Mensaje: "Faltan campos requeridos o poseen formato inválido"| 400 Bad Request           |
 | Error de conexión a DB  | Mensaje: "Error interno, reintente más tarde"                | 500 Internal Server Error |
 

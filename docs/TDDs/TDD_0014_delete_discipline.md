@@ -32,10 +32,28 @@ Permitir a los administrativos desactivar sanciones registradas por error, prese
 ### Contrato de API (@alentapp/shared)
 
 Al tratarse de una operación destructiva que solo requiere conocer el identificador, no se envía cuerpo en la petición HTTP.
+**Éxito:** el cuerpo JSON usa `{ "data": ... }`. **Errores:** `{ "error": "<mensaje en español>" }`
 
 * Endpoint: `DELETE /api/v1/disciplines/:id`
 * Request Body: `None`
-* Response: `204 No Content` en caso de éxito.
+* Response: `200 OK` en caso de éxito:
+```ts
+{
+    data: {
+        id: string;
+        reason: string;
+        startDate: string;
+        endDate: string;
+        isTotalSuspension: boolean;
+        memberId: string;
+        deletedAt: string;
+        createdAt: string;
+        updatedAt: string;
+    }
+}
+```
+> **Nota:** Aunque el verbo HTTP es `DELETE`, el backend **no** borra físicamente el registro 
+> en base de datos. Solo marca la sanción como desactivada mediante `deletedAt`.
 
 ### Componentes de Arquitectura Hexagonal
 
@@ -51,7 +69,6 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 | Sanción ya eliminada | Mensaje: "La sanción ya fue eliminada"         | 409 Conflict              |
 | Sanción inexistente  | Mensaje: "La sanción no existe"                | 404 Not Found             |
 | Error de conexión DB | Mensaje: "Error interno, reintente más tarde"  | 500 Internal Server Error |
-| Eliminación exitosa  | Respuesta vacía                                | 204 No Content            |
 
 ## Plan de Implementación
 

@@ -39,10 +39,13 @@ Se utilizará la entidad `Discipline` con las siguientes propiedades:
 * `isTotalSuspension`: Booleano.
 * `memberId`: UUID (clave foránea a Member).
 * `deletedAt`: Fecha (datetime) de eliminación lógica. `null` indica que la sanción se encuentra activa en el sistema.
+* `createdAt`: Fecha (datetime) de creación (autogenerada).
+* `updatedAt`: Fecha (datetime) de última actualización (autogenerada).
 
 ### Contrato de API (@alentapp/shared)
 
 Definiremos los tipos en el paquete compartido para asegurar sincronización:
+**Éxito:** el cuerpo JSON usa `{ "data": ... }`. **Errores:** `{ "error": "<mensaje en español>" }`.
 
 * Endpoint: `PUT /api/v1/disciplines/:id`
 * Request Body (UpdateDisciplineRequest):
@@ -55,6 +58,24 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
     isTotalSuspension?: boolean;
 }
 ```
+* Response 200 OK:
+
+```ts
+{
+    data: {
+        id: string;
+        reason: string;
+        startDate: string; // ISO 8601 DateTime
+        endDate: string; // ISO 8601 DateTime
+        isTotalSuspension: boolean;
+        memberId: string;
+        deletedAt: string | null;
+        createdAt: string; // ISO 8601 DateTime
+        updatedAt: string; // ISO 8601 DateTime
+    }
+}
+```
+
 Los campos omitidos conservarán su valor actual. El endpoint utilizará `PUT` para realizar actualizaciones parciales preservando los valores existentes no enviados en la request.
 
 ### Componentes de Arquitectura Hexagonal
