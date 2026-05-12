@@ -112,7 +112,7 @@ El único campo modificable a través de este caso de uso es `isValidated`.
 Se utilizarán librerías como `zod` para validar que los datos de entrada cumplan con los formatos esperados, asegurando `isValidated` sea un booleano, que el `id` sea un UUID válido y que el body no contenga campos adicionales no permitidos.
 
 ### 5.2. Repetición de la misma operación
-Si el certificado ya está en el estado solicitado (validar un certificado que ya tenía `isValidated = true`), el sistema acepta la operación y responde con éxito, sin generar cambios reales en la base. 
+Si el certificado ya está en el estado solicitado (por ejemplo, se intenta validar un certificado que ya tenía `isValidated = true`), el sistema acepta la operación y responde con éxito, sin generar cambios reales en la base. 
 
 ### 5.3. Inmutabilidad de los demás campos
 Los campos `memberId`, `issueDate`, `expiryDate` y `doctorLicense` son inmutables a través de esta operación. Si se necesita corregir alguno de estos datos por un error de carga, el flujo correcto es eliminar lógicamente el certificado erróneo (TDD de Baja) y crear uno nuevo con los datos correctos (TDD de Alta).
