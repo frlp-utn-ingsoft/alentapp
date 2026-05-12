@@ -92,3 +92,12 @@ export interface GetLoansQuery {
   search?: string;
 }
 
+export interface LoanWithMemberDTO extends LoanDTO {
+  member: {
+    name: string;
+  };
+}
+
+export interface UpdateLoanStatusRequest {
+  status: 'Returned' | 'Damaged';
+}
