@@ -7,6 +7,14 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
+import { InMemorySportRepository } from './infrastructure/InMemorySportRepository.js';
+import { InMemoryEnrollmentRepository } from './infrastructure/InMemoryEnrollmentRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
+import { DeleteSportUseCase } from './application/DeleteSportUseCase.js';
+import { SportController } from './delivery/SportController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -43,10 +51,31 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
+    const sportRepo = new InMemorySportRepository();
+    const enrollmentRepo = new InMemoryEnrollmentRepository();
+    const sportValidator = new SportValidator(sportRepo);
+
+    const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
+    const getSportsUseCase = new GetSportsUseCase(sportRepo);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
+    const deleteSportUseCase = new DeleteSportUseCase(sportRepo, enrollmentRepo);
+
+    const sportController = new SportController(
+        createSportUseCase,
+        getSportsUseCase,
+        updateSportUseCase,
+        deleteSportUseCase
+    );
+
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
+    server.get('/api/v1/deportes', sportController.getAll.bind(sportController));
+    server.post('/api/v1/deportes', sportController.create.bind(sportController));
+    server.put('/api/v1/deportes/:id', sportController.update.bind(sportController));
+    server.delete('/api/v1/deportes/:id', sportController.delete.bind(sportController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
