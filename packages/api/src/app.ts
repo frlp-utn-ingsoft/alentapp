@@ -16,6 +16,10 @@ import { GetMemberDisciplineStatusUseCase } from './application/GetMemberDiscipl
 import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.js';
 import { DeleteDisciplineUseCase } from './application/DeleteDisciplineUseCase.js';
 import { DisciplineController } from './delivery/DisciplineController.js';
+import { PostgresLoanRepository } from './infrastructure/PostgresLoanRepository.js';
+import { LoanValidator } from './domain/services/LoanValidator.js';
+import { CreateLoanUseCase } from './application/CreateLoanUseCase.js';
+import { LoanController } from './delivery/LoanController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -32,7 +36,7 @@ export function buildApp() {
 
     server.register(cors, {
         origin: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     });
@@ -53,6 +57,10 @@ export function buildApp() {
     const updateDisciplineUseCase = new UpdateDisciplineUseCase(disciplineRepo, disciplineValidator);
     const deleteDisciplineUseCase = new DeleteDisciplineUseCase(disciplineRepo, disciplineValidator);
 
+    const loanRepo = new PostgresLoanRepository();
+    const loanValidator = new LoanValidator();
+    const createLoanUseCase = new CreateLoanUseCase(loanRepo, memberRepo, loanValidator);
+
     const memberController = new MemberController(
         createMemberUseCase, 
         getMembersUseCase,
@@ -68,6 +76,8 @@ export function buildApp() {
         deleteDisciplineUseCase
     );
 
+    const loanController = new LoanController(createLoanUseCase);
+
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
@@ -78,6 +88,8 @@ export function buildApp() {
     server.delete('/api/v1/disciplines/:id', disciplineController.delete.bind(disciplineController));
     server.get('/api/v1/members/:memberId/disciplines', disciplineController.getByMember.bind(disciplineController));
     server.get('/api/v1/members/:memberId/discipline-status', disciplineController.getMemberStatus.bind(disciplineController));
+
+    server.post('/api/v1/equipment-loan', loanController.create.bind(loanController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })

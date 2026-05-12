@@ -66,3 +66,23 @@ export interface MemberDisciplineStatusResponse {
   isSuspended: boolean;
   activeTotalSuspension?: DisciplineResponse;
 }
+
+// ==========================================
+// Equipment Loan
+// ==========================================
+export type LoanStatus = 'Loaned' | 'Returned' | 'Damaged';
+
+export interface LoanDTO {
+  id: string; // UUID
+  member_id: string;
+  item_name: string;
+  loan_date: string; // ISO Date String
+  due_date: string; // ISO Date String
+  status: LoanStatus;
+}
+
+export interface CreateLoanRequest {
+  member_id: string;
+  item_name: string;
+  due_date: string; // ISO Date String
+}
