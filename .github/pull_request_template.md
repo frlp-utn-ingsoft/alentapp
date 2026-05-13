@@ -148,7 +148,7 @@ Closes #
 Un PR está listo para mergear **únicamente** cuando se cumplen **todas** las condiciones:
 
 1. **Issue asociado** con `Closes #XX` en la descripción
-2. **2 approvals** de miembros del equipo (excluyendo el autor)
+2. **1 approval** de miembros del equipo (excluyendo el autor)
 3. Tests ejecutados y pasando localmente (`npm run test`, `npm run e2e`)
 4. Todos los checkboxes del autor completados
 5. Ningún comentario de review sin resolver
