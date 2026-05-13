@@ -7,10 +7,10 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
-import { PostgresPaymentRepository } from './payment/infrastructure/PostgresPaymentRepository.js';
-import { CreatePaymentUseCase } from './payment/application/CreatePaymentUseCase.js';
-import { UpdatePaymentUseCase } from './payment/application/UpdatePaymentUseCase.js';
-import { PaymentController } from './payment/delivery/PaymentController.js';
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
+import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
+import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
+import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
     const server = Fastify({
