@@ -63,3 +63,8 @@ export interface UpdateLockerEstadoRequest {
   memberId?: string;
   fechaFinContrato?: string; // "YYYY-MM-DD"
 }
+
+export interface UpdateLockerRequest {
+  numero?: number;
+  ubicacion?: LockerUbicacion;
+}
