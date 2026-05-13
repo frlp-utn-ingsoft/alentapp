@@ -1,41 +1,30 @@
-import { CreatePaymentRequest, PaymentDTO } from '@alentapp/shared';
 import { PaymentRepository } from '../domain/PaymentRepository.js';
-import { MemberRepository } from '../domain/MemberRepository.js';
+import { PaymentDTO, PaymentStatus } from '@alentapp/shared';
+import { Payment } from '../domain/Payment.js';
 
-export class CreatePaymentUseCase {
+export class UpdatePaymentUseCase {
     constructor(
-        private readonly paymentRepo: PaymentRepository,
-        private readonly memberRepo: MemberRepository,
+        private readonly paymentRepo: PaymentRepository
     ) {}
 
-    async execute(data: CreatePaymentRequest): Promise<PaymentDTO> {
-        // 1. Validar que el socio existe
-        const member = await this.memberRepo.findById(data.member_id);
-        if (!member) {
-            throw new Error('El socio no existe');
-        }
-
-        // 2. Validar que el monto sea mayor a cero
-        if (data.amount <= 0) {
-            throw new Error('El monto debe ser mayor a cero');
-        }
-
-        // 3. Validar mes
-        if (data.month < 1 || data.month > 12) {
-            throw new Error('El mes debe estar entre 1 y 12');
-        }
-
-        // 4. Validar que no exista un pago activo para ese socio en el mismo mes/año
-        const existing = await this.paymentRepo.findActiveByMemberMonthYear(
-            data.member_id,
-            data.month,
-            data.year,
-        );
-        if (existing) {
-            throw new Error('Ya existe un pago activo para ese socio en ese período');
-        }
-
-        // 5. Crear el pago (status pending)
-        return await this.paymentRepo.create(data);
+    async execute(id: string, newStatus: PaymentStatus): Promise<PaymentDTO> {
+                // 1. Validar existencia del pago
+                const dto = await this.paymentRepo.findById(id);
+                if (!dto) {
+                    throw new Error('El pago no existe');
+                }
+         
+                // 2. Construir la entidad de dominio e invocar transitionTo
+                //    — transitionTo maneja idempotencia y validación de transiciones
+                const payment = new Payment(dto);
+                payment.transitionTo(newStatus);
+         
+                // 3. Persistir y retornar
+                return await this.paymentRepo.update(id, {
+                    status:       payment.status,
+                    payment_date: payment.payment_date,
+                    cancelled_at: payment.cancelled_at,
+                });
     }
+
 }
