@@ -22,7 +22,7 @@ Permitir al personal encargado del equipamiento actualizar el estado de un prés
 ### Criterios de Aceptación
 
 - El sistema debe permitir actualizar uno, varios o todos los campos modificables del préstamo.
-- El sistema debe permitir actualizar el `estado` del préstamo exclusivamente a los valores permitidos: "Prestado", "Devuelto" o "Dañado".
+- El sistema debe permitir actualizar el `status` del préstamo exclusivamente a los valores permitidos: "Loaned", "Returned" o "Damaged".
 - Si durante la actualización se modifica el `member_id` (reasignación a otro socio), el sistema debe validar obligatoriamente que el nuevo socio posea categoría "Senior" o "Lifetime".
 - El sistema debe rechazar la actualización si el nuevo socio referenciado pertenece a la categoría "Cadet", ya que tienen prohibido solicitar material.
 - Si la edición es correcta, debe retornar los nuevos datos del préstamo actualizados.
@@ -37,9 +37,9 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
 - Request Body (UpdateEquipmentLoanRequest):
 ```ts
 {
-    nombre_item?: string;
-    estado?: 'Prestado' | 'Devuelto' | 'Dañado';
-    fecha_devolucion?: string;
+    item_name?: string;
+    status?: 'Loaned' | 'Returned' | 'Damaged';
+    due_date?: string;
     member_id?: string; 
 }
 ```
