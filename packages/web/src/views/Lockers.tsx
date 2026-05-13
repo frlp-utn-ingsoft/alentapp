@@ -2,7 +2,7 @@ import {
   Table, Button, Heading, HStack, Stack, Text, Box,
   Flex, Spinner, Center, Input, Badge,
 } from '@chakra-ui/react';
-import { LuRefreshCw, LuPlus } from 'react-icons/lu';
+import { LuRefreshCw, LuPlus, LuPencil } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 import { lockersService } from '../services/lockers';
 import { membersService } from '../services/members';
@@ -53,7 +53,7 @@ const ubicacionLabel: Record<LockerUbicacion, string> = {
   NINOS: 'Niños',
 };
 
-type Modal = 'none' | 'create' | 'assign';
+type Modal = 'none' | 'create' | 'assign' | 'edit';
 
 export function LockersView() {
   const [lockers, setLockers] = useState<LockerDTO[]>([]);
@@ -67,6 +67,7 @@ export function LockersView() {
   const [filtroUbicacion, setFiltroUbicacion] = useState('');
   const [createForm, setCreateForm] = useState({ numero: '', ubicacion: 'VESTUARIO_MASCULINO' as LockerUbicacion });
   const [assignForm, setAssignForm] = useState({ memberId: '', fechaFinContrato: '' });
+  const [editForm, setEditForm] = useState({ numero: '', ubicacion: 'VESTUARIO_MASCULINO' as LockerUbicacion });
 
   const memberCollection = createListCollection({
     items: members.map((m) => ({ label: `${m.name} (DNI: ${m.dni})`, value: m.id })),
@@ -124,6 +125,24 @@ export function LockersView() {
       void fetchLockers();
     } catch (err: any) {
       alert(err.message || 'Error al asignar el locker');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedLocker) return;
+    setIsSubmitting(true);
+    try {
+      await lockersService.update(selectedLocker.id, {
+        numero: Number(editForm.numero),
+        ubicacion: editForm.ubicacion,
+      });
+      setModal('none');
+      void fetchLockers();
+    } catch (err: any) {
+      alert(err.message || 'Error al actualizar el locker');
     } finally {
       setIsSubmitting(false);
     }
@@ -222,6 +241,40 @@ export function LockersView() {
         </DialogContent>
       </DialogRoot>
 
+      {/* Modal Editar */}
+      <DialogRoot open={modal === 'edit'} onOpenChange={(e) => !e.open && setModal('none')}>
+        <DialogContent>
+          <form onSubmit={handleEdit}>
+            <DialogHeader><DialogTitle>Editar Locker #{selectedLocker?.numero}</DialogTitle></DialogHeader>
+            <DialogBody>
+              <Stack gap="4">
+                <Field label="Número" required>
+                  <Input type="number" min={1}
+                    value={editForm.numero}
+                    onChange={(e) => setEditForm({ ...editForm, numero: e.target.value })}
+                    required
+                  />
+                </Field>
+                <Field label="Ubicación" required>
+                  <SelectRoot collection={ubicacionCreateOptions} value={[editForm.ubicacion]}
+                    onValueChange={(e) => setEditForm({ ...editForm, ubicacion: e.value[0] as LockerUbicacion })}>
+                    <SelectTrigger><SelectValueText /></SelectTrigger>
+                    <SelectContent>
+                      {ubicacionCreateOptions.items.map((opt) => <SelectItem item={opt} key={opt.value}>{opt.label}</SelectItem>)}
+                    </SelectContent>
+                  </SelectRoot>
+                </Field>
+              </Stack>
+            </DialogBody>
+            <DialogFooter>
+              <DialogActionTrigger asChild><Button variant="outline">Cancelar</Button></DialogActionTrigger>
+              <Button type="submit" colorPalette="blue" loading={isSubmitting}>Guardar</Button>
+            </DialogFooter>
+            <DialogCloseTrigger />
+          </form>
+        </DialogContent>
+      </DialogRoot>
+
       <Stack gap="8">
         <Flex justify="space-between" align="center">
           <Stack gap="1">
@@ -293,6 +346,12 @@ export function LockersView() {
                     <Table.Cell color="fg.muted">{locker.fechaFinContrato ?? '—'}</Table.Cell>
                     <Table.Cell textAlign="end">
                       <HStack gap="2" justify="flex-end">
+                        {locker.estado !== 'OCUPADO' && (
+                          <Button size="sm" variant="ghost"
+                            onClick={() => { setSelectedLocker(locker); setEditForm({ numero: String(locker.numero), ubicacion: locker.ubicacion }); setModal('edit'); }}>
+                            <LuPencil />
+                          </Button>
+                        )}
                         {locker.estado === 'DISPONIBLE' && (
                           <>
                             <Button size="sm" colorPalette="blue" variant="outline"
