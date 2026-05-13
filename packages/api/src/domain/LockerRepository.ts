@@ -9,5 +9,6 @@ export interface LockerRepository {
   create(data: CreateLockerRequest): Promise<LockerDTO>;
   findAll(filters?: GetLockersFilters): Promise<LockerDTO[]>;
   updateEstado(id: string, data: UpdateLockerEstadoRequest): Promise<LockerDTO>;
+  findById(id: string): Promise<LockerDTO | null>;
 }
 
