@@ -39,6 +39,8 @@ model Member {
     category   MemberCategory
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
+    payments   Payment[] //Importante: agregé la relación bidireccional donde un socio
+                        //tiene varios pagos, sirve para que prisma entienda la relación peor no agrega ninguna columna
 
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
 }
