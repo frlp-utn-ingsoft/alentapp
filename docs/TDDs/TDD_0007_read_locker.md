@@ -24,7 +24,7 @@ Permitir a los administrativos visualizar el listado completo de lockers del clu
 - El sistema debe devolver el listado completo de lockers existentes en la base de datos.
 - El sistema debe permitir consultar un locker por su `id`.
 - Si el locker solicitado no existe, debe devolver un error claro.
-- La respuesta debe incluir todos los atributos del locker, incluido el `miembro_id` (que puede ser `null` si no está asignado).
+- La respuesta debe incluir todos los atributos del locker, incluido el `memberId` (que puede ser `null` si no está asignado).
 
 ## Diseño Técnico (RFC)
 
@@ -32,11 +32,31 @@ Permitir a los administrativos visualizar el listado completo de lockers del clu
 
 Se exponen dos endpoints de lectura: uno para el listado completo y otro para el detalle individual.
 
-- **Endpoint (listado)**: `GET /api/v1/lockers`
-- **Response 200 OK** (`LockerResponse[]`):
+```ts
+type LockerResponse = {
+  id: string;
+  number: number;
+  location: string;
+  status: 'Available' | 'Occupied' | 'Maintenance';
+  memberId: string | null;
+}
+```
 
-- **Endpoint (detalle)**: `GET /api/v1/lockers/:id`
-- **Response 200 OK** (`LockerResponse`):
+*   **Endpoint (listado)**: `GET /api/v1/lockers`
+*   **Response 200 OK** (`LockerResponse[]`)
+```ts
+{
+  data: LockerResponse[];
+}
+```
+
+*   **Endpoint (detalle)**: `GET /api/v1/lockers/:id`
+*   **Response 200 OK** (`LockerResponse`)
+```ts
+{
+  data: LockerResponse;
+}
+```
 
 
 ### Componentes de Arquitectura Hexagonal
@@ -48,13 +68,14 @@ Se exponen dos endpoints de lectura: uno para el listado completo y otro para el
 
 ## Casos de Borde y Errores
 
-| Escenario                                | Resultado Esperado                            | Código HTTP actual        |
+| Escenario                                | Resultado Esperado                            | Código HTTP               |
 | ---------------------------------------- | --------------------------------------------- | ------------------------- |
-| Listado sin lockers cargados             | Array vacío `[]`                              | 200 OK                    |
-| Consulta exitosa de listado              | Array con todos los lockers                   | 200 OK                    |
-| Consulta exitosa por `id`                | Objeto con los datos del locker               | 200 OK                    |
-| Locker inexistente al consultar por `id` | Mensaje: "El locker no existe"                | 404 Not Found             |
-| Error de conexión a DB                   | Mensaje: error del motor de base de datos     | 500 Internal Server Error |
+| Listado sin lockers cargados             | `{ data: [] }`                                 | 200 OK                    |
+| Consulta exitosa de listado              | `{ data: LockerResponse[] }`                   | 200 OK                    |
+| Consulta exitosa por `id`                | `{ data: LockerResponse }`                     | 200 OK                    |
+| `id` inválido                            | `{ error: "El id del locker es inválido" }`   | 400 Bad Request           |
+| Locker inexistente al consultar por `id` | `{ error: "El locker no existe" }`            | 404 Not Found             |
+| Error de conexión a DB                   | `{ error: "Error interno, reintente más tarde" }` | 500 Internal Server Error |
 
 ## Plan de Implementación
 

@@ -24,6 +24,7 @@ Permitir a los administrativos dar de baja permanentemente a un locker del siste
 - El sistema debe pedir una confirmación explícita (advertencia visual) antes de proceder con el borrado.
 - El sistema debe validar que el locker exista antes de intentar borrarlo.
 - El sistema debe realizar un borrado físico de la base de datos (hard delete).
+- El locker tiene que tener `memberId = null` para poder borrarse.
 - Si el borrado es exitoso, la tabla debe actualizarse automáticamente.
 
 ## Diseño Técnico (RFC)
@@ -32,24 +33,33 @@ Permitir a los administrativos dar de baja permanentemente a un locker del siste
 
 Al tratarse de una operación destructiva que solo requiere conocer el identificador, no se envía cuerpo en la petición HTTP.
 
-- Endpoint: `DELETE /api/v1/lockers/:id`
-- Request Body: `None`
-- Response: `204 No Content` en caso de éxito.
+*   **Endpoint**: `DELETE /api/v1/lockers/:id`
+*   **Request Body**: `None`
+*   **Response 200 OK**
+```ts
+{
+  data: {
+    id: string;
+  }
+}
+```
 
 ### Componentes de Arquitectura Hexagonal
 
 1. **Puerto**: `LockerRepository` (Método `delete(id)`).
 2. **Caso de Uso**: `DeleteLockerUseCase` (Comprueba existencia previa vía `findById` y delega la eliminación).
 3. **Adaptador de Salida**: `PostgresLockerRepository` (Eliminación usando el método `delete` de Prisma).
-4. **Adaptador de Entrada**: `LockerController` (Ruta HTTP que extrae el `id` y devuelve un status 204).
+4. **Adaptador de Entrada**: `LockerController` (Ruta HTTP que extrae el `id` y devuelve la respuesta de éxito).
 
 ## Casos de Borde y Errores
 
-| Escenario                  | Resultado Esperado                            | Código HTTP actual        |
+| Escenario                  | Resultado Esperado                            | Código HTTP               |
 | -------------------------- | --------------------------------------------- | ------------------------- |
-| Locker inexistente         | Mensaje: "El locker no existe"                | 404 Not found            |
-| Error de conexión a DB     | Mensaje: error del motor de base de datos     | 500 Error a conexión a BD           |
-| Eliminación exitosa        | Respuesta vacía                               | 204 No Content            |
+| `id` inválido              | `{ error: "El id del locker es inválido" }`   | 400 Bad Request           |
+| Locker inexistente         | `{ error: "El locker no existe" }`            | 404 Not Found             |
+| Locker asignado a un socio (`memberId` no es `null`) | `{ error: "No se puede eliminar un locker asignado a un socio" }` | 409 Conflict |
+| Error de conexión a DB     | `{ error: "Error interno, reintente más tarde" }` | 500 Internal Server Error |
+| Eliminación exitosa        | `{ data: { id: string } }`                    | 200 OK                    |
 
 ## Plan de Implementación
 
