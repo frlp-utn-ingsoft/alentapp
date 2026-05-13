@@ -16,6 +16,7 @@ import {
   SelectRoot, SelectTrigger, SelectValueText,
   SelectContent, SelectItem, createListCollection,
 } from '../components/ui/select';
+import { LuRefreshCw, LuPlus, LuPencil, LuTrash2 } from 'react-icons/lu';
 
 const ubicacionCreateOptions = createListCollection({
   items: [
@@ -167,6 +168,16 @@ export function LockersView() {
       alert(err.message || 'Error al enviar a mantenimiento');
     }
   };
+
+  const handleDelete = async (locker: LockerDTO) => {
+    if (!window.confirm(`¿Eliminar el locker #${locker.numero}? Esta acción no se puede deshacer.`)) return;
+    try {
+      await lockersService.delete(locker.id);
+      void fetchLockers();
+    } catch (err: any) {
+      alert(err.message || 'Error al eliminar el locker');
+    }
+};
 
   useEffect(() => { void fetchLockers(); }, [filtroEstado, filtroUbicacion]);
   useEffect(() => { void fetchMembers(); }, []);
@@ -347,10 +358,16 @@ export function LockersView() {
                     <Table.Cell textAlign="end">
                       <HStack gap="2" justify="flex-end">
                         {locker.estado !== 'OCUPADO' && (
-                          <Button size="sm" variant="ghost"
-                            onClick={() => { setSelectedLocker(locker); setEditForm({ numero: String(locker.numero), ubicacion: locker.ubicacion }); setModal('edit'); }}>
-                            <LuPencil />
-                          </Button>
+                          <>
+                            <Button size="sm" variant="ghost"
+                              onClick={() => { setSelectedLocker(locker); setEditForm({ numero: String(locker.numero), ubicacion: locker.ubicacion }); setModal('edit'); }}>
+                              <LuPencil />
+                            </Button>
+                            <Button size="sm" colorPalette="red" variant="ghost"
+                              onClick={() => handleDelete(locker)}>
+                              <LuTrash2 />
+                            </Button>
+                          </>
                         )}
                         {locker.estado === 'DISPONIBLE' && (
                           <>
