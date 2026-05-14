@@ -12,6 +12,10 @@ No se permite pushear directamente a la rama `main`. Todas las contribuciones de
 *   `docs/mejoras-en-documentacion` (para cambios en docs)
 *   `refactor/nombre-del-cambio` (para mejoras de código sin cambio de lógica)
 
+### Formato de Merge
+    Merge pull request #(número de merge) from ValentinaPertile/dirección correspondiente
+    De esta manera podemos diferenciar claramente donde están los merge.
+
 ---
 
 ## 🛠 Flujo de Trabajo (Workflow)
