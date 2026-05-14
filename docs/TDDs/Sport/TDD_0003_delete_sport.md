@@ -16,7 +16,7 @@ Permitir a los administrativos eliminar un deporte del sistema, removiendo su re
 
 ### User Persona
 
-*   **Nombre**: Administrador
+*   **Nombre**: Juan Perez (Administrador)
 *   **Necesidad**: Como administrador, quiero eliminar un deporte cargado por error o que ya no se dicta en el club, contando con una advertencia previa para evitar eliminaciones accidentales.
 
 ### Criterios de Aceptación
@@ -58,3 +58,7 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 3. Agregar el endpoint `DELETE /api/v1/sport/:id` en `SportController`.
 4. Añadir el método `delete` al servicio Frontend.
 5. Enlazar el botón de eliminación en la vista correspondiente agregando confirmación antes de ejecutar la llamada.
+
+## Decisiones de Diseño
+
+- **Hard delete**: Se optó por borrado físico dado que la entidad `Enrollment` no está implementada en el alcance actual del proyecto. Si en el futuro se incorporaran inscripciones, esta decisión debería revisarse para preservar la integridad referencial.

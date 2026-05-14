@@ -16,7 +16,7 @@ Permitir la modificación parcial de un deporte existente en el sistema, restrin
 
 ### User Persona
 
-*   **Nombre**: Administrador
+*   **Nombre**: Juan Perez (Administrador)
 *   **Necesidad**: Como administrador, quiero modificar la descripción y el cupo máximo de un deporte ya registrado, sin alterar su nombre original para mantener la información del deporte actualizada.
 
 
@@ -35,9 +35,9 @@ No se realizan cambios en el esquema. Se utiliza la entidad `Sport` existente.
 
 ### Contrato de API (@alentapp/shared)
 
-Se utilizará el paquete compartido para definir el cuerpo de la petición. Los campos editables son opcionales ya que se trata de una actualización parcial. El campo `name` es inmutable y no forma parte del contrato de actualización (PATCH a nivel de negocio, aunque el endpoint implemente PUT).
+Se utilizará el paquete compartido para definir el cuerpo de la petición. Los campos editables son opcionales ya que se trata de una actualización parcial mediante `PATCH`. El campo `name` es inmutable y no forma parte del contrato de actualización.
 
-*   **Endpoint**: `PUT /api/v1/sport/:id`
+*   **Endpoint**: `PATCH /api/v1/sport/:id`
 *   **Request Body**:
 ```ts
 {
@@ -75,7 +75,7 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Los 
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Deporte no existe | Mensaje: "El deporte indicado no se encuentra registrado" | 404 Not Found |
 | Capacidad máxima inválida | Mensaje: "La capacidad máxima debe ser mayor a cero" | 400 Bad Request |
-| Se envía un campo no permitido (`name`) | Mensaje: "El nombre del deporte no puede modificarse" | 400 Bad Request |
+| Se envía un campo no permitido | Mensaje: "Solo se permite modificar description y max_capacity" | 400 Bad Request |
 | Error de conexión a DB | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |        |
 
 ## Plan de Implementación
