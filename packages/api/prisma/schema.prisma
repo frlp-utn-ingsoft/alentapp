@@ -24,6 +24,13 @@ enum MemberStatus {
     Suspendido
 }
 
+enum PaymentStatus {
+    Pendiente
+    Pagado
+    Vencido
+    Cancelado
+}
+
 model Member {
     id         String         @id @default(uuid())
     dni        String         @unique
@@ -35,4 +42,22 @@ model Member {
     created_at DateTime       @default(now())
 
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+}
+
+model Payment {
+    id              String         @id @default(uuid())
+    member_id       String         
+    amount          Decimal        @db.Decimal(10, 2)
+    month           Int
+    year            Int
+    due_date        DateTime       @db.Date
+    status          PaymentStatus  @default(Pendiente)
+    payment_date    DateTime?
+    created_at      DateTime       @default(now())
+    updated_at      DateTime       @updatedAt
+
+    member          Member         @relation(fields: [member_id], references: [id] ) 
+
+    @@map("payments")
+
 }
