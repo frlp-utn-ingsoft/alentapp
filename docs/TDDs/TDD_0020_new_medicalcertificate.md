@@ -19,7 +19,7 @@ Digitalizar la gestión de aptos físicos para garantizar que el club cumpla con
 
 ### Criterios de Aceptación
 *   El sistema debe validar que la fecha de vencimiento sea estrictamente posterior a la fecha de emisión.
-*   El sistema debe validar que el socio (`member_id`) exista antes de procesar el registro.
+*   El sistema debe validar que el socio (`miembroId`) exista antes de procesar el registro.
 *   Solo puede haber un certificado activo por socio. Al crear uno nuevo, el sistema debe invalidar automáticamente (marcar como histórico) los registros anteriores de ese socio
 *   Al finalizar, el sistema debe mostrar un mensaje de éxito y el certificado debe quedar en estado validado por defecto
 
@@ -29,12 +29,12 @@ Digitalizar la gestión de aptos físicos para garantizar que el club cumpla con
 Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propiedades y restricciones.
 
 *   `id`: Identificador único universal (UUID, PK).
-*   `fecha_emision`: DateTime (Fecha de emisión).
-*   `fecha_vencimiento`: DateTime (Fecha de vencimiento).
-*   `medico_matricula`: String (Número de matrícula del profesional).
+*   `fechaEmision`: DateTime (Fecha de emisión).
+*   `fechaVencimiento`: DateTime (Fecha de vencimiento).
+*   `medicoMatricula`: String (Número de matrícula del profesional).
 *   `institucion`: String (Nombre de la entidad emisora).
-*   `esta_validado`: Boolean (Estado de vigencia actual).
-*   `member_id`: UUID (FK hacia la entidad Member).
+*   `estaValidado`: Boolean (Estado de vigencia actual).
+*   `miembroId`: UUID (FK hacia la entidad Member).
 
 ### Contrato de API (@alentapp/shared)
 [Definición de endpoints y tipos compartidos.]
@@ -42,11 +42,11 @@ Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propie
 *   **Request Body**: (CreateMedicalCertificateRequest)
 ```ts
 {
-    fecha_emision: string;      // ISO Date String
-    fecha_vencimiento: string;  // ISO Date String
-    medico_matricula: string;
+    fechaEmision: string;      // ISO Date String
+    fechaVencimiento: string;  // ISO Date String
+    medicoMatricula: string;
     institucion: string;
-    member_id: string;          // UUID del socio
+    miembroId: string;          // UUID del socio
 }
 ```
 
@@ -54,7 +54,7 @@ Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propie
 [Cómo se distribuye la lógica en las capas.]
 *   **Domain**: 
 	* Entidad MedicalCertificate con validaciones de integridad.
-	* Puerto MedicalCertificateRepository: interfaz con métodos save e invalidatePreviousCertificates
+	* Puerto MedicalCertificateRepository: interfaz con métodos Save e InvalidatePreviousCertificates
 *   **Application**:
 	* Caso de Uso CreateMedicalCertificate: Orquesta la búsqueda de certificados activos previos para su invalidación antes de persistir el nuevo registro.
 *   **Infrastructure**:
