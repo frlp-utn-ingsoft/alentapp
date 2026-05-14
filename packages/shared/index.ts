@@ -89,3 +89,11 @@ export interface CreateDisciplineRequest {
   is_total_suspension: boolean;
   member_id: string;
 }
+
+export type DisciplineStatus = 'active' | 'expired' | 'upcoming';
+
+export interface ListDisciplinesFilters {
+  member_id?: string;
+  status?: DisciplineStatus;
+  sort_desc?: boolean;
+}
