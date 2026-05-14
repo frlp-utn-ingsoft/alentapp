@@ -60,7 +60,6 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
-<<<<<<< HEAD
     const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
     const createMedicalCertificateUseCase = new CreateMedicalCertificateUseCase(medicalCertificateRepo, memberRepo);
     const medicalCertificateController = new MedicalCertificateController(
@@ -68,18 +67,16 @@ export function buildApp() {
     );
 
 
-=======
     const sportController = new SportController(
         createSportUseCase,
         getSportsUseCase
     );
 
->>>>>>> 66e5b38 (feat(Sport): registra ruta GET y POST /api/v1/deportes)
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
-    server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));
+    /*server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));*/
     server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
 
     server.get('/api/v1/deportes', sportController.getAll.bind(sportController));

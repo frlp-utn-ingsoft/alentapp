@@ -33,7 +33,8 @@ export function HomeView() {
         />
         <SectionCard 
           title="Deportes"
-          description="Administra los deportes, el alta, baja y actualización."
+          description="Administra el catálogo de deportes, gestiona su información, cupos y configuración general.
+"
           to="/sports"
           icon={FcSportsMode}
         />
