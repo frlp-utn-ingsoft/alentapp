@@ -26,7 +26,7 @@ Permitir que un administrativo cancele un pago registrado **sin borrar físicame
 - La baja lógica debe establecer **`status` igual a `"Canceled"`** y **`deletedAt`** con fecha/hora actual (no `null` tras aplicar).
 - La baja lógica está permitida únicamente si el registro **`deletedAt` es `null` y no estaba ya cancelado** mediante este flujo. Si ya está dado de baja (`deletedAt != null`), la operación se rechaza.
 - Para esta implementación **simple**, la baja lógica desde `DELETE` se permite **solo** cuando el estado de negocio actual es **`Pending`**. Si el pago está en **`Paid`**, se debe rechazar (no hay anulación posterior en esta versión).
-- Una vez aplicada (`deletedAt` seteado y `status === "Canceled"`), el pago no puede modificarse ni reactivarse mediante los casos de uso de actualización/consultas operativas según otros TDDs.
+- **Ajuste respecto de la redacción inicial (TDD-0024):** al documentar la baja lógica se había dado por sentado que el `amount` quedaba fijo tras el alta. En la práctica el monto de la cuota se ingresa por teclado; **se permite modificar `amount` siempre que el pago siga en `Pending` y `deletedAt == null`** (caso de uso de actualización acorde a otros TDDs). Una vez aplicada la cancelación (`deletedAt` seteado y `status === "Canceled"`), el pago no puede modificarse ni reactivarse mediante los casos de uso de actualización/consultas operativas según otros TDDs.
 - Los listados habituales **excluyen** pagos con `deletedAt != null`, salvo un futuro modo explícito de historial (fuera del alcance mínimo de este texto).
 - Al finalizar con éxito, el sistema debe devolver `{ "data": ... }` con el payment actualizado, incluyendo `status`, `deletedAt`, `updatedAt` y los demás campos de respuesta habitual.
 
@@ -103,12 +103,4 @@ La operación se expresa con `DELETE`, pero contractualmente describe **solo** c
 4. Implementar persistencia mediante `PaymentPrismaRepository` (actualización de fila existente).
 5. Crear el endpoint `DELETE /api/v1/payments/:id` en `PaymentController`, documentando que no efectúa borrado físico.
 6. En el frontend, acción equivalente (“Cancelar pago”) usando `DELETE`, con mensaje aclaratorio al usuario cuando corresponda.
-
-## Cambios respecto de la versión anterior
-
-- Sustitución de `PATCH /api/v1/pagos/:id/cancelar` por `DELETE /api/v1/payments/:id`; aclaración de que es baja **lógica** (no física).
-- Inclusión de `deletedAt` obligatorio tras la operación (además de `status: "Canceled"`).
-- Eliminación de referencias a código Prisma en la documentación técnica.
-- Restricción simple: sólo desde `Pending` y sin baja previa; rechazo desde `Paid` sin anulación posterior.
-- Uso consistente del wrapper `data` y mensajes HTTP en formato `error`; hexagonal alineado a `DeletePaymentUseCase`.
 

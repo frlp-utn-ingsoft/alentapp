@@ -26,7 +26,7 @@ Permitir que un administrativo registre un nuevo pago de forma digital, garantiz
 - El sistema debe validar que el `memberId` corresponda a un socio existente en el sistema.
 - El estado inicial del pago debe ser `Pending` de forma automática, sin intervención del usuario.
 - Al finalizar con éxito, el sistema debe retornar el pago creado (incluye `id` asignado) dentro de `{ "data": ... }`.
-- El campo `amount` queda fijo en el momento de la creación y no puede modificarse posteriormente.
+- El campo `amount` se ingresa por teclado en el alta; **puede modificarse mientras el pago permanezca en estado `Pending`** (y no esté cancelado; `deletedAt == null`). Si el pago pasa a `Paid` o se cancela, el monto no debe alterarse por los flujos operativos habituales.
 
 ## Diseño Técnico (RFC)
 
@@ -35,7 +35,7 @@ Permitir que un administrativo registre un nuevo pago de forma digital, garantiz
 Se definirá la entidad `Payment` persistente en base de datos, con las siguientes propiedades y restricciones:
 
 - `id`: Identificador único universal (UUID), clave primaria.
-- `amount`: Decimal o número monetario — monto del pago (debe ser > 0, inmutable tras la creación).
+- `amount`: Decimal o número monetario — monto del pago (debe ser > 0); editable solo mientras `status === Pending` y `deletedAt == null`.
 - `description`: Cadena de texto opcional — descripción o concepto del pago.
 - `status`: Enumeración `PaymentStatus` — estado del negocio del pago (`Pending` por defecto al crear).
 - `paymentDate`: Fecha/hora en que se efectúa el pago.
@@ -91,7 +91,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 - **Domain**:
   - Entidad `Payment`.
   - Enum `PaymentStatus`.
-  - Reglas de negocio: validar que `amount` sea válido (> 0), que `paymentDate` esté definido de forma coherent con el modelo, estado inicial `Pending`, `deletedAt` en creación igual a ausente/`null`; `amount` inmutable después de crear.
+  - Reglas de negocio: validar que `amount` sea válido (> 0), que `paymentDate` esté definido de forma coherent con el modelo, estado inicial `Pending`, `deletedAt` en creación igual a ausente/`null`; fuera del alta, `amount` solo puede actualizarse mientras el pago siga `Pending` y sin baja lógica (caso de uso de actualización en otro TDD).
 - **Application**:
   - Caso de uso `CreatePaymentUseCase`: validaciones de dominio aplicables, verificación de socio existente, persistencia del pago con estado inicial `Pending`.
   - Puerto de salida `IPaymentRepository` (`save`, y lecturas según otros TDDs).
@@ -121,12 +121,5 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 6. Crear el endpoint `POST /api/v1/payments` en `PaymentController`.
 7. Conectar el formulario de alta del frontend con el nuevo endpoint.
 
-## Cambios respecto de la versión anterior
 
-- Eliminación del bloque de sintaxis Prisma; modelo descrito solo en inglés como persistencia BD.
-- Nomenclatura en inglés (`amount`, `paymentDate`, `memberId`, `PaymentStatus`: `Pending` / `Paid` / `Canceled`, etc.) y enums/DTO sin español técnico.
-- Respuestas exitosas envueltas en `data`; alineación con mensajes en español vía campo `error` en fallos HTTP.
-- Incorporación de `deletedAt` en el modelo (nullable en alta).
-- Endpoint recurso plural `payments` y DTO `CreatePaymentRequest`.
-- Renombrado de puertos/casos de uso (`IPaymentRepository`, `CreatePaymentUseCase`, `PaymentPrismaRepository`) y sección de arquitectura hexagonal en formato Domain/Application/Infrastructure.
 

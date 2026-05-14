@@ -117,11 +117,5 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización.
 5. Crear el endpoint `PUT /api/v1/payments/:id` en `PaymentController`.
 6. Conectar el formulario de edición del frontend con el nuevo endpoint.
 
-## Cambios respecto de la versión anterior
 
-- Transiciones documentadas (`Pending → Paid`; `Pending → Canceled` solo por `DELETE`; bloqueos de `Paid`/baja aplicada/`Canceled`).
-- DTO `UpdatePaymentRequest`, endpoint `PUT /api/v1/payments/:id`, respuesta en `data`.
-- Reglas coherentes con baja lógica: rechazo ante `deletedAt != null`; sin anular `Paid` por esta historia.
-- Nomenclatura en inglés, `PaymentStatus` con valores `Paid` (confirmado).
-- Hexagonal Domain/Application/Infrastructure formalizado con `UpdatePaymentUseCase` e `IPaymentRepository`.
 
