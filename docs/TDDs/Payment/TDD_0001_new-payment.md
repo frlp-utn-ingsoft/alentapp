@@ -49,7 +49,7 @@ Se definirá la entidad `Payment` con las siguientes propiedades y restricciones
 *   **Request Body**:
 ```ts
 export interface CreatePaymentRequest {
-  memberId: string;
+  member_id: string;
   amount: number;
   month: number;
   year: number;
@@ -60,7 +60,7 @@ export interface CreatePaymentRequest {
 ```ts
 export interface CreatePaymentResponse {
   id: string;
-  memberId: string;
+  member_id: string;
   amount: number;
   month: number;
   year: number;
@@ -98,7 +98,7 @@ La lógica se distribuye en capas para separar las reglas de negocios de los det
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Socio inexistente     | El sistema debe informar que el socio no se encuentra registrado       | 404 Not Found              |
-| Campos obligatorios faltante | El sistema debe informar qué campos requeridos faltan: `memberId`, `amount`, `month`, `year` o `due_date`.   | 400 Bad Request           |
+| Campos obligatorios faltante | El sistema debe informar qué campos requeridos faltan: `member_id`, `amount`, `month`, `year` o `due_date`.   | 400 Bad Request           |
 | amount inválido  | El sistema debe informar que el `amount` debe ser mayor a cero. | 400 Bad Request |
 | Mes de referencia inválido | El sistema debe informar que el `month` debe estar entre 1 y 12. | 400 Bad Request |
 | Año de referencia inválido | El sistema debe informar que el `year` no es válido. | 400 Bad Request |
