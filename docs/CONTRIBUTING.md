@@ -71,7 +71,7 @@ No se permite pushear directamente a la rama `main`. Todas las contribuciones de
     * Todo PR debe usar un template
     * Completar secciones de testing y evidencia cuando aplique
     * Asociar el PR a un issue cuando corresponda (`Closes #ID` o `Refs #ID`)
-    *Toda PR debe ser eliminada una vez fue mergeada con la rama main.
+    *Toda rama debe ser eliminada una vez fue mergeada con la rama main.
 
     ### 📝 Template por defecto
 
