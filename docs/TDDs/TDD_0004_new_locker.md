@@ -58,10 +58,36 @@ Eliminar el registro manual de los lockers del club en planillas de papel, permi
 
 ### Componentes de Arquitectura Hexagonal
 
-1. Puerto: `LockerRepository` (Interface en el Dominio).
-2. Caso de Uso: `CreateLocker` (Lógica que verifica que no exista un locker con el mismo `number` antes de persistir, y setea `status` en `Available` y `memberId` en `null`).
-3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
-4. Adaptador de Entrada: `LockerController` (Ruta HTTP).
+- Dominio
+  - Entity: `Locker`
+  - Value Objects/Enums (van en el Shared ya que los usan tanto en back como el front)
+    - `LockerStatus`
+  - DomainService: `LockerValidator` o `LockerDomainService`
+    - Valida `number` positivo, `location` obligatoria y unicidad del `number`.
+    - Aplica los valores iniciales: `status: 'Available'` y `memberId: null`.
+- Aplicacion
+  - Caso de Uso
+    - `CreateLockerUseCase`
+  - Puertos
+    - `LockerRepository`
+      - `create(locker)`
+      - `findByNumber(number)`
+  - DTOs (Van en el Shared ya que los usan tanto en back como el front)
+    - `CreateLockerRequest`
+    - `LockerResponse`
+- Infraestructura
+  - Adaptadores de Entrada
+    - `LockerController`
+    - Rutas registradas en `app.ts` para `POST /api/v1/lockers` (sin `LockerRouter` separado si se mantiene el patron actual del proyecto).
+  - Adaptadores de Salida
+    - `PostgresLockerRepository`
+  - Mappers
+    - `LockerPersistenceMapper` con los metodos:
+      - `ToPersistence`
+      - `ToDomain`
+    - `LockerDTOMapper` con los metodos:
+      - `ToDTO`
+      - Para pasar de DTO a dominio se usa el constructor de la entidad `Locker()`.
 
 ## Casos de Borde y Errores
 

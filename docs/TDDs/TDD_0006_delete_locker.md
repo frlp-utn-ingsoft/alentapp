@@ -46,10 +46,36 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 
 ### Componentes de Arquitectura Hexagonal
 
-1. **Puerto**: `LockerRepository` (Método `delete(id)`).
-2. **Caso de Uso**: `DeleteLockerUseCase` (Comprueba existencia previa vía `findById` y delega la eliminación).
-3. **Adaptador de Salida**: `PostgresLockerRepository` (Eliminación usando el método `delete` de Prisma).
-4. **Adaptador de Entrada**: `LockerController` (Ruta HTTP que extrae el `id` y devuelve la respuesta de éxito).
+- Dominio
+  - Entity: `Locker`
+  - Value Objects/Enums (van en el Shared ya que los usan tanto en back como el front)
+    - `LockerStatus`
+  - DomainService: `LockerValidator` o `LockerDomainService`
+    - Valida que el locker exista.
+    - Valida que `memberId` sea `null` antes de permitir el borrado.
+- Aplicacion
+  - Caso de Uso
+    - `DeleteLockerUseCase`
+  - Puertos
+    - `LockerRepository`
+      - `findById(id)`
+      - `delete(id)`
+  - DTOs (Van en el Shared ya que los usan tanto en back como el front)
+    - No aplica request body: se usa el `id` de la ruta.
+    - `DeleteLockerResponse` o respuesta simple `{ id: string }`.
+- Infraestructura
+  - Adaptadores de Entrada
+    - `LockerController`
+    - Rutas registradas en `app.ts` para `DELETE /api/v1/lockers/:id` (sin `LockerRouter` separado si se mantiene el patron actual del proyecto).
+  - Adaptadores de Salida
+    - `PostgresLockerRepository`
+  - Mappers
+    - `LockerPersistenceMapper` con los metodos:
+      - `ToPersistence`
+      - `ToDomain`
+    - `LockerDTOMapper` con los metodos:
+      - `ToDTO`
+      - Para pasar de DTO a dominio se usa el constructor de la entidad `Locker()` si la operacion necesita reconstruir el dominio desde datos persistidos.
 
 ## Casos de Borde y Errores
 

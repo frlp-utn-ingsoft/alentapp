@@ -61,11 +61,41 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
 
 ### Componentes de Arquitectura Hexagonal
 
-1. **Puerto**: `LockerRepository` (Método `update(id, data)`).
-2. **Servicio de Dominio**: `LockerValidator` (Encargado de reutilizar validaciones de number y si el estado es 'Mantenimiento' y se quiere agregar un miembro).
-3. **Caso de Uso**: `UpdateLockerUseCase` (Orquesta la validación y llama al repositorio).
-4. **Adaptador de Salida**: `PostgresLockerRepository` (Actualización usando el método `update` de Prisma).
-5. **Adaptador de Entrada**: `LockerController` (Ruta HTTP que extrae el `id` de la URL y mapea excepciones a códigos HTTP).
+- Dominio
+  - Entity: `Locker`
+  - Value Objects/Enums (van en el Shared ya que los usan tanto en back como el front)
+    - `LockerStatus`
+  - DomainService: `LockerValidator` o `LockerDomainService`
+    - Valida `number`, `location` y `status`.
+    - Valida que no se asigne un socio a un locker en `Maintenance`.
+    - Valida que un locker asignado no pueda pasar a `Maintenance`.
+    - Define la transicion automatica de estado segun `memberId`: `Occupied` si tiene socio y `Available` si queda en `null`.
+- Aplicacion
+  - Caso de Uso
+    - `UpdateLockerUseCase`
+  - Puertos
+    - `LockerRepository`
+      - `findById(id)`
+      - `findByNumber(number)`
+      - `update(id, data)`
+    - `MemberRepository`
+      - `findById(memberId)` para validar que el socio exista cuando se asigna un locker.
+  - DTOs (Van en el Shared ya que los usan tanto en back como el front)
+    - `UpdateLockerRequest`
+    - `LockerResponse`
+- Infraestructura
+  - Adaptadores de Entrada
+    - `LockerController`
+    - Rutas registradas en `app.ts` para `PUT /api/v1/lockers/:id` (sin `LockerRouter` separado si se mantiene el patron actual del proyecto).
+  - Adaptadores de Salida
+    - `PostgresLockerRepository`
+  - Mappers
+    - `LockerPersistenceMapper` con los metodos:
+      - `ToPersistence`
+      - `ToDomain`
+    - `LockerDTOMapper` con los metodos:
+      - `ToDTO`
+      - Para pasar de DTO a dominio se usa el constructor de la entidad `Locker()`.
 
 ## Casos de Borde y Errores
 

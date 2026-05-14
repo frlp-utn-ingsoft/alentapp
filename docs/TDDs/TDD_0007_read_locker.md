@@ -61,10 +61,37 @@ type LockerResponse = {
 
 ### Componentes de Arquitectura Hexagonal
 
-1. **Puerto**: `LockerRepository` (Métodos `findAll()` y `findById(id)`).
-2. **Caso de Uso**: `GetLockersUseCase` (Devuelve el listado completo) y `GetLockerByIdUseCase` (Comprueba existencia y devuelve el detalle).
-3. **Adaptador de Salida**: `PostgresLockerRepository` (Lectura usando los métodos `findMany` y `findUnique` de Prisma).
-4. **Adaptador de Entrada**: `LockerController` (Rutas HTTP que devuelven los resultados serializados).
+- Dominio
+  - Entity: `Locker`
+  - Value Objects/Enums (van en el Shared ya que los usan tanto en back como el front)
+    - `LockerStatus`
+  - DomainService
+    - No aplica para el listado simple.
+    - Para el detalle, la validacion de existencia puede quedar en el caso de uso.
+- Aplicacion
+  - Caso de Uso
+    - `GetLockersUseCase`
+    - `GetLockerByIdUseCase`
+  - Puertos
+    - `LockerRepository`
+      - `findAll()`
+      - `findById(id)`
+  - DTOs (Van en el Shared ya que los usan tanto en back como el front)
+    - No aplica request body: el listado no usa body y el detalle usa el `id` de la ruta.
+    - `LockerResponse`
+- Infraestructura
+  - Adaptadores de Entrada
+    - `LockerController`
+    - Rutas registradas en `app.ts` para `GET /api/v1/lockers` y `GET /api/v1/lockers/:id` (sin `LockerRouter` separado si se mantiene el patron actual del proyecto).
+  - Adaptadores de Salida
+    - `PostgresLockerRepository`
+  - Mappers
+    - `LockerPersistenceMapper` con los metodos:
+      - `ToPersistence`
+      - `ToDomain`
+    - `LockerDTOMapper` con los metodos:
+      - `ToDTO`
+      - Para pasar de DTO a dominio se usa el constructor de la entidad `Locker()` si la operacion necesita reconstruir el dominio desde datos persistidos.
 
 ## Casos de Borde y Errores
 
