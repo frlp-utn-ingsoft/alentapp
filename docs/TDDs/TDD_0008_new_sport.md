@@ -40,15 +40,25 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 ### Contrato de API (@alentapp/shared)
 
 - **Endpoint**: `POST /api/v1/sports`
-- **Request Body**: (CreateSportRequest)
-- **Response Body**: 201 Created
+- **Request Body** (CreateSportRequest):
 ```ts
 {
-  name: string;               // Único
-  description?: string;       
-  max_capacity: number;       // Entero > 0
-  additional_price?: number;  
-  requires_medical_certificate?: boolean; // default false
+  name: string;                            // Único
+  description?: string;
+  max_capacity: number;                    // Entero > 0
+  additional_price?: number;               // >= 0 si se especifica
+  requires_medical_certificate?: boolean;  // default false
+}
+```
+- **Response Body** (201 Created):
+```ts
+{
+  id: string;
+  name: string;
+  description: string | null;
+  max_capacity: number;
+  additional_price: number | null;
+  requires_medical_certificate: boolean;
 }
 ```
 
@@ -61,13 +71,13 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 ## Casos de Borde y Errores
 
 | Escenario                        | Resultado Esperado                                      | Código HTTP       |
-|----------------------------------|---------------------------------------------------------|-------------------|
-| `name` ya registrado             | Mensaje: "El deporte ya existe"                         | 409 Conflict      |
-| `max_capacity` es 0 o negativo   | Mensaje: "La capacidad maxima debe ser mayor a cero"    | 400 Bad Request   |
-| `max_capacity` no es entero      | Mensaje: "La capacidad maxima debe ser un numero entero"| 400 Bad Request   |
-| `aditioanl_price` menor que cero | Mensaje: "El precio adicional debe ser mayor a cero"    | 400 Bad Request   |
-| `name` ausente en el body        | Mensaje: "El nombre del deporte es obligatorio"         | 400 Bad Request   |
-| Body vacío                       | Error de validación: campos requeridos faltantes        | 400 Bad Request   |
+|------------------------------------------|---------------------------------------------------------|-------------------|
+| `name` ya registrado                     | Mensaje: "El deporte ya existe"                         | 409 Conflict      |
+| `max_capacity` es 0 o negativo           | Mensaje: "La capacidad maxima debe ser mayor a cero"    | 400 Bad Request   |
+| `max_capacity` no es entero              | Mensaje: "La capacidad maxima debe ser un numero entero"| 400 Bad Request   |
+| `additional_price` no puede ser negativo | Mensaje: "El precio adicional no puede ser negativo" | 400 Bad Request   |
+| `name` ausente en el body                | Mensaje: "El nombre del deporte es obligatorio"         | 400 Bad Request   |
+| Body vacío                               | Error de validación: campos requeridos faltantes        | 400 Bad Request   |
 
 ## Plan de Implementación
 1. Definir tipos `CreateSportDto` y `SportResponseDto` en `@alentapp/shared`.

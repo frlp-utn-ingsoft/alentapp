@@ -6,7 +6,7 @@ fecha: 2026-05-01
 titulo: Consulta de Deporte (Sport)
 ---
 
-# TDD-0011: Consulta de Deporte
+# TDD-0011: Listado y Consultas de Deportes Existentes
 
 ## Contexto de Negocio (PRD)
 

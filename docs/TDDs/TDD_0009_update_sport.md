@@ -42,14 +42,24 @@ Campo **inmutable** (no editable post-creación):
 ### Contrato de API (@alentapp/shared)
 
 - **Endpoint**: `PATCH /api/v1/sports/:id`
-- **Request Body**: (UpdateSportRequest)
-- **Response Body**: 200 OK
+- **Request Body** (UpdateSportRequest):
 ```ts
 {
   description?: string;
   max_capacity?: number;       // Entero > 0 si se especifica
-  additional_price?: number;
+  additional_price?: number;   // >= 0 si se especifica
   requires_medical_certificate?: boolean;
+}
+```
+- **Response Body** (200 OK):
+```ts
+{
+  id: string;
+  name: string;
+  description: string | null;
+  max_capacity: number;
+  additional_price: number | null;
+  requires_medical_certificate: boolean;
 }
 ```
 
@@ -62,13 +72,13 @@ Campo **inmutable** (no editable post-creación):
 ## Casos de Borde y Errores
 
 | Escenario                               | Resultado Esperado                                      | Código HTTP       |
-|-----------------------------------------|---------------------------------------------------------|-------------------|
-| `id` no corresponde a ningún deporte    | Mensaje: "Deporte no encontrado"                        | 404 Not Found     |
-| Se intenta modificar `name`             | Mensaje: "El nombre del deporte no puede modificarse"   | 400 Bad Request   |
-| `max_capacity` es 0 o negativo          | Mensaje: "La capacidad maxima debe ser mayor a cero"    | 400 Bad Request   |
-| `aditional_price` es negativo           | Mensaje: "El precio adicional debe ser mayor a cero"    | 400 Bad Request   |
-| Body vacío (sin campos a actualizar)    | Mensaje: "Se requiere al menos un campo para actualizar"| 400 Bad Request   |
-| Actualización exitosa                   | Retorna el deporte con los datos actualizados           | 200 OK            |
+|-----------------------------------------|---------------------------------------------------------------|-------------------|
+| `id` no corresponde a ningún deporte    | Mensaje: "Deporte no encontrado"                              | 404 Not Found     |
+| Se intenta modificar `name`             | Mensaje: "El nombre del deporte no puede modificarse"         | 400 Bad Request   |
+| `max_capacity` es 0 o negativo          | Mensaje: "La capacidad maxima debe ser mayor a cero"          | 400 Bad Request   |
+| `additional_price` es negativo           | Mensaje: "El precio adicional debe ser mayor o igual a cero" | 400 Bad Request   |
+| Body vacío (sin campos a actualizar)    | Mensaje: "Se requiere al menos un campo para actualizar"      | 400 Bad Request   |
+| Actualización exitosa                   | Retorna el deporte con los datos actualizados                 | 200 OK            |
 
 ## Plan de Implementación
 1. Definir tipo `UpdateSportDto` en `@alentapp/shared` (sin el campo `name`).
