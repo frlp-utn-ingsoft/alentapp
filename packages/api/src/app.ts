@@ -79,8 +79,8 @@ export function buildApp() {
     /*server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));*/
     server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
 
-    server.get('/api/v1/deportes', sportController.getAll.bind(sportController));
-    server.post('/api/v1/deportes', sportController.create.bind(sportController));
+    server.get('/api/v1/sport', sportController.getAll.bind(sportController));
+    server.post('/api/v1/sport', sportController.create.bind(sportController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
