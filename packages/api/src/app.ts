@@ -65,8 +65,8 @@ export function buildApp() {
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
 
-    server.get('/api/v1/deportes', sportController.getAll.bind(sportController));
-    server.post('/api/v1/deportes', sportController.create.bind(sportController));
+    server.get('/api/v1/sport', sportController.getAll.bind(sportController));
+    server.post('/api/v1/sport', sportController.create.bind(sportController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
