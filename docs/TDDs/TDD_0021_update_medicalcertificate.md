@@ -20,16 +20,16 @@ Permitir la corrección de datos cargados erróneamente en un certificado médic
 ### Criterios de Aceptación
 *   El sistema debe permitir la edición de: fecha de emisión, fecha de vencimiento, matrícula y nombre de la institución.
 *   El sistema debe validar que, si se modifica la fecha de vencimiento, esta siga siendo posterior a la fecha de emisión.
-*   No se debe permitir cambiar el `member_id` asociado; si el certificado se cargó al socio equivocado, debe anularse y crearse uno nuevo.
+*   No se debe permitir cambiar el `miembroID` asociado; si el certificado se cargó al socio equivocado, debe anularse y crearse uno nuevo.
 *   Al finalizar la edición, el sistema debe confirmar que los cambios fueron persistidos exitosamente.
 
 ## Diseño Técnico (RFC)
 
 ### Modelo de Datos
 La operación de actualización impacta sobre la entidad `MedicalCertificate` existente en Prisma:
-*   `fecha_emision`: DateTime (Editable).
-*   `fecha_vencimiento`: DateTime (Editable, con validación de rango).
-*   `medico_matricula`: String (Editable).
+*   `fechaEmision`: DateTime (Editable).
+*   `fechavencimiento`: DateTime (Editable, con validación de rango).
+*   `medicoMatricula`: String (Editable).
 *   `institucion`: String (Editable).
 
 ### Contrato de API (@alentapp/shared)
@@ -39,9 +39,9 @@ Definición del contrato para la actualización parcial (Put):
 *   **Request Body (UpdateMedicalCertificateRequest)**:
 ```ts
 {
-    fecha_emision?: string;
-    fecha_vencimiento?: string;
-    medico_matricula?: string;
+    fechaEmision?: string;
+    fechaVencimiento?: string;
+    medicoMatricula?: string;
     institucion?: string;
 }
 ```
@@ -49,7 +49,7 @@ Definición del contrato para la actualización parcial (Put):
 ### Componentes de Arquitectura Hexagonal
 *   **Domain**:
 	* Lógica de validación de fecha dentro de la entidad de dominio MedicalCertificate.
-	* Puerto MedicalCertificateRepository: Método update(id, data).
+	* Puerto MedicalCertificateRepository: Método Update(id, data).
 
 *   **Application**:
 	* Caso de uso UpdateMedicalCertificate: Se encarga de recuperar el registro actual, aplicar las validaciones de negocio sobre los nuevos datos y solicitar la persistencia.
@@ -61,8 +61,8 @@ Definición del contrato para la actualización parcial (Put):
 | Escenario                                      | Resultado Esperado                                                         | Código HTTP     |     
 | -----------------------------------------------|--------------------------------------------------------------------------- |-----------------| 
 | ID de certificado inexistente                  | Mensaje: "Certificado no encontrado"                                       | 404 Not Found   |      
-| Nueva fecha_vencimiento menor que fecha_emision| Mensaje: "La fecha de vencimiento no puede ser anterior a la de la emisión"| 400 Bad Request |   
-| Intento de modificar member_id                 | El campo debe ser ignorado o retornar error de validación                  | 400 Bad Request |
+| Nueva fechaVencimiento menor que fechaEmision  | Mensaje: "La fecha de vencimiento no puede ser anterior a la de la emisión"| 400 Bad Request |   
+| Intento de modificar miembroId                 | El campo debe ser ignorado o retornar error de validación                  | 400 Bad Request |
 |  Error de concurrencia en BD                   | Mensaje: "El registro fue modificado por otro usuario"                     | 409 Conflict    |
 
 ## Plan de Implementación

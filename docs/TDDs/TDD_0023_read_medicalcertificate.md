@@ -18,8 +18,8 @@ Proveer una interfaz centralizada para que el personal administrativo pueda visu
 *   **Necesidad**: Consultar el estado de salud legal de un socio antes de permitirle realizar acciones condicionadas (como inscripciones a deportes), visualizando tanto el certificado actual como el historial.
 
 ### Criterios de Aceptación
-*   El sistema debe permitir listar todos los certificados asociados a un `member_id` específico.
-*   El sistema debe permitir filtrar la búsqueda para mostrar únicamente el certificado que tiene `esta_validado: true`.
+*   El sistema debe permitir listar todos los certificados asociados a un `miembroId` específico.
+*   El sistema debe permitir filtrar la búsqueda para mostrar únicamente el certificado que tiene `estaValidado: true`.
 *   La respuesta debe incluir los campos: fecha de emisión, vencimiento, institución y matrícula del médico.
 *   Si un socio no tiene certificados registrados, el sistema debe informar que no posee antecedentes médicos.
 
@@ -27,30 +27,30 @@ Proveer una interfaz centralizada para que el personal administrativo pueda visu
 
 ### Modelo de Datos
 La operación de lectura accede a la entidad `MedicalCertificate` en Prisma, realizando consultas de selección y filtrado:
-*   `member_id`: Filtro obligatorio para recuperar el historial de un socio específico.
-*   `esta_validado`: Filtro opcional para obtener solo el certificado vigente.
+*   `miembroId`: Filtro obligatorio para recuperar el historial de un socio específico.
+*   `estaValidado`: Filtro opcional para obtener solo el certificado vigente.
 
 ### Contrato de API (@alentapp/shared)
 Definición de los endpoints de consulta en el paquete compartido:
 
-*   **Endpoint (Listado)**: `GET /api/v1/medical-certificates?memberId={uuid}`
+*   **Endpoint (Listado)**: `GET /api/v1/medical-certificates?miembroId={uuid}`
 *   **Endpoint (Individual)**: `GET /api/v1/medical-certificates/:id`
 *   **Response Body (MedicalCertificateResponse)**:
 ```ts
 {
     id: string;
-    fecha_emision: string;
-    fecha_vencimiento: string;
-    medico_matricula: string;
+    fechaEmision: string;
+    fechaVencimiento: string;
+    medicoMatricula: string;
     institucion: string;
-    esta_validado: boolean;
-    member_id: string
+    estaValidado: boolean;
+    miembroId: string
 }
 ```
 ## Componentes de Arquitectura Hexagonal
 
 * Domain:
-	* Puerto MedicalCertificateRepository: Interfaz que define los métodos findById(id), findAllByMember(memberId) y findActiveByMember(memberId).
+	* Puerto MedicalCertificateRepository: Interfaz que define los métodos findById(id), findAllByMember(miembroId) y findActiveByMember(miembroId).
 
 * Application:
 	* Caso de Uso GetMedicalCertificate: Lógica para recuperar un certificado único por su ID.

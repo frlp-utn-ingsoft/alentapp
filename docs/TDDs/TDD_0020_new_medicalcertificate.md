@@ -63,7 +63,7 @@ Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propie
 ## Casos de Borde y Errores
 | Escenario                              | Resultado Esperado                                           | Código HTTP              |
 | ---------------------------------------| -------------------------------------------------------------| -------------------------|
-| fecha_vencimiento <= fecha_emision     | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request          |
+| fechaVencimiento <= fechaEmision       | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request          |
 | Socio inexistente                      | Mensaje: "Socio no encontrado"                               | 404 Not found            |
 | Datos Obligatorios nulos               | Mensaje: "Datos inválidos"                                   | 400 Bad Request          |
 | Error de conexión a DB                 | Mensaje: "Error interno, reintente más tarde"                | 500 Internal Server Error|
