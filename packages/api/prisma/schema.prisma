@@ -34,6 +34,7 @@ model Member {
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
     lockers Locker[] //
+    sports     Sport[]        @relation("MemberSports")
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
 }
 
@@ -74,6 +75,7 @@ model Sport {
     esFederado                   Boolean
     requires_medical_certificate Boolean
     created_at                   DateTime @default(now())
+    members                      Member[] @relation("MemberSports")
 
     @@map("sports")
 }
