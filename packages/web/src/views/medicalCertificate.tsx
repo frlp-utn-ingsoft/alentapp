@@ -14,7 +14,7 @@ import {
 import { LuPlus, LuRefreshCw } from "react-icons/lu";
 import { useEffect, useState } from "react";
 
-// Tendrás que crear este servicio similar a members.ts
+
 import { medicalCertificatesService } from "../services/medicalCertificates"; 
 
 import { 
