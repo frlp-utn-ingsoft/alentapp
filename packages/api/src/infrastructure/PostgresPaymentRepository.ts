@@ -25,6 +25,14 @@ type DBPayment = {
 };
 
 export class PostgresPaymentRepository implements PaymentRepository {
+    async findAll(): Promise<PaymentDTO[]> {
+        const payments = await prisma.payment.findMany({
+            orderBy: { created_at: 'desc' },
+        });
+
+        return payments.map(this.mapToDTO);
+    }
+
     async create(data: CreatePaymentRequest): Promise<PaymentDTO> {
         const payment = await prisma.payment.create({
             data: {

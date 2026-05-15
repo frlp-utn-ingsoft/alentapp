@@ -1,9 +1,22 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { CreatePaymentRequest } from '@alentapp/shared';
 import type { CreatePaymentUseCase } from '../application/CreatePaymentUseCase.js';
+import type { GetPaymentsUseCase } from '../application/GetPaymentsUseCase.js';
 
 export class PaymentController {
-    constructor(private readonly createPaymentUseCase: CreatePaymentUseCase) {}
+    constructor(
+        private readonly createPaymentUseCase: CreatePaymentUseCase,
+        private readonly getPaymentsUseCase: GetPaymentsUseCase,
+    ) {}
+
+    async getAll(_request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const payments = await this.getPaymentsUseCase.execute();
+            return reply.status(200).send({ data: payments });
+        } catch (error: any) {
+            return reply.status(500).send({ error: error.message });
+        }
+    }
 
     async create(
         request: FastifyRequest<{ Body: CreatePaymentRequest }>,
