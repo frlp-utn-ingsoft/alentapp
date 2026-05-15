@@ -24,7 +24,6 @@ type DBPayment = {
     updated_at: Date;
 };
 
-
 export class PostgresPaymentRepository implements PaymentRepository {
     async create(data: CreatePaymentRequest): Promise<PaymentDTO> {
         const payment = await prisma.payment.create({
@@ -44,9 +43,8 @@ export class PostgresPaymentRepository implements PaymentRepository {
         const payment = await prisma.payment.findUnique({
             where: { id },
         });
-        return payment ? this.mapToDTO(payment) : null; 
+        return payment ? this.mapToDTO(payment) : null;
     }
-
 
     async findByMemberId(member_id: string): Promise<PaymentDTO[]> {
         const payments = await prisma.payment.findMany({
@@ -56,19 +54,36 @@ export class PostgresPaymentRepository implements PaymentRepository {
         return payments.map(this.mapToDTO);
     }
 
-    async findAll(): Promise<PaymentDTO[] > {
+    async findAll(): Promise<PaymentDTO[]> {
         const payments = await prisma.payment.findMany({
             orderBy: { created_at: 'desc' },
         });
         return payments.map(this.mapToDTO);
-        }
+    }
 
-    async findByMemberMonthYear(member_id: string, month: number, year: number): Promise<PaymentDTO | null> {
+    async findByMemberMonthYear(
+        member_id: string,
+        month: number,
+        year: number,
+    ): Promise<PaymentDTO | null> {
         const payment = await prisma.payment.findFirst({
             where: { member_id, month, year },
         });
         return payment ? this.mapToDTO(payment) : null;
     }
 
-
+    private mapToDTO(payment: any): PaymentDTO {
+        return {
+            id: payment.id,
+            member_id: payment.member_id,
+            amount: Number(payment.amount),
+            month: payment.month,
+            year: payment.year,
+            due_date: payment.due_date.toISOString(),
+            status: payment.status,
+            payment_date: payment.payment_date
+                ? payment.payment_date.toISOString()
+                : null,
+        };
+    }
 }
