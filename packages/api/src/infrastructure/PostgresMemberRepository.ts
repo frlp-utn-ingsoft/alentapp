@@ -3,14 +3,6 @@ import { PrismaClient } from '../generated/client/client.js';
 import { MemberRepository } from '../domain/MemberRepository.js';
 import { MemberDTO, CreateMemberRequest, UpdateMemberRequest } from '@alentapp/shared';
 
-if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL environment variable is not set');
-}
-
-const prisma = new PrismaClient({
-    adapter: new PrismaPg(process.env.DATABASE_URL),
-});
-
 type DBMember = {
     id: string;
     dni: string;
@@ -23,8 +15,22 @@ type DBMember = {
 };
 
 export class PostgresMemberRepository implements MemberRepository {
+    private prisma?: PrismaClient;
+
+    private getPrisma(): PrismaClient {
+        if (!process.env.DATABASE_URL) {
+            throw new Error('DATABASE_URL environment variable is not set');
+        }
+
+        this.prisma ??= new PrismaClient({
+            adapter: new PrismaPg(process.env.DATABASE_URL),
+        });
+
+        return this.prisma;
+    }
+
     async create(data: CreateMemberRequest): Promise<MemberDTO> {
-        const member = await prisma.member.create({
+        const member = await this.getPrisma().member.create({
             data: {
                 dni: data.dni,
                 name: data.name,
@@ -38,7 +44,7 @@ export class PostgresMemberRepository implements MemberRepository {
     }
 
     async findById(id: string): Promise<MemberDTO | null> {
-        const member = await prisma.member.findUnique({
+        const member = await this.getPrisma().member.findUnique({
             where: { id },
         });
 
@@ -46,7 +52,7 @@ export class PostgresMemberRepository implements MemberRepository {
     }
 
     async findByDni(dni: string): Promise<MemberDTO | null> {
-        const member = await prisma.member.findUnique({
+        const member = await this.getPrisma().member.findUnique({
             where: { dni },
         });
 
@@ -54,7 +60,7 @@ export class PostgresMemberRepository implements MemberRepository {
     }
 
     async findAll(): Promise<MemberDTO[]> {
-        const members = await prisma.member.findMany({
+        const members = await this.getPrisma().member.findMany({
             orderBy: { created_at: 'desc' },
         });
 
@@ -62,7 +68,7 @@ export class PostgresMemberRepository implements MemberRepository {
     }
 
     async update(id: string, data: UpdateMemberRequest): Promise<MemberDTO> {
-        const member = await prisma.member.update({
+        const member = await this.getPrisma().member.update({
             where: { id },
             data: {
                 ...(data.dni && { dni: data.dni }),
@@ -78,7 +84,7 @@ export class PostgresMemberRepository implements MemberRepository {
     }
 
     async delete(id: string): Promise<void> {
-        await prisma.member.delete({
+        await this.getPrisma().member.delete({
             where: { id },
         });
     }
