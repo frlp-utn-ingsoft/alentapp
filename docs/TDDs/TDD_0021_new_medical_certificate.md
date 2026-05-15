@@ -87,14 +87,14 @@ Se recomienda reforzar la regla de unicidad del estado activo por socio a nivel 
 
 ## Casos de Borde y Errores
 
-| Escenario                       | Resultado Esperado                                                    | Código HTTP actual        |
-| ------------------------------- | --------------------------------------------------------------------- | ------------------------- |
-| Datos faltantes                 | Mensaje: "Faltan campos requeridos"                                   | 400 Bad Request           |
-| Socio inexistente               | Mensaje: "El socio especificado no existe"                            | 404 Not Found             |
-| Fecha de emision invalida       | Mensaje: "La fecha de emision no es valida"                           | 400 Bad Request           |
-| Fecha de vencimiento invalida   | Mensaje: "La fecha de vencimiento debe ser posterior a la de emision" | 400 Bad Request           |
-| Ya existe un certificado activo | El sistema invalida el certificado activo previo y crea el nuevo      | 201 Created               |
-| Error de conexión a DB          | Mensaje: "Error interno, reintente más tarde"                         | 500 Internal Server Error |
+| Escenario                       | Resultado Esperado                                                           | Código HTTP actual        |
+| ------------------------------- | ---------------------------------------------------------------------------- | ------------------------- |
+| Datos faltantes                 | Mensaje: "Faltan campos requeridos"                                          | 400 Bad Request           |
+| Socio inexistente               | Mensaje: "El socio especificado no existe"                                   | 404 Not Found             |
+| Fecha de emision invalida       | Mensaje: "La fecha de emision no es valida"                                  | 400 Bad Request           |
+| Fecha de vencimiento invalida   | Mensaje: "La fecha de vencimiento es invalida o es anterior a la de emision" | 400 Bad Request           |
+| Ya existe un certificado activo | El sistema invalida el certificado activo previo y crea el nuevo             | 201 Created               |
+| Error de conexión a DB          | Mensaje: "Error interno, reintente más tarde"                                | 500 Internal Server Error |
 
 ## Plan de Implementación
 
