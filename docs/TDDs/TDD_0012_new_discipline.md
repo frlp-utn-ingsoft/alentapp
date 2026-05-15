@@ -80,7 +80,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 1. Puerto: IDisciplineRepository (Interface del Dominio).
 2. Caso de Uso: CreateDisciplineUseCase (Lógica que valida fechas y existencia del socio antes de persistir).
-3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
+3. Adaptador de Salida: PostgresDisciplineRepository (Implementación real en BD con Prisma).
 4. Adaptador de Entrada: DisciplineController (Ruta HTTP).
 
 ## Casos de Borde y Errores

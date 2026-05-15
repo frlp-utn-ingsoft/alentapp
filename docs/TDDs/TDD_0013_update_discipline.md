@@ -82,7 +82,7 @@ Los campos omitidos conservarán su valor actual. El endpoint utilizará `PUT` p
 
 1. Puerto: IDisciplineRepository (Interface del Dominio).
 2. Caso de Uso: UpdateDisciplineUseCase (Lógica que valida existencia de la sanción y la coherencia del estado final de las fechas antes de persistir los cambios).
-3. Adaptador de Salida: DB persistence adapter (Implementación real en BD).
+3. Adaptador de Salida: PostgresDisciplineRepository (Implementación real en BD con Prisma).
 4. Adaptador de Entrada: DisciplineController (Ruta HTTP).
 
 ## Casos de Borde y Errores
