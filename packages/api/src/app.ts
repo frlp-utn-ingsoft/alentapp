@@ -19,6 +19,7 @@ import { SportController } from './delivery/SportController.js';
 import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
 import { CreateMedicalCertificateUseCase } from './application/NewMedicalCertificateUseCase.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
+import { DeleteMedicalCertificateUseCase } from './application/DeleteMedicalCertificateUseCase.js';
 
 
 import { PaymentController } from './delivery/PaymentController.js';
@@ -77,12 +78,15 @@ export function buildApp() {
         medicalCertificateRepo,
         memberRepo
     );
+    const deleteMedicalCertificateUseCase =
+    new DeleteMedicalCertificateUseCase(medicalCertificateRepo);
 
     const medicalCertificateController =
-    new MedicalCertificateController(
-        createMedicalCertificateUseCase
-    );
-
+         new MedicalCertificateController(
+            createMedicalCertificateUseCase,
+            deleteMedicalCertificateUseCase,
+        );
+    
     //payment
     const paymentRepo = new PostgresPaymentRepository();
     const paymentValidator = new PaymentValidator(paymentRepo);
@@ -99,7 +103,10 @@ export function buildApp() {
     server.post('/api/v1/sport', sportController.create.bind(sportController));
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
+    
+    //Medical Certificate Endpoints
     server.post('/api/v1/medicalcertificate',medicalCertificateController.create.bind(medicalCertificateController));
+    server.delete('/api/v1/medicalcertificate/:id', medicalCertificateController.delete.bind(medicalCertificateController));
     
     //Payments Endpoints
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
