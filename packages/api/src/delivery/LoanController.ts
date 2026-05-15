@@ -1,12 +1,14 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateLoanUseCase } from '../application/CreateLoanUseCase.js';
 import { GetLoansUseCase } from '../application/GetLoansUseCase.js';
-import { CreateLoanRequest, GetLoansQuery } from '@alentapp/shared';
+import { UpdateLoanStatusUseCase } from '../application/UpdateLoanStatusUseCase.js';
+import { CreateLoanRequest, GetLoansQuery, UpdateLoanStatusRequest } from '@alentapp/shared';
 
 export class LoanController {
     constructor(
         private readonly createLoanUseCase: CreateLoanUseCase,
         private readonly getLoansUseCase: GetLoansUseCase,
+        private readonly updateLoanStatusUseCase: UpdateLoanStatusUseCase,
     ) {}
 
     async create(
@@ -33,6 +35,17 @@ export class LoanController {
         }
     }
 
+    async updateStatus(
+        request: FastifyRequest<{ Params: { id: string }; Body: UpdateLoanStatusRequest }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const loan = await this.updateLoanStatusUseCase.execute(request.params.id, request.body);
+            return reply.status(200).send({ data: loan });
+        } catch (error: any) {
+            return this.handleError(error, reply);
+        }
+    }
 
     private handleError(error: Error, reply: FastifyReply) {
 if (

@@ -434,7 +434,7 @@ export function LoansView() {
                             variant="ghost"
                             colorPalette="red"
                             onClick={() => openDeleteDialog(loan.id)}
-                            disabled={loan.status !== 'Loaned'}
+                            disabled={true}
                           >
                             <LuTrash2 />
                           </Button>
