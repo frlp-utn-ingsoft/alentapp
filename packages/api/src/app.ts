@@ -51,8 +51,7 @@ export function buildApp() {
     const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
     const createMedicalCertificateUseCase = new CreateMedicalCertificateUseCase(medicalCertificateRepo, memberRepo);
     const medicalCertificateController = new MedicalCertificateController(
-        createMedicalCertificateUseCase,
-        medicalCertificateRepo
+        createMedicalCertificateUseCase
     );
 
 
