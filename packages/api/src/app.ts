@@ -13,6 +13,7 @@ import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { SportController } from './delivery/SportController.js';
 
+
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -55,6 +56,7 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
+
     const sportController = new SportController(
         createSportUseCase,
         getSportsUseCase
@@ -64,6 +66,8 @@ export function buildApp() {
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+    server.get('/api/v1/sport', sportController.getAll.bind(sportController));
+    server.post('/api/v1/sport', sportController.create.bind(sportController));
 
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
