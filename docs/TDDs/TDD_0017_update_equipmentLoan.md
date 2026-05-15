@@ -31,7 +31,7 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 
 ### Contrato de API (@alentapp/shared)
 
-- **Endpoint**: `PUT /api/v1/equipment-loans/:id`
+- **Endpoint**: `PATCH /api/v1/equipment-loans/:id`
 - **Request Body**:
 
 ```tsx
@@ -48,11 +48,13 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
     - La estructura de la entidad `EquipmentLoan` y el Value Object `EquipmentLoanStatus` son idénticos a los definidos en el documento base de creación
     - Reglas de Negocio(Transicion de estados): Solo permitir cambiar el estado de `Prestado` a `Devuelto` o `Dañado`y transicionar entre estos ultimos dos. Bloquear el retorno a `Prestado` y congelar la edición de los campos `item_name` y `due_date` si el préstamo ya está finalizado(`Devuelto` o `Dañado`)."
 - **Application**:
-    - Caso de Uso: UpdateEquipmentLoan (Busca el prestamo existente, aplica las reglas de transicion de estados, bloquea los campos correspondientes si es necesario y persiste la entidad modificada utilizando `EquipmentLoanRepository`)
-    - Puertos de Salida: `EquipmentLoanRepository` (Interface de dominio, de la cual necesitamos el metodo `findById()` y `update()`)
+    - Caso de Uso: `UpdateEquipmentLoanUseCase` (Busca el prestamo existente, llama a `EquipmentLoan` para que aplique sus reglas de transicion de estados, bloquea los campos correspondientes si es necesario y persiste la entidad modificada utilizando `IEquipmentLoanRepository`)
+    - Puertos de Salida: `IEquipmentLoanRepository` (Interface de dominio, de la cual necesitamos el metodo `findById()` y `update()`)
+    - DTOs: `UpdateEquipmentLoanRequest` y `EquipmentLoanResponse`(Estos estaran situados en la carpeta @alentapp/shared)
 - **Infrastructure**:
-    - Adaptadores de entrada: `EquimentLoanController` utilizando su ruta `PUT /api/v1/equipment-loans/:id`
+    - Adaptadores de entrada: `EquipmentLoanController` utilizando su ruta `PATCH /api/v1/equipment-loans/:id` y `EquipmentLoanRouter`
     - Adaptadores de salida: DB persistence adaptor (Se reutiliza la implementacion definida en el Alta)
+    - Mappers: `EquipmentLoanPersistenceMapper` con los metodos `ToPersistence` y `ToDomain`.Tambien `EquipmentLoanDTOMapper`con el metodo `ToDTO`.
 
 ## Casos de Borde y Errores
 
@@ -67,9 +69,36 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 
 ## Plan de Implementación
 
-1. Actualizar `@alentapp/shared` para incluir el tipo de petición `UpdateEquipmentLoanRequest`
-2. Crear un servicio de dominio `EquipmentLoanDomainService` para validar las reglas de transición de estado.
-3. Asegurar que `EquipmentLoanRepository` incluya los métodos necesarios para esta operación: `findById()` y `update()`
-4. Desarrollar el caso de uso `UpdateEquipmentLoan`
-5. Implementar de manera concreta en el DB persistence adapter el `UPDATE`en la base de datos
-6. Implementar el endpoint `PUT /api/v1/equipment-loans/:id` en el controlador `EquipmentLoanController`
+---
+
+## Fase 1: Contratos Shared (`@alentapp/shared`)
+1. **Actualizar DTOs**: Crear y exportar `UpdateEquipmentLoanRequest`.
+
+---
+
+## Fase 2: Núcleo de Dominio (Domain)
+2. **Comportamiento en la Entidad `EquipmentLoan`**:
+   - Implementar método para actualizar la informacion: Debe lanzar un error de negocio si el estado actual ya es `Devuelto` o `Dañado` (campos congelados).
+   - Implementar método para cambiar el estado: Validar que solo se permita pasar de `Prestado` a `Devuelto`/`Dañado`. Bloquear cualquier intento de volver a `Prestado`.
+3. **Puertos (Interfaces)**: Asegurar que `IEquipmentLoanRepository` incluya:
+   - `findById()`: Para recuperar la versión actual de la base de datos.
+   - `update()`: Para persistir los cambios en el registro existente.
+
+---
+
+## Fase 3: Lógica de Aplicación (Application)
+4. **Desarrollar `UpdateEquipmentLoanUseCase`**:
+   - **Flujo de orquestación**:
+     1. Obtener la entidad actual desde `IEquipmentLoanRepository`.
+     2. Si no existe, lanzar excepción de negocio.
+     3. Ejecutar los métodos de comportamiento de la entidad con los datos del Request.
+     4. Persistir la entidad modificada mediante el método `update()` del repositorio.
+
+---
+
+## Fase 4: Infraestructura y Mapeo (Infrastructure)
+5. **Adaptadores de Salida**:
+   - Implementar en el `DB persistence adapter` la lógica para buscar por ID y realizar el `UPDATE` real en la base de datos.
+   - Asegurar que el `EquipmentLoanPersistenceMapper` procese correctamente los cambios de estado y fechas.
+6. **Adaptadores de Entrada**:
+   - Implementar en `EquipmentLoanController` el método vinculado a `PUT /api/v1/equipment-loans/:id`.
