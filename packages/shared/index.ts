@@ -33,6 +33,31 @@ export interface UpdateMemberRequest {
 }
 
 // ==========================================
+// Payment
+// ==========================================
+
+export type PaymentStatus = 'Pendiente' | 'Pagado' | 'Vencido' | 'Cancelado';
+
+export interface PaymentDTO {
+   id: string; //uuid
+   member_id: string; //FK uuid
+   amount: number;
+   month: number;
+   year: number;
+   due_date: string; // ISO Date String (YYYY-MM-DD)
+   payment_date: string | null; // ISO Date String (YYYY-MM-DD)
+   status: PaymentStatus;
+}
+
+export interface CreatePaymentRequest {
+  member_id: string;
+  amount: number;
+  month: number;
+  year: number;
+  due_date: string; // ISO Date String (YYYY-MM-DD)
+  status?: PaymentStatus; // Opcional, por defecto 'Pendiente'
+}
+
 // Sport
 // ==========================================
 export interface SportDTO {
