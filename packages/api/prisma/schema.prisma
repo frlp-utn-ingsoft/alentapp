@@ -18,6 +18,13 @@ enum MemberCategory {
     Honorario
 }
 
+enum PaymentStatus {
+    Pending
+    Paid
+    Canceled
+}
+
+
 enum MemberStatus {
     Activo
     Moroso
@@ -34,5 +41,25 @@ model Member {
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
 
+    payments Payment[]
+
+
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+}
+
+model Payment {
+    id           String        @id @default(uuid())
+    amount       Float
+    month        Int
+    year         Int
+    status       PaymentStatus @default(Pending)
+    due_date     DateTime      @db.Date
+    payment_date DateTime?
+    member_id    String
+    member       Member        @relation(fields: [member_id], references: [id])
+    created_at   DateTime      @default(now())
+    updated_at   DateTime      @updatedAt
+
+    @@index([member_id])
+    @@map("payments")
 }
