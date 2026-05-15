@@ -60,7 +60,7 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 1. **Puerto**: `IDisciplineRepository` (Método `softDelete(id)`).
 2. **Caso de Uso**: `DeleteDisciplineUseCase` (Valida la existencia previa mediante `findById` y marca la sanción como eliminada lógicamente mediante `deletedAt`.).
 3. **Adaptador de Salida**: `PostgresDisciplineRepository` (Actualización lógica de la entidad marcando `deletedAt`).
-4. **Adaptador de Entrada**: `DisciplineController` (Extrae el `id` de la request y devuelve status 204).
+4. **Adaptador de Entrada**: `DisciplineController` (Extrae el `id` de la request y devuelve status 200).
 
 ## Casos de Borde y Errores
 

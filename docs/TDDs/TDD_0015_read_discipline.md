@@ -46,8 +46,8 @@ Se exponen dos endpoints de lectura: uno para el listado completo y otro para el
         isTotalSuspension: boolean;
         memberId: string;
         deletedAt: string | null;
-        createdAt: string;      // ← AGREGAR
-        updatedAt: string;      // ← AGREGAR
+        createdAt: string;      
+        updatedAt: string;      
     }
 }
 ```
@@ -91,7 +91,7 @@ Nota: Las sanciones con deletedAt != null (desactivadas) pueden ser consultadas 
 | Listado sin sanciones cargadas           | Array vacío `[]`                              | 200 OK                    |
 | Consulta exitosa de listado              | Array con todas las sanciones                 | 200 OK                    |
 | Consulta exitosa por `id`                | Objeto con los datos de la sancion            | 200 OK                    |
-| Sancion inexistente al consultar por `id`| Mensaje: "La sancion no existe"               | 404 Not Found             |
+| Sanción inexistente al consultar por `id`| Mensaje: "La sanción no existe"               | 404 Not Found             |
 | Error de conexión a DB                   | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |
 
 ## Plan de Implementación
