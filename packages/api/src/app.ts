@@ -12,6 +12,9 @@ import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { SportController } from './delivery/SportController.js';
+import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
+import { CreateMedicalCertificateUseCase } from './application/NewMedicalCertificateUseCase.js';
+import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
 
 
 export function buildApp() {
@@ -62,15 +65,28 @@ export function buildApp() {
         getSportsUseCase
     );
 
+    const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
+
+    const createMedicalCertificateUseCase =
+    new CreateMedicalCertificateUseCase(
+        medicalCertificateRepo,
+        memberRepo
+    );
+
+    const medicalCertificateController =
+    new MedicalCertificateController(
+        createMedicalCertificateUseCase
+    );
+
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
-
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
+    server.post('/api/v1/medicalcertificate',medicalCertificateController.create.bind(medicalCertificateController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
