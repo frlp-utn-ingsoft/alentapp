@@ -13,10 +13,6 @@ import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { SportController } from './delivery/SportController.js';
 
-import { PostgresMedicalCertificateRepository } from './MedicalCertificate/infrastructure/PostgresMedicalCertificateRepository.js';
-import { CreateMedicalCertificateUseCase } from './MedicalCertificate/application/CreateMedicalCertificateUseCase.js';
-import { MedicalCertificateController } from './MedicalCertificate/delivery/MedicalCertificateController.js';
-
 
 export function buildApp() {
     const server = Fastify({
@@ -60,12 +56,6 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
-    const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
-    const createMedicalCertificateUseCase = new CreateMedicalCertificateUseCase(medicalCertificateRepo, memberRepo);
-    const medicalCertificateController = new MedicalCertificateController(
-        createMedicalCertificateUseCase
-    );
-
 
     const sportController = new SportController(
         createSportUseCase,
@@ -76,9 +66,6 @@ export function buildApp() {
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
-    /*server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));*/
-    server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
-
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
 

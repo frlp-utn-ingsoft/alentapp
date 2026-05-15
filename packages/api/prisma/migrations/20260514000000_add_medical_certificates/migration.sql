@@ -9,3 +9,11 @@ CREATE TABLE "medical_certificates" (
 
     CONSTRAINT "medical_certificates_pkey" PRIMARY KEY ("id")
 );
+
+-- AddForeignKey
+ALTER TABLE "medical_certificates"
+ADD CONSTRAINT "medical_certificates_member_id_fkey"
+FOREIGN KEY ("member_id")
+REFERENCES "members"("id")
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
