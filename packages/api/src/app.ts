@@ -8,6 +8,11 @@ import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 
+import { PostgresMedicalCertificateRepository } from './MedicalCertificate/infrastructure/PostgresMedicalCertificateRepository.js';
+import { CreateMedicalCertificateUseCase } from './MedicalCertificate/application/CreateMedicalCertificateUseCase.js';
+import { MedicalCertificateController } from './MedicalCertificate/delivery/MedicalCertificateController.js';
+
+
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -43,10 +48,20 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
+    const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
+    const createMedicalCertificateUseCase = new CreateMedicalCertificateUseCase(medicalCertificateRepo, memberRepo);
+    const medicalCertificateController = new MedicalCertificateController(
+        createMedicalCertificateUseCase,
+        medicalCertificateRepo
+    );
+
+
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+    server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));
+    server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
