@@ -24,8 +24,8 @@ Digitalizar y controlar la entrega de material y equipamiento deportivo del club
 - El sistema debe verificar obligatoriamente la categoría del socio antes de procesar el préstamo.
 - El sistema debe permitir el préstamo únicamente a los socios con categoría "Senior" o "Lifetime".
 - El sistema debe rechazar y bloquear la solicitud de préstamo si el socio pertenece a la categoría "Cadet".
-- Al crearse, el préstamo debe inicializarse automáticamente con el status "Prestado".
-- Se debe registrar la fecha y hora exacta del préstamo (fecha_prestado).
+- Al crearse, el préstamo debe inicializarse automáticamente con el status "Loaned".
+- Se debe registrar la fecha y hora exacta del préstamo (loan_date).
 
 ## Diseño Técnico (RFC)
 
@@ -34,10 +34,10 @@ Digitalizar y controlar la entrega de material y equipamiento deportivo del club
 Se definirá la entidad `EquipmentLoan` con las siguientes propiedades y restricciones de acuerdo al DER:
 
 - `id`: Identificador único universal (UUID).
-- `item_nombre`: Cadena de texto, nombre del artículo prestado.
-- `estado`: Enumeración (`Prestado`, `Devuelto`, `Dañado`).
-- `fecha_prestado`: Fecha y hora (datetime) del momento de la entrega.
-- `fecha_devolucion`: Fecha y hora (datetime) estipulada para la devolución.
+- `item_name`: Cadena de texto, nombre del artículo prestado.
+- `status`: Enumeración (`Loaned`, `Returned`, `Damaged`).
+- `loan_date`: Fecha y hora (datetime) del momento de la entrega.
+- `due_date`: Fecha y hora (datetime) estipulada para la devolución.
 - `member_id`: Identificador único universal (UUID), clave foránea que referencia al socio.
 
 ### Contrato de API (@alentapp/shared)
@@ -48,8 +48,8 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 - Request Body (CreateEquipmentLoanRequest):
 ```ts
 {
-    nombre_item: string;
-    fecha_devolucion: string; 
+    item_name: string;
+    due_date: string; 
     member_id: string;
 }
 ```
@@ -64,7 +64,7 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 ## Casos de Borde y Errores
 
 | Escenario                  | Resultado Esperado                                                    | Código HTTP               |
-| -------------------------- | ---------------------------------------------------------------- ---- | ------------------------- |
+| -------------------------- | --------------------------------------------------------------------- | ------------------------- |
 | Socio es categoría Cadet   | Mensaje: "Los socios Cadet tiene prohibido solicitar material"        | 403 Forbidden             |
 | Socio no existe            | Mensaje: "El socio referenciado no existe"                            | 404 Not Found             |
 | Faltan datos obligatorios  | Mensaje: "El nombre del ítem y la fecha de devolución son requeridos" | 400 Bad Request           |
