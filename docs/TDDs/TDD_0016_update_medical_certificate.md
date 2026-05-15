@@ -50,7 +50,7 @@ Reglas de negocio y restricciones de API:
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
-* **Endpoint**: `PUT /api/v1/medical-certificates/:id`
+* **Endpoint**: `PATCH /api/v1/medical-certificates/:id`
 * **Request Body (UpdateMedicalCertificateRequest)**:
 
 ```ts
@@ -150,7 +150,7 @@ model MedicalCertificate {
 2. Ampliar el puerto `MedicalCertificateRepository` con `findById` y `update`.
 3. Implementar la validación de fechas en el Dominio.
 4. Desarrollar `UpdateMedicalCertificateUseCase` con la lógica transaccional de validación (único `validated` por socio).
-5. Implementar el endpoint `PUT` en el controlador.
+5. Implementar el endpoint `PATCH` en el controlador.
 6. Realizar pruebas unitarias y de integración.
 
 ## 6. Observaciones Adicionales
