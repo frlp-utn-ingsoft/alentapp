@@ -95,12 +95,14 @@ export function buildApp() {
     const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase);
 
     //Endpoints
+
+    //Member Endpoints
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
-    server.get('/api/v1/sport', sportController.getAll.bind(sportController));
-    server.post('/api/v1/sport', sportController.create.bind(sportController));
+
+    //Sport EndPoints
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
     

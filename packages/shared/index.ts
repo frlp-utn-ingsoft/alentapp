@@ -61,6 +61,7 @@ export interface CreatePaymentRequest {
   status?: PaymentStatus; // Opcional, por defecto 'Pendiente'
 }
 
+// ==========================================
 // Sport
 // ==========================================
 export interface SportDTO {
@@ -78,6 +79,11 @@ export interface CreateSportRequest {
   max_capacity: number;
   additional_price: number;
   requires_medical_certificate: boolean;
+}
+
+export interface UpdateSportRequest {
+  description?: string;
+  max_capacity?: number;
 }
 
 // ==========================================
