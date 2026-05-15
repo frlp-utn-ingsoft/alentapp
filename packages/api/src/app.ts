@@ -97,8 +97,8 @@ export function buildApp() {
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
-    server.get('/api/v1/sport', sportController.getAll.bind(sportController));
-    server.post('/api/v1/sport', sportController.create.bind(sportController));
+
+    
     server.post('/api/v1/medicalcertificate',medicalCertificateController.create.bind(medicalCertificateController));
     
     //Payments Endpoints
