@@ -31,3 +31,20 @@ export interface UpdateMemberRequest {
   category?: MemberCategory;
   status?: MemberStatus;
 }
+
+// ==========================================
+// Payment
+// ==========================================
+
+export type PaymentStatus = 'Pendiente' | 'Pagado' | 'Vencido' | 'Cancelado';
+
+export interface PaymentDTO {
+   id: string; //uuid
+   member_id: string; //FK uuid
+   amount: number;
+   month: number;
+   year: number;
+   due_date: Date;
+   payment_date: Date | null;
+   status: PaymentStatus;
+}
