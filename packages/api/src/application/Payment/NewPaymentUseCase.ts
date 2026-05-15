@@ -4,7 +4,7 @@ import { PaymentDTO, CreatePaymentRequest } from "@alentapp/shared";
 import { PaymentValidator } from "../../domain/services/PaymentValidator.js";
 import { MemberRepository } from "../../domain/MemberRepository.js";
 
-export class NewPaymentUseCase {
+export class CreatePaymentUseCase {
     constructor(
         private readonly paymentRepository: PaymentRepository,
         private readonly paymentValidator: PaymentValidator,
