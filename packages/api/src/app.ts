@@ -13,6 +13,9 @@ import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
 import { LockerController } from './delivery/LockerController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
+import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { SportValidator } from './domain/services/SportValidator.js';
 import { SportController } from './delivery/SportController.js';
 import { UpdateLockerEstadoUseCase } from './application/UpdateLockerEstadoUseCase.js';
 import { LockerEstadoValidator } from './domain/services/LockerEstadoValidator.js';
@@ -88,10 +91,15 @@ export function buildApp() {
 
     // sports
     const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator();
+    const getSportsUseCase = new GetSportsUseCase(sportRepo);
     const createSportUseCase = new CreateSportUseCase(sportRepo);
-    const sportController = new SportController(createSportUseCase);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
+    const sportController = new SportController(getSportsUseCase, createSportUseCase, updateSportUseCase);
 
+    server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
+    server.put('/api/v1/sports/:id', sportController.update.bind(sportController));
     
     // disciplines
     const disciplineRepo = new PostgresDisciplineRepository();

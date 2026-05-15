@@ -75,6 +75,11 @@ export interface CreateSportRequest {
   requires_medical_certificate: boolean;
 }
 
+export interface UpdateSportRequest {
+  descripcion?: string;
+  cupoMaximo?: number;
+}
+
 export interface GetLockersFilters {
   estado?: LockerEstado;
   ubicacion?: LockerUbicacion;
