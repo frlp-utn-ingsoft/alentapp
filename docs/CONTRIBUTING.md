@@ -87,15 +87,20 @@ No se permite pushear directamente a la rama `main`. Todas las contribuciones de
 
 Usar siempre una etiqueta al inicio del comentario para indicar prioridad y tipo:
 
-    * **[Blocking]** → Debe resolverse antes de mergear (bug, error lógico, rompe funcionalidad)
-    * **[Bug]** → Comportamiento incorrecto (puede o no ser blocking)
-    * **[Security]** → Riesgo de seguridad
-    * **[Performance]** → Impacto en performance
-    * **[Refactor]** → Mejora de estructura sin cambiar comportamiento
-    * **[Suggestion]** → Mejora recomendada (no obligatoria)
-    * **[Docs]** → Falta o mejora de documentación
-    * **[Test]** → Falta o mejora de tests
-    * **[Nit]** → Detalle menor (nombres, formato, estilo)
+    * [Blocking] → Debe resolverse antes de mergear (bug, error lógico, rompe funcionalidad)
+    * [Bug] → Comportamiento incorrecto (puede o no ser blocking)
+    * [Security] → Riesgo de seguridad
+    * [Performance] → Impacto en performance
+    * [Refactor] → Mejora de estructura sin cambiar comportamiento
+    * [Suggestion] → Mejora recomendada (no obligatoria)
+    * [Docs] → Falta o mejora de documentación
+    * [Test] → Falta o mejora de tests
+    * [Nit] → Detalle menor (nombres, formato, estilo)
+    * [Approved] → Aprobación de los cambios hechos en la PR
+    * [Query] → Consulta por no comprender
+    * [Response] → Respuesta a comentario anterior
+    
+
 
 ---
 
@@ -107,7 +112,8 @@ Usar siempre una etiqueta al inicio del comentario para indicar prioridad y tipo
         [Etiqueta] archivo.ext:Línea(s)
 
         Problema:
-        Descripción clara del issue
+        @usuario_que_creo_la_pr
+        Descripción clara del issue.
 
         Impacto:
         Por qué importa (error, legibilidad, performance, etc.)
@@ -121,6 +127,7 @@ Usar siempre una etiqueta al inicio del comentario para indicar prioridad y tipo
         [Blocking] payments.service.ts:52-60
 
         Problema:
+        @melissita
         No se valida si el usuario es null
 
         Impacto:
@@ -132,14 +139,17 @@ Usar siempre una etiqueta al inicio del comentario para indicar prioridad y tipo
 
     ---
 
-### 3.3 🔄 Formato de respuesta (autor del PR)
+### 3.3 🔄 Formato de respuesta 
 
-    El autor debe responder cada comentario usando este esquema:
+    Todo contribuidor debe responder cada comentario usando este esquema:
 
     ```
-    Estado: [Resuelto | En progreso | Rechazado]
+    [Etiqueta] Referencia: Link del comentario
+
+    Estado: [Resuelto | En progreso | Rechazado] 
 
     Respuesta:
+    @usuario_que_creo_el_comentario
     Qué se hizo o justificación
 
     Referencia:
@@ -147,9 +157,12 @@ Usar siempre una etiqueta al inicio del comentario para indicar prioridad y tipo
     ```
     **Ejemplo:**
     ```
+    [Response] (#7(comment))
+
     Estado: Resuelto
 
     Respuesta:
+    Hola! @melissa.braunstein 
     Se agregó validación null en el servicio
 
     Referencia:
@@ -160,12 +173,12 @@ Usar siempre una etiqueta al inicio del comentario para indicar prioridad y tipo
 
 ### 3.4 ✅ Reglas
 
-    * Un comentario = un problema
+    * El comentario debe ser atómico. Sea por una problemática encontrada, comentario de aporbación o duda, se debe hacer un comentario por cada caso, no un comentario enorme. 
     * Usar siempre etiqueta
     * Marcar claramente los **Blocking**
     * Incluir propuesta cuando sea posible
     * El autor debe responder todos los comentarios antes del merge
-
+ 
 ---
 ## 4. 🎨 Estándares de Código
 *   **Linting**: Asegúrate de correr `npm run lint` antes de commitear.
