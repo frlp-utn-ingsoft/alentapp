@@ -57,3 +57,22 @@ export interface CreatePaymentRequest {
   due_date: string; // ISO Date String (YYYY-MM-DD)
   status?: PaymentStatus; // Opcional, por defecto 'Pendiente'
 }
+
+// Sport
+// ==========================================
+export interface SportDTO {
+  id: string;
+  name: string
+  description?: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+}
+
+export interface CreateSportRequest {
+  name: string;
+  description?: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+}

@@ -1,5 +1,5 @@
 ---
-id: 0004
+id: 0001
 estado: En proceso
 autor: Yanina Fatima Ester Martinez
 fecha: 2026-04-30
@@ -16,7 +16,7 @@ Permitir el registro de nuevos deportes en el sistema, garantizando que el depor
 
 ### User Persona
 
-*   **Nombre**: Administrador
+*   **Nombre**: Juan Perez (Administrador)
 *   **Necesidad**: Como administrador, quiero registrar un nuevo deporte en el sistema para que los socios puedan inscribirse en él, asegurando que la capacidad máxima sea un valor válido mayor a cero. 
 
 ### Criterios de Aceptación
@@ -53,6 +53,17 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
     requires_medical_certificate: boolean;
 }
 ```
+*   **Response Body**: `201 Created` en caso de éxito.
+```ts
+{
+    id: string;
+    name: string;
+    description?: string;
+    max_capacity: number;
+    additional_price: number;
+    requires_medical_certificate: boolean;
+}
+```
 
 ### Componentes de Arquitectura Hexagonal
 
@@ -70,8 +81,6 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 | ----------------------------| --------------------------------------------- | ------------------------- |
 | Capacidad máxima inválida     | Mensaje: "La capacidad máxima debe ser mayor a cero"       | 400 Bad Request              |
 | Nombre ya existente | Mensaje: "Ya existe un deporte con ese nombre"         | 409 Conflict          |
-| Nombre sin definir  | Mensaje: "El nombre del deporte es obligatorio"         | 400 Bad Request          |
-| Capacidad máxima sin definir  | Mensaje: "La capacidad máxima es obligatoria"         | 400 Bad Request          |
 | Error de conexión a DB     | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |       |
 
 ## Plan de Implementación
@@ -82,4 +91,5 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 4. Definir el puerto `SportRepository` en domain e implementar el caso de uso `create`.
 5. Implementar el repositorio `PostgresSportRepository` en infrastructure.
 6. Crear el controlador `SportController` con la ruta `POST /api/v1/sport`.
-7. Crear el formulario en React y conectar con el endpoint del backend.
+7. Añadir el método `create` al servicio Frontend.
+9. Crear el formulario en React y conectar con el endpoint del backend.
