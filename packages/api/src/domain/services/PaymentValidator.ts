@@ -35,13 +35,13 @@ export class PaymentValidator {
 
     validateYear(year: number): void {
         if (!Number.isInteger(year) || year < 1900) {
-            throw new Error('El año no es válido');
+            throw new Error('El año es inválido');
         }
     }
 
     validateDueDate(dueDate: string): void {
         if (!this.isValidDateOnly(dueDate)) {
-            throw new Error('La fecha de vencimiento no es válida');
+            throw new Error('La fecha de vencimiento es inválida.');
         }
     }
 
