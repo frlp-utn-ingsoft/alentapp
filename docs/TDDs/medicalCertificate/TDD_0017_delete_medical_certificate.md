@@ -43,14 +43,14 @@ Se utiliza la entidad `MedicalCertificate` completa (aunque para esta operación
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
-* **Endpoint**: `PATCH /api/v1/medical-certificates/:id`
+* **Endpoint**: `DELETE /api/v1/medical-certificates/:id`
 * **Semántica**: Baja lógica del certificado. Esta operación no elimina el recurso físicamente; el servidor setea `deleted_at = now()` y el certificado deja de ser visible por defecto.
 * **Request Body**: `{}` (vacío). No se requiere información adicional para ejecutar la baja; la marca temporal se determina del lado del servidor.
 * **Response**: `204 No Content` en caso de éxito.
 
 Nota de diseño:
 
-* Se utiliza `PATCH` (en lugar de `DELETE`) para modelar explícitamente una actualización parcial del recurso (seteo de `deleted_at`), manteniendo trazabilidad/auditoría.
+* Se utiliza `DELETE` por decisión grupal. Aunque la operación realiza una baja lógica (seteo de `deleted_at`) en lugar de un borrado físico, se prioriza la semántica REST de la operación: el recurso deja de estar disponible para el cliente, lo cual es consistente con el verbo `DELETE`.
 
 ### 2.3. Esquema de Persistencia
 
@@ -104,7 +104,7 @@ model MedicalCertificate {
 
 1. Asegurar que el puerto `MedicalCertificateRepository` incluya `findById` y `softDelete`.
 2. Desarrollar la lógica de borrado lógico en `DeleteMedicalCertificateUseCase`.
-3. Implementar el endpoint `PATCH` en el controlador.
+3. Implementar el endpoint `DELETE` en el controlador.
 4. Registrar la ruta en la aplicación.
 5. Realizar pruebas de integración verificando que el registro persiste con `deleted_at != null`.
 
