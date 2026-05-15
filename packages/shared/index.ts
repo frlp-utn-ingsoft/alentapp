@@ -47,6 +47,9 @@ export interface PaymentDTO {
    due_date: string; // ISO Date String (YYYY-MM-DD)
    payment_date: string | null; // ISO Date String (YYYY-MM-DD)
    status: PaymentStatus;
+   member?: {
+    name: string;
+    dni: string;};
 }
 
 export interface CreatePaymentRequest {

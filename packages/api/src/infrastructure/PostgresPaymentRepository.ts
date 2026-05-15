@@ -56,7 +56,16 @@ export class PostgresPaymentRepository implements PaymentRepository {
 
     async findAll(): Promise<PaymentDTO[]> {
         const payments = await prisma.payment.findMany({
+            include:{
+                member: {
+                    select: {
+                        name: true,
+                        dni: true,
+                    }
+                }
+            },
             orderBy: { created_at: 'desc' },
+
         });
         return payments.map(this.mapToDTO);
     }
@@ -83,6 +92,12 @@ export class PostgresPaymentRepository implements PaymentRepository {
             status: payment.status,
             payment_date: payment.payment_date
                 ? payment.payment_date.toISOString()
+                : null,
+            member: payment.member
+                ? {
+                      name: payment.member.name,
+                      dni: payment.member.dni,
+                  }
                 : null,
         };
     }
