@@ -62,5 +62,12 @@ export class PostgresPaymentRepository implements PaymentRepository {
         return payments.map(this.mapToDTO);
         }
 
+    async findByMemberMonthYear(member_id: string, month: number, year: number): Promise<PaymentDTO | null> {
+        const payment = await prisma.payment.findFirst({
+            where: { member_id, month, year },
+        });
+        return payment ? this.mapToDTO(payment) : null;
+    }
+    
 
 }
