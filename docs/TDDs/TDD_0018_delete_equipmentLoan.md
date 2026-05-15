@@ -39,11 +39,12 @@ Permitir la anulación o baja lógica de un registro de préstamo para mantener 
     - La estructura de la entidad `EquipmentLoan` y el Value Object `EquipmentLoanStatus` son idénticos a los definidos en el documento base de creación.
     - Comportamiento: La entidad `EquipmentLoan` es responsable de gestionar su propia baja. Posee un comportamiento interno que asienta la fecha actual en `deleted_at` y valida que no se pueda eliminar si ya estaba eliminado.
 - **Application**:
-    - Caso de Uso: `DeleteEquipmentLoan` (Busca el prestamo validando su existencia, delega a la entidad el cambio del campo `deleted_at` de `null` a la fecha de eliminacion y persiste la entidad modificada utilizando `EquipmentLoanRepository`)
-    - Puertos de Salida: `EquipmentLoanRepository` (Interface de dominio, de la cual necesitamos el metodo `findById()` y `update()` para registrar la fecha y hora de la eliminacion)
+    - Caso de Uso: `DeleteEquipmentLoanUseCase` (Busca el prestamo validando su existencia, delega a la entidad el cambio del campo `deleted_at` de `null` a la fecha de eliminacion y persiste la entidad modificada utilizando `IEquipmentLoanRepository`)
+    - Puertos de Salida: `IEquipmentLoanRepository` (Interface de dominio, de la cual necesitamos el metodo `findById()` y `update()` para registrar la fecha y hora de la eliminacion)
 - **Infrastructure**:
-    - Adaptadores de entrada: `EquipmentLoanController` utilizando su ruta `DELETE /api/v1/equipment-loans/:id`
+    - Adaptadores de entrada: `EquipmentLoanController` utilizando su ruta `DELETE /api/v1/equipment-loans/:id` y `EquipmentLoanRouter`
     - Adaptadores de salida: DB persistence adapter (Se reutiliza la implementacion definida en el Alta)
+    - Mappers: `EquipmentLoanPersistenceMapper` con los metodos `ToPersistence` y `ToDomain`.Tambien `EquipmentLoanDTOMapper`con el metodo `ToDTO`.
 
 ## Casos de Borde y Errores
 
@@ -56,7 +57,31 @@ Permitir la anulación o baja lógica de un registro de préstamo para mantener 
 
 ## Plan de Implementación
 
-1. Crear el método interno dentro de la entidad, el cual se encargará de asignar la fecha/hora actual y validar internamente que el registro no haya sido eliminado previamente.
-2. Desarrollar el `DeleteEquipmentLoan`
-3. Modificar las consultas de lectura en el `PostgresEquipmentLoanRepository` (como `findById`) para que siempre agreguen el filtro que excluye los registros eliminados.
-4. Agregar el endpoint `DELETE /api/v1/equipment-loans/:id` en el `EquipmentLoanController`.
+---
+
+## Fase 1: Núcleo de Dominio (Domain)
+1. **Comportamiento en la Entidad `EquipmentLoan`**:
+   - Implementar método `delete()`: 
+     - Validar que `deleted_at` sea actualmente `null`. Si ya tiene una fecha, lanzar una excepción de negocio.
+     - Asignar la fecha y hora actual al campo `deleted_at`.
+2. **Puertos (Interfaces)**: Verificar que `IEquipmentLoanRepository` disponga de:
+   - `findById()`: Para recuperar el préstamo antes de marcarlo.
+   - `update()`: Para persistir el cambio de estado en la base de datos.
+
+---
+
+## Fase 2: Lógica de Aplicación (Application)
+3. **Desarrollar `DeleteEquipmentLoanUseCase`**:
+   - **Flujo de orquestación**:
+     1. Solicitar el préstamo al repositorio.
+     2. Si no se encuentra, lanzar una excepción.
+     3. Llamar al método `delete()` de la entidad.
+     4. Persistir la entidad modificada a través del método `update()` del repositorio.
+
+---
+
+## Fase 3: Infraestructura y Persistencia (Infrastructure)
+4. **Actualizar el `DB persistence adapter`**:
+   - **Filtrado Crítico**: Modificar las consultas de lectura (`findAll` y `findById`) para incluir la cláusula que excluya registros donde `deleted_at` no sea nulo.
+5. **Adaptadores de Entrada**:
+   - Agregar en `EquipmentLoanController` el método vinculado a `DELETE /api/v1/equipment-loans/:id`.
