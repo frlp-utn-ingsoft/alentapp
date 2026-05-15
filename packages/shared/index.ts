@@ -55,4 +55,5 @@ export interface CreatePaymentRequest {
   month: number;
   year: number;
   due_date: string; // ISO Date String (YYYY-MM-DD)
+  status?: PaymentStatus; // Opcional, por defecto 'Pendiente'
 }

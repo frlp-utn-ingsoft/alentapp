@@ -34,6 +34,7 @@ export class PostgresPaymentRepository implements PaymentRepository {
                 month: data.month,
                 year: data.year,
                 due_date: new Date(data.due_date),
+                status: data.status,
             },
         });
         return this.mapToDTO(payment);
@@ -68,6 +69,6 @@ export class PostgresPaymentRepository implements PaymentRepository {
         });
         return payment ? this.mapToDTO(payment) : null;
     }
-    
+
 
 }
