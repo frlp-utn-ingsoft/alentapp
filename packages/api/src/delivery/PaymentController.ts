@@ -1,16 +1,20 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreatePaymentRequest } from '@alentapp/shared';
-import { NewPaymentUseCase } from '../application/Payment/NewPaymentUseCase.js';
+import { CreatePaymentUseCase } from '../application/Payment/NewPaymentUseCase.js';
+import { GetPaymentsUseCase } from '../application/Payment/GetPaymentsUseCase.js';
 
 export class PaymentController {
-    constructor(private readonly newPaymentUseCase: NewPaymentUseCase) {}
+    constructor(
+        private readonly createPaymentUseCase: CreatePaymentUseCase,
+        private readonly getPaymentsUseCase: GetPaymentsUseCase,
+    ) {}
     async create(
         request: FastifyRequest<{ Body: CreatePaymentRequest }>,
         reply: FastifyReply,
     ) {
         try {
             request.log.info('Alguien pegó al endpoint de crear pago');
-            const payment = await this.newPaymentUseCase.execute(request.body);
+            const payment = await this.createPaymentUseCase.execute(request.body);
             return reply.status(201).send({ data: payment });
         } catch (error: any) {
             if (
@@ -18,8 +22,8 @@ export class PaymentController {
                 error.message.includes('mayor a cero') ||
                 error.message.includes('entre 1 y 12') ||
                 error.message.includes('año actual o futuro') ||
-                error.message.includes('fecha de vencimiento') ||
-                error.message.includes('Faltan campos obligatorios')
+                error.message.includes('inválida') ||
+                error.message.includes('campos obligatorios')
             ) {
                 return reply.status(400).send({ error: error.message });
             }
@@ -38,5 +42,15 @@ export class PaymentController {
                 .send({ error: 'Error interno, reintente más tarde' });
         }
     }
-    
+    async getAll(_request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const payments = await this.getPaymentsUseCase.execute();
+            return reply.status(200).send({ data: payments });
+        } catch (error: any) {
+            console.error('Error obteniendo pagos:', error);
+            return reply
+                .status(500)
+                .send({ error: 'Error interno, reintente más tarde' });
+        }
+    }
 }
