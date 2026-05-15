@@ -19,6 +19,7 @@ import { DisciplineController } from './delivery/DisciplineController.js';
 import { PostgresLoanRepository } from './infrastructure/PostgresLoanRepository.js';
 import { LoanValidator } from './domain/services/LoanValidator.js';
 import { CreateLoanUseCase } from './application/CreateLoanUseCase.js';
+import { GetLoansUseCase } from './application/GetLoansUseCase.js';
 import { LoanController } from './delivery/LoanController.js';
 
 export function buildApp() {
@@ -60,6 +61,7 @@ export function buildApp() {
     const loanRepo = new PostgresLoanRepository();
     const loanValidator = new LoanValidator();
     const createLoanUseCase = new CreateLoanUseCase(loanRepo, memberRepo, loanValidator);
+    const getLoansUseCase = new GetLoansUseCase(loanRepo);
 
     const memberController = new MemberController(
         createMemberUseCase, 
@@ -76,7 +78,7 @@ export function buildApp() {
         deleteDisciplineUseCase
     );
 
-    const loanController = new LoanController(createLoanUseCase);
+    const loanController = new LoanController(createLoanUseCase, getLoansUseCase);
 
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
@@ -90,6 +92,7 @@ export function buildApp() {
     server.get('/api/v1/members/:memberId/discipline-status', disciplineController.getMemberStatus.bind(disciplineController));
 
     server.post('/api/v1/equipment-loan', loanController.create.bind(loanController));
+    server.get('/api/v1/equipment-loan', loanController.getAll.bind(loanController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
