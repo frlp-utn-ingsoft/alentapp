@@ -52,6 +52,16 @@ export function PaymentsView() {
         return date.toISOString().split('T')[0];
     };
 
+    const formatDate = (date: string | null) => {
+    if (!date) return 'No pagado';
+
+    return new Date(date).toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
+};
+
     // Form state
     const [formData, setFormData] = useState<
         CreatePaymentRequest & { status?: PaymentStatus }
@@ -282,6 +292,12 @@ export function PaymentsView() {
                             <Table.Header>
                                 <Table.Row bg="bg.muted/50">
                                     <Table.ColumnHeader py="4">
+                                        Nombre del socio
+                                    </Table.ColumnHeader>
+                                    <Table.ColumnHeader py="4">
+                                        DNI 
+                                    </Table.ColumnHeader>
+                                    <Table.ColumnHeader py="4">
                                         Monto
                                     </Table.ColumnHeader>
                                     <Table.ColumnHeader py="4">
@@ -308,21 +324,33 @@ export function PaymentsView() {
                                         key={payment.id}
                                         _hover={{ bg: 'bg.muted/30' }}
                                     >
+                                         <Table.Cell
+                                            fontWeight="semibold"
+                                            color="fg.emphasized"
+                                        >
+                                            {payment.member?.name || 'N/A'}
+                                        </Table.Cell>
+                                        
+                                         <Table.Cell
+                                            fontWeight="semibold"
+                                            color="fg.emphasized"
+                                        >
+                                            {payment.member?.dni || 'N/A'}
+                                        </Table.Cell>
                                         <Table.Cell
                                             fontWeight="semibold"
                                             color="fg.emphasized"
                                         >
-                                            {payment.amount}
+                                            ${payment.amount}
                                         </Table.Cell>
                                         <Table.Cell color="fg.muted">
                                             {payment.month}/{payment.year}
                                         </Table.Cell>
                                         <Table.Cell color="fg.muted">
-                                            {payment.due_date}
+                                            {formatDate(payment.due_date)}
                                         </Table.Cell>
                                         <Table.Cell color="fg.muted">
-                                            {payment.payment_date ||
-                                                'No pagado'}
+                                            {formatDate(payment.payment_date)}
                                         </Table.Cell>
 
                                         <Table.Cell>
