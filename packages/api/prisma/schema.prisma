@@ -85,13 +85,10 @@ model MedicalCertificate {
   member_id      String
 
   //relación con Member:
-  //member Member @relation(fields: [member_id], references: [id])
+  member Member @relation(fields: [member_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-
-  member   Member? @relation(fields: [memberId], references: [id])
-  memberId String?
 
   @@map("medical_certificates")
 }
