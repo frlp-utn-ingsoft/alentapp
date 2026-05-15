@@ -1,0 +1,42 @@
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { CreatePaymentRequest } from '@alentapp/shared';
+import { NewPaymentUseCase } from '../application/Payment/NewPaymentUseCase.js';
+
+export class PaymentController {
+    constructor(private readonly newPaymentUseCase: NewPaymentUseCase) {}
+    async create(
+        request: FastifyRequest<{ Body: CreatePaymentRequest }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            request.log.info('Alguien pegó al endpoint de crear pago');
+            const payment = await this.newPaymentUseCase.execute(request.body);
+            return reply.status(201).send({ data: payment });
+        } catch (error: any) {
+            if (
+                error.message.includes('inválido') ||
+                error.message.includes('mayor a cero') ||
+                error.message.includes('entre 1 y 12') ||
+                error.message.includes('año actual o futuro') ||
+                error.message.includes('fecha de vencimiento') ||
+                error.message.includes('Faltan campos obligatorios')
+            ) {
+                return reply.status(400).send({ error: error.message });
+            }
+            if (
+                error.message.includes(
+                    'Ya existe un pago para este miembro en el mes y año especificados',
+                )
+            ) {
+                return reply.status(409).send({ error: error.message });
+            }
+            if (error.message.includes('El miembro especificado no existe')) {
+                return reply.status(404).send({ error: error.message });
+            }
+            return reply
+                .status(500)
+                .send({ error: 'Error interno, reintente más tarde' });
+        }
+    }
+    
+}

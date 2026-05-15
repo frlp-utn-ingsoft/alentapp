@@ -3,6 +3,24 @@ import { PaymentRepository } from '../PaymentRepository.js';
 export class PaymentValidator {
     constructor(private readonly paymentRepo: PaymentRepository) {}
 
+    validateFields(data: {
+        member_id?: string;
+        amount?: number;
+        month?: number;
+        year?: number;
+        due_date?: string;
+    }): void {
+        if (
+            !data.member_id ||
+            data.amount === undefined ||
+            data.month === undefined ||
+            data.year === undefined ||
+            !data.due_date
+        ) {
+            throw new Error('Faltan campos obligatorios');
+        }
+    }
+
     validateAmount(amount: number): void {
         if (amount <= 0) {
             throw new Error('El monto debe ser mayor a cero');
