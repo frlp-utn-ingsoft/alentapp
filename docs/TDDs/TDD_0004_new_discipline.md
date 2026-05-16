@@ -23,6 +23,9 @@ Permitir a los administradores registrar sanciones disciplinarias a los socios d
     - Escenario de éxito: "Si el usuario completa el registro con los datos correctos, el sistema debe responder creando la sanción y notificando al usuario".
     - Escenario de fallo: "Si el usuario ingresa una fecha de fin menor o igual a la fecha de inicio, el sistema debe bloquear la acción y notificar al usuario que la fecha de fin debe ser estrictamente posterior a la fecha de inicio".
     - Escenario de fallo: "Si el usuario ingresa un socio que no existe, el sistema debe responder indicando el error y cancelando la operación".
+    - Escenario de fallo: "Si el usuario deja campos obligatorios vacíos, el sistema debe bloquear la acción e informar que todos los campos son requeridos".
+    - Escenario de fallo: "Si el usuario ingresa un motivo vacío o compuesto solo por espacios, el sistema debe bloquear la acción e informar que el motivo es obligatorio".
+    - Escenario de fallo: "Si el usuario ingresa un valor inválido para `is_total_suspension`, el sistema debe bloquear la acción e informar que el campo debe ser booleano".
 
 ## 2. Diseño Técnico 
 
@@ -52,6 +55,23 @@ Se definirá la entidad "Discipline" con las siguientes propiedades:
     member_id: string;
 }
 ```
+* **Response (Success):** `201 Created`
+* **Response Body:**
+```
+type DisciplineResponseDTO = {
+  id: string;
+  reason: string;
+  start_date: string; en formato ISO 8601 datetime
+  end_date: string; en formato ISO 8601 datetime
+  is_total_suspension: boolean;
+  deleted_at: string | null; en formato ISO 8601 datetime
+  member_id: string;
+};
+
+type ErrorResponse = {
+  message: string;
+};
+```
 
 ### 2.3. Esquema de Persistencia
 
@@ -79,21 +99,26 @@ model Discipline {
 
 ### 3.2. Lógica del Caso de Uso
 
-**Caso de Uso**: `NewDisciplineUseCase`.
-1. Validar los datos de entrada.
-2. Verificar que `end_date` sea estrictamente posterior a `start_date`.
-3. Validar que `start_date` y `end_date` cumplan con el formato ISO 8601.
-4. Verificar que el socio exista mediante su `member_id`.
-5. Mapear el DTO a Entidad de Dominio.
-6. Persistir la entidad a través de `DisciplineRepository`.
-7. Retornar la sanción creada.
+**Caso de Uso**: `CreateDisciplineUseCase`.
+1. Validar que todos los campos obligatorios estén presentes.
+2. Validar que `reason` no esté vacío ni compuesto solo por espacios.
+3. Validar que `is_total_suspension` sea un valor booleano.
+4. Verificar que `end_date` sea estrictamente posterior a `start_date`.
+5. Validar que `start_date` y `end_date` cumplan con el formato ISO 8601.
+6. Verificar que el socio exista mediante su `member_id`.
+7. Mapear el DTO a Entidad de Dominio.
+8. Persistir la entidad a través de `DisciplineRepository`.
+9. Retornar la sanción creada.
 
 ## 4. Casos de Borde y Errores
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
 | ----------------------------| --------------------------------------------- | ------------------------- |
+| Registro exitoso | La sanción es creada con `deleted_at = null` | 201 Created |
 | Socio inexistente     | "El socio no existe"       | 404 Not Found              |
 | Fecha de fin menor a fecha de inicio | "La fecha de fin debe ser estrictamente posterior a la fecha de inicio"              | 400 Bad Request           |
 | Campos obligatorios faltantes | "Todos los campos son requeridos" | 400 Bad Request |
+| Motivo vacío o compuesto solo por espacios | "El motivo de la sanción es obligatorio" | 400 Bad Request |
+| `is_total_suspension` faltante o no booleano | "El campo is_total_suspension debe ser booleano" | 400 Bad Request |
 | Formato de fecha inválido | "Formato de fecha inválido" | 400 Bad Request |
 | Error de conexión a DB     | "Error interno, reintente más tarde" | 500 Internal Server Error |
 
@@ -101,12 +126,14 @@ model Discipline {
 
 1. Definir el esquema de persistencia de `Discipline` y correr migración.
 2. Crear tipos en `@alentapp/shared` y puerto `DisciplineRepository` en el Dominio.
-3. Implementar el repositorio y el caso de uso `NewDisciplineUseCase`, validando fechas y existencia del socio.
+3. Implementar el repositorio y el caso de uso `CreateDisciplineUseCase`, validando fechas y existencia del socio.
 4. Crear formulario y conectar con el endpoint `POST /api/v1/disciplines`.
+5. Ejecutar pruebas unitarias del caso de uso y pruebas de integración del endpoint `POST`.
 
 ## 6. Observaciones Adicionales
 
 * Al crear una sanción, `deleted_at` debe inicializarse en `null`.
 * Las sanciones con `deleted_at` distinto de `null` no deben considerarse activas.
-* La consulta de si un socio está suspendido actualmente debería resolverse comparando la fecha actual con `start_date` y `end_date`.
+* Se permite registrar sanciones con fecha de inicio pasada, presente o futura, siempre que `end_date` sea estrictamente posterior a `start_date`.
+* La sanción se considera activa cuando `deleted_at = null` y la fecha actual se encuentra entre `start_date` y `end_date`.
 
