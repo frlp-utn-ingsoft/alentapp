@@ -12,10 +12,11 @@ import {
   Center,
   Input,
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw } from "react-icons/lu";
+import { LuPlus, LuRefreshCw, LuPencil } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import { lockersService } from "../services/lockers";
-import type { LockerDTO, CreateLockerRequest, LockerStatus } from "@alentapp/shared";
+import { membersService } from "../services/members";
+import type { LockerDTO, CreateLockerRequest, UpdateLockerRequest, LockerStatus, MemberDTO } from "@alentapp/shared";
 import {
   DialogRoot,
   DialogContent,
@@ -36,25 +37,36 @@ import {
   createListCollection,
 } from "../components/ui/select";
 
-const statusOptions = createListCollection({
+const initialStatusOptions = createListCollection({
   items: [
     { label: "Available", value: "Available" },
     { label: "Maintenance", value: "Maintenance" },
   ],
 });
 
+const allStatusOptions = createListCollection({
+  items: [
+    { label: "Available", value: "Available" },
+    { label: "Occupied", value: "Occupied" },
+    { label: "Maintenance", value: "Maintenance" },
+  ],
+});
+
 export function LockersView() {
   const [lockers, setLockers] = useState<LockerDTO[]>([]);
+  const [members, setMembers] = useState<MemberDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingLockerId, setEditingLockerId] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<CreateLockerRequest>({
+  const [formData, setFormData] = useState<CreateLockerRequest & { member_id?: string | null }>({
     number: 0,
     location: "",
     status: "Available",
+    member_id: null,
   });
 
   const fetchLockers = async () => {
@@ -70,8 +82,29 @@ export function LockersView() {
     }
   };
 
+  const fetchMembers = async () => {
+    try {
+      const data = await membersService.getAll();
+      setMembers(data);
+    } catch (err: any) {
+      console.error("Error al cargar socios:", err);
+    }
+  };
+
   const openCreateModal = () => {
-    setFormData({ number: 0, location: "", status: "Available" });
+    setEditingLockerId(null);
+    setFormData({ number: 0, location: "", status: "Available", member_id: null });
+    setIsDialogOpen(true);
+  };
+
+  const openEditModal = (locker: LockerDTO) => {
+    setEditingLockerId(locker.id);
+    setFormData({
+      number: locker.number,
+      location: locker.location,
+      status: locker.status,
+      member_id: locker.member_id,
+    });
     setIsDialogOpen(true);
   };
 
@@ -79,7 +112,11 @@ export function LockersView() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await lockersService.create(formData);
+      if (editingLockerId) {
+        await lockersService.update(editingLockerId, formData as UpdateLockerRequest);
+      } else {
+        await lockersService.create(formData as CreateLockerRequest);
+      }
       setIsDialogOpen(false);
       fetchLockers();
     } catch (err: any) {
@@ -89,8 +126,16 @@ export function LockersView() {
     }
   };
 
+  const membersCollection = createListCollection({
+    items: [
+      { label: "Sin asignar", value: "null" },
+      ...members.map((m) => ({ label: `${m.name} (${m.dni})`, value: m.id })),
+    ],
+  });
+
   useEffect(() => {
     fetchLockers();
+    fetchMembers();
   }, []);
 
   const statusColor = (status: string) => {
@@ -119,11 +164,11 @@ export function LockersView() {
           </HStack>
         </Flex>
 
-        {/* Modal alta */}
+        {/* Modal alta/edición */}
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Agregar Nuevo Casillero</DialogTitle>
+              <DialogTitle>{editingLockerId ? "Editar Casillero" : "Agregar Nuevo Casillero"}</DialogTitle>
             </DialogHeader>
             <DialogBody>
               <Stack gap="4">
@@ -146,19 +191,19 @@ export function LockersView() {
                     required
                   />
                 </Field>
-                <Field label="Estado Inicial" required>
+                <Field label="Estado" required>
                   <SelectRoot
-                    collection={statusOptions}
+                    collection={editingLockerId ? allStatusOptions : initialStatusOptions}
                     value={[formData.status]}
                     onValueChange={(e) =>
-                      setFormData({ ...formData, status: e.value[0] as "Available" | "Maintenance" })
+                      setFormData({ ...formData, status: e.value[0] as LockerStatus })
                     }
                   >
                     <SelectTrigger>
                       <SelectValueText placeholder="Seleccioná un estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      {statusOptions.items.map((opt) => (
+                      {(editingLockerId ? allStatusOptions : initialStatusOptions).items.map((opt) => (
                         <SelectItem item={opt} key={opt.value}>
                           {opt.label}
                         </SelectItem>
@@ -166,6 +211,32 @@ export function LockersView() {
                     </SelectContent>
                   </SelectRoot>
                 </Field>
+
+                {editingLockerId && (
+                  <Field label="Socio Asignado">
+                    <SelectRoot
+                      collection={membersCollection}
+                      value={[formData.member_id ?? "null"]}
+                      onValueChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          member_id: e.value[0] === "null" ? null : e.value[0],
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValueText placeholder="Seleccioná un socio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {membersCollection.items.map((opt) => (
+                          <SelectItem item={opt} key={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectRoot>
+                  </Field>
+                )}
               </Stack>
             </DialogBody>
             <DialogFooter>
@@ -173,7 +244,7 @@ export function LockersView() {
                 <Button variant="outline">Cancelar</Button>
               </DialogActionTrigger>
               <Button type="submit" colorPalette="blue" loading={isSubmitting}>
-                Crear Casillero
+                {editingLockerId ? "Guardar Cambios" : "Crear Casillero"}
               </Button>
             </DialogFooter>
             <DialogCloseTrigger />
@@ -242,11 +313,20 @@ export function LockersView() {
                       </Box>
                     </Table.Cell>
                     <Table.Cell color="fg.muted">
-                      {locker.member_id ?? "—"}
+                      {locker.member_id
+                        ? members.find((m) => m.id === locker.member_id)?.name ?? locker.member_id
+                        : "—"}
                     </Table.Cell>
                     <Table.Cell textAlign="end">
                       <HStack gap="2" justify="flex-end">
-                        {/* Acciones para update/delete se agregan en los próximos features */}
+                        <IconButton
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Editar casillero"
+                          onClick={() => openEditModal(locker)}
+                        >
+                          <LuPencil />
+                        </IconButton>
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
