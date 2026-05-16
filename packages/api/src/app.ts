@@ -23,6 +23,10 @@ import { GetLoansUseCase } from './application/GetLoansUseCase.js';
 import { DeleteLoanUseCase } from './application/DeleteLoanUseCase.js';
 import { UpdateLoanStatusUseCase } from './application/UpdateLoanStatusUseCase.js';
 import { LoanController } from './delivery/LoanController.js';
+import { PostgresLockerRepository } from './infrastructure/PostgresLockerRepository.js';
+import { LockerValidator } from './domain/services/LockerValidator.js';
+import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
+import { LockerController } from './delivery/LockerController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -84,6 +88,12 @@ export function buildApp() {
 
     const loanController = new LoanController(createLoanUseCase, getLoansUseCase, deleteLoanUseCase, updateLoanStatusUseCase);
 
+    // instancias de locker
+    const lockerRepo = new PostgresLockerRepository();
+    const lockerValidator = new LockerValidator(lockerRepo);
+    const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
+    const lockerController = new LockerController(createLockerUseCase);
+
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
@@ -99,6 +109,9 @@ export function buildApp() {
     server.get('/api/v1/equipment-loan', loanController.getAll.bind(loanController));
     server.delete('/api/v1/equipment-loan/:id', loanController.delete.bind(loanController));
     server.patch('/api/v1/equipment-loan/:id/status', loanController.updateStatus.bind(loanController));
+
+    // rutas de locker
+    server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
