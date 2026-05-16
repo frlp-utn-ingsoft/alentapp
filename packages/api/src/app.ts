@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+
+// Members
 import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
 import { MemberValidator } from './domain/services/MemberValidator.js';
 import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
@@ -13,6 +15,12 @@ import { PrismaLockerRepository } from './infrastructure/PrismaLockerRepository.
 import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
 import { LockerController } from './delivery/LockerController.js';
 import { GetLockersUseCase } from './application/GetLockersUseCase.js';
+
+// Payments
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
+import { CreatePaymentUseCase } from './application/NewPaymentUseCase.js'; 
+import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
+import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -34,6 +42,7 @@ export function buildApp() {
         credentials: true,
     });
 
+    //Dependencias de Member
     // --- Members ---
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
@@ -53,6 +62,24 @@ export function buildApp() {
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
 
+    //Dependencias de Payment
+    const paymentRepo = new PostgresPaymentRepository();
+
+    // Le pasamos el memberRepo que ya instanciamos arriba para no crear dos!
+    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, memberRepo);
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
+
+    const paymentController = new PaymentController(
+        createPaymentUseCase,
+        getPaymentsUseCase
+    );
+
+    // Fijate que acá usamos "server", igual que con socios
+    server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
+    server.post('/api/v1/payments', paymentController.create.bind(paymentController));
+
+
+    // Ruta de prueba
     // --- Lockers ---
     const lockerRepo = new PrismaLockerRepository();
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo);
