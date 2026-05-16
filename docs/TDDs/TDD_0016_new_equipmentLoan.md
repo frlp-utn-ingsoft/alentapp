@@ -33,12 +33,12 @@ Permitir que un administrativo de de alta un nuevo prestamo de equipamiento digi
 Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 
 - `id`: Identificador único universal (UUID).
-- `item_name`: Cadena de texto
+- `itemName`: Cadena de texto
 - `status`: Enumeracion (`Prestado`, `Devuelto`, `Dañado`)
 - `loanDate`: Fecha de creacion.
 - `dueDate`: Fecha.
-- `member_id`: Identificador único universal (UUID) referenciando a “`member`”.
-- `deleted_at`: Fecha (Opcional / Nulo)
+- `memberId`: Identificador único universal (UUID) referenciando a “`member`”.
+- `deletedAt`: Fecha (Opcional / Nulo)
 
 ### Contrato de API (@alentapp/shared)
 
@@ -47,16 +47,31 @@ Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 
 ```tsx
 {
-    item_name: string;
-    due_date: string;
-    member_id: string;  
+    itemName: string;
+    dueDate: string;
+    memberId: string;  
+}
+```
+
+- **Response 200 OK**:
+
+```tsx
+{
+"data": {
+        id: "3b2ca8d7-5e6e-4b67-a8b4-482a201c13d9",
+        itemName: "Pelota de Básquet Spalding",
+        status: "Prestado",
+        loanDate: "2026-05-16T15:30:00Z",
+        dueDate: "2026-05-23T15:30:00Z",
+        memberId: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+    } 
 }
 ```
 
 ### Componentes de Arquitectura Hexagonal
 
 - **Domain**:
-    - `EquipmentLoan` (Maneja su propia invariante: la fecha de devolución debe ser futura al momento del préstamo, su estado inicial es siempre `Prestado`y `deleted_at`en `null`).
+    - `EquipmentLoan` (Maneja su propia invariante: la fecha de devolución debe ser futura al momento del préstamo, su estado inicial es siempre `Prestado`y `deletedAt`en `null`).
     - **Value Objects:** `EquipmentLoanStatus` ( `'Prestado' | 'Devuelto' | 'Dañado'`).
     - **Reglas de negocio:**  Un préstamo de equipamiento no puede existir si el socio solicitante no tiene categoría "Senior" o "Lifetime”(Esta regla se delega al caso de uso)
 - **Application**:
@@ -71,12 +86,12 @@ Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 ## Casos de Borde y Errores
 
 | **Escenario** | **Resultado Esperado** | **Código HTTP** |
-| --- | --- | --- |
-| **Socio no autorizado (Cadete)** | Mensaje: "Los socios categoría Cadete no tienen permitido solicitar material." | 403 Forbidden |
-| **Fecha de devolución en el pasado** | Mensaje: "La fecha de devolución debe ser posterior a la fecha actual." | 400 Bad Request |
-| **Socio inexistente** | Mensaje: "El socio solicitado no se encuentra registrado en el sistema." | 404 Not Found |
-| **Campos obligatorios faltantes** | Mensaje listando los campos requeridos que no se enviaron (ej. `item_name`, `due_date`). | 400 Bad Request |
-| **Error de conexión a DB** | Mensaje: "Error interno del servidor, reintente más tarde." | 500 Internal Server Error |
+| :--- | :--- | :--- |
+| **Socio no autorizado (Cadete)** | `{ "error": "Los socios categoría Cadete no tienen permitido solicitar material." }` | 403 Forbidden |
+| **Fecha de devolución en el pasado** | `{ "error": "La fecha de devolución debe ser posterior a la fecha actual." }` | 400 Bad Request |
+| **Socio inexistente** | `{ "error": "El socio solicitado no se encuentra registrado en el sistema." }` | 404 Not Found |
+| **Campos obligatorios faltantes** | `{ "error": "Los campos itemName y dueDate son requeridos." }` | 400 Bad Request |
+| **Error de conexión a DB** | `{ "error": "Error interno del servidor, reintente más tarde." }` | 500 Internal Server Error |
 
 ## Plan de Implementación
 
@@ -93,7 +108,7 @@ Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 
 2. **Entidad `EquipmentLoan`**:
    - Implementar la clase con sus atributos y lógica de validación interna (invariantes).
-   - El constructor debe asegurar que la fecha de devolución sea futura, el estado inicial sea `'Prestado'` y `deleted_at` sea `null`.
+   - El constructor debe asegurar que la fecha de devolución sea futura, el estado inicial sea `'Prestado'` y `deletedAt` sea `null`.
 3. **Puertos (Interfaces)**:
    - Crear la interfaz `IEquipmentLoanRepository` con el método `save()`.
 
