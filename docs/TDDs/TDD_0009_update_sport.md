@@ -18,10 +18,10 @@ Permitir al personal administrativo actualizar los datos editables de un deporte
 - **Necesidad**: Necesita poder ajustar la capacidad máxima de un deporte según disponibilidad de espacios, o actualizar la descripción para comunicar mejor la actividad a los socios. Su punto de dolor es no poder corregir información sin tener que eliminar y volver a crear el deporte.
 
 ### Criterios de Aceptación
-- El sistema debe permitir modificar únicamente los campos `description`, `max_capacity` y `additional_price`, y `requires_medical_certificate`.
+- El sistema debe permitir modificar únicamente los campos `description`, `maxCapacity` y `additionalPrice`, y `requiresMedicalCertificate`.
 - El sistema **no debe permitir** modificar el campo `name`. Si se incluye en el body, debe ser ignorado o rechazado con un error explícito.
-- El sistema debe validar que `max_capacity`, si se incluye, siga siendo mayor a cero.
-- El sistema debe validar que`additional_price`, si se informa, sea mayor o igual a cero.
+- El sistema debe validar que `maxCapacity`, si se incluye, siga siendo mayor a cero.
+- El sistema debe validar que`additionalPrice`, si se informa, sea mayor o igual a cero.
 - Si el deporte no existe, el sistema debe retornar un error claro.
 - El sistema debe retornar el recurso actualizado completo.
 
