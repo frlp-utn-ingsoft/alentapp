@@ -21,8 +21,9 @@ Permitir a los administrativos modificar un Locker existente: actualizar su ubic
 
 ### Criterios de Aceptación
 
-- El sistema debe validar que un Locker con status `Maintenance` no pueda asignarse a ningún socio.
-- El sistema debe validar que un Locker con status `Occupied` no pueda asignarse a otro socio sin desasignarlo primero.
+- El sistema debe validar que un Locker con status `Mantenimiento` no pueda asignarse a ningún socio.
+- El sistema debe validar que un Locker con socio asignado (`member_id` distinto de `null`) no pueda pasar a status `Mantenimiento` sin desasignarlo primero.
+- El sistema debe validar que un Locker con status `Ocupado` no pueda asignarse a otro socio sin desasignarlo primero.
 - El sistema debe validar que, si se cambia el numero de locker, este no pertenezca ya a otro Locker.
 - Si la edición es correcta, debe retornar los datos actualizados del Locker.
 
@@ -39,7 +40,7 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
 {
     number?: number;
     location?: string;
-    status?: 'Available' | 'Occupied' | 'Maintenance';
+    status?: 'Disponible' | 'Ocupado' | 'Mantenimiento';
     member_id?: string | null;
 }
 ```
@@ -51,14 +52,14 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
     id: string;
     number: number;
     location: string;
-    status: 'Available' | 'Occupied' | 'Maintenance';
+    status: 'Disponible' | 'Ocupado' | 'Mantenimiento';
     member_id: string | null;
 }
 ```
 ### Componentes de Arquitectura Hexagonal
 
 1. **Puerto**: `LockerRepository` (Método `update(id, data)`).
-2. **Servicio de Dominio**: `LockerValidator` (Encargado de validar estado `Maintenance`, unicidad del numero de locker y coherencia entre `status` y `member_id`).
+2. **Servicio de Dominio**: `LockerValidator` (Encargado de validar estado `Mantenimiento`, unicidad del numero de locker y coherencia entre `status` y `member_id`).
 3. **Caso de Uso**: `UpdateLockerUseCase` (Orquesta la validación y llama al repositorio con transacción).
 4. **Adaptador de Salida**: `PostgresLockerRepository` (Actualización usando el método `update` del ORM).
 5. **Adaptador de Entrada**: `LockerController` (Ruta HTTP `PATCH /api/v1/lockers/:id` que extrae el `id` de la URL y mapea excepciones a códigos HTTP).
@@ -68,8 +69,9 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
 | Escenario                              | Resultado Esperado                                           | Código HTTP               |
 | -------------------------------------- | ------------------------------------------------------------ | ------------------------- |
 | Locker inexistente                  | Mensaje: "El Locker no existe"                            | 404 Not Found             |
-| Asignar Locker en `Maintenance` (mantenimiento)     | Mensaje: "El Locker está en mantenimiento y no puede asignarse" | 409 Conflict        |
-| Asignar Locker `Occupied` (ocupado) a otro    | Mensaje: "El Locker ya se encuentra ocupado"              | 409 Conflict              |
+| Asignar Locker en `Mantenimiento`     | Mensaje: "El Locker está en mantenimiento y no puede asignarse" | 409 Conflict        |
+| Pasar a `Mantenimiento` con socio asignado (`member_id` != `null`) | Mensaje: "No se puede poner en mantenimiento un Locker ocupado. Desasigná el socio primero" | 409 Conflict |
+| Asignar Locker `Ocupado` a otro    | Mensaje: "El Locker ya se encuentra ocupado"              | 409 Conflict              |
 | Nuevo numero de locker ya usado por otro Locker | Mensaje: "Ya existe un Locker con ese número"         | 409 Conflict              |
 | Numero ID del miembro no existente      | Mensaje: "El socio no existe"                                | 400 Bad Request           |
 | Error de conexión a DB                 | Mensaje: "Error interno, reintente más tarde"                | 500 Internal Server Error |
@@ -80,7 +82,7 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
     - `findById(id)`
     - `findByNumber(number)`
     - `update(id, data)`
-2. Implementar o ampliar `LockerValidator` para validar reglas de asignación (`Maintenance` y `Occupied`), unicidad del número y coherencia entre `status` y `member_id`.
+2. Implementar o ampliar `LockerValidator` para validar reglas de asignación (`Mantenimiento` y `Ocupado`), incluyendo el bloqueo de pase a `Mantenimiento` con `member_id` asignado, unicidad del número y coherencia entre `status` y `member_id`.
 3. Implementar el caso de uso `UpdateLockerUseCase` orquestando validaciones y actualización del Locker.
 4. Implementar los métodos correspondientes en `PostgresLockerRepository`.
 5. Crear la ruta `PATCH /api/v1/lockers/:id` en `LockerController`.
