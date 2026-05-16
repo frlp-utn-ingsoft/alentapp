@@ -2,6 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { PaymentRepository } from '../domain/PaymentRepository.js';
 import { PaymentDTO, CreatePaymentRequest } from '@alentapp/shared';
+import { UpdatePaymentRequest } from '../../../shared/index.js';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -91,6 +92,21 @@ export class PostgresPaymentRepository implements PaymentRepository {
 
         return this.mapToDTO(payment);
     }
+    async update(id: string, data: UpdatePaymentRequest): Promise<PaymentDTO> {
+    const payment = await prisma.payment.update({
+        where: { id },
+        data: {
+            ...(data.status && { status: data.status }),
+            ...(data.payment_date !== undefined && {
+                payment_date: data.payment_date
+                    ? new Date(data.payment_date)
+                    : null,
+            }),
+        },
+    });
+
+    return this.mapToDTO(payment);
+}
 
     private mapToDTO(payment: any): PaymentDTO {
         return {

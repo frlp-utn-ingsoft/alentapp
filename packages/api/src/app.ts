@@ -26,6 +26,7 @@ import { MedicalCertificateValidator } from './domain/services/MedicalCertificat
 
 import { PaymentController } from './delivery/PaymentController.js';
 import { DeletePaymentUseCase } from './application/Payment/DeletePaymentUseCase.js';
+import { UpdatePaymentUseCase } from './application/Payment/UpdatePaymentUseCase.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -105,7 +106,8 @@ export function buildApp() {
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, paymentValidator, memberRepo);
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
     const deletePaymentUseCase = new DeletePaymentUseCase(paymentRepo, paymentValidator);
-    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase, deletePaymentUseCase);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
+    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase, updatePaymentUseCase, deletePaymentUseCase);
 
     //Endpoints
 
@@ -129,6 +131,8 @@ export function buildApp() {
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
     server.delete('/api/v1/payments/:id', paymentController.cancel.bind(paymentController)); 
+    server.patch('/api/v1/payments/:id', paymentController.update.bind(paymentController));
+
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
