@@ -38,10 +38,10 @@ type Props = {
     memberSearchRef: React.RefObject<HTMLDivElement | null>;
 
     onSubmit: (event: React.FormEvent) => void;
-    onUpdateField: <K extends keyof CreatePaymentRequest>(
-        field: K,
-        value: CreatePaymentRequest[K],
-    ) => void;
+   onUpdateField: <K extends keyof PaymentFormData>(
+    field: K,
+    value: PaymentFormData[K],
+) => void;
     onUpdateMonth: (value: string) => void;
     onUpdateYear: (value: string) => void;
     onSearchMember: (value: string) => void;
@@ -165,7 +165,7 @@ export function PaymentFormDialog({
                         </SimpleGrid>
                         {isUpdateMode && (
                             <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-                                <Field label="Estado" required={!isUpdateMode}>
+                                <Field label="Estado" >
                                     <NativeSelect.Root>
                                         <NativeSelect.Field
                                             value={formData.status ?? ''}

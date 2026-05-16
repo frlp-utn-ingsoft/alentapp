@@ -18,7 +18,7 @@ export type PaymentFormData = CreatePaymentRequest & {
 
 function getInitialFormData(): PaymentFormData {
     const { month, year } = getPreviousMonthAndYear();
-    
+
     return {
         member_id: '',
         amount: 0,
@@ -72,9 +72,9 @@ export function usePaymentForm(onSaved: () => void) {
         setIsDialogOpen(false);
     };
 
-    const updateField = <K extends keyof CreatePaymentRequest>(
+    const updateField = <K extends keyof PaymentFormData>(
         field: K,
-        value: CreatePaymentRequest[K],
+        value: PaymentFormData[K],
     ) => {
         setFormData((prev) => ({
             ...prev,
@@ -122,9 +122,14 @@ export function usePaymentForm(onSaved: () => void) {
 
     const submitPayment = async (event: React.FormEvent) => {
         event.preventDefault();
-
-        if (!formData.member_id) {
+       
+        if (formMode === 'create' && !formData.member_id) {
             alert('Debe seleccionar un socio válido');
+            return;
+        }
+
+        if (formMode === 'update' && !selectedPayment) {
+            alert('No se pudo identificar el pago a actualizar');
             return;
         }
 
@@ -141,7 +146,9 @@ export function usePaymentForm(onSaved: () => void) {
                 };
 
                 await paymentsService.create(createData);
-            } else if (formMode === 'update' && selectedPayment) {
+            }
+
+            if (formMode === 'update' && selectedPayment) {
                 const updateData: UpdatePaymentRequest = {
                     status: formData.status,
                     payment_date:
@@ -152,6 +159,7 @@ export function usePaymentForm(onSaved: () => void) {
 
                 await paymentsService.update(selectedPayment.id, updateData);
             }
+
             closePaymentModal();
             onSaved();
         } catch (err: any) {
