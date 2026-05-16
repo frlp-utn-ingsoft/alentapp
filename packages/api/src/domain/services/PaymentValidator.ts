@@ -62,10 +62,6 @@ export class PaymentValidator {
         if (payment.status === 'Cancelado') {
             throw new Error('El pago ya se encuentra cancelado');
         }
-
-        if (payment.status === 'Pagado') {
-            throw new Error('No se puede cancelar un pago ya pagado');
-        }
     }
     async validateUniquePayment(
         member_id: string,
@@ -83,13 +79,6 @@ export class PaymentValidator {
             throw new Error(
                 'Ya existe un pago para este miembro en el mes y año especificados',
             );
-        }
-    }
-    validatePaymentExists(
-        payment: PaymentDTO | null,
-    ): asserts payment is PaymentDTO {
-        if (!payment) {
-            throw new Error('Pago no encontrado');
         }
     }
 
