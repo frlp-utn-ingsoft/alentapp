@@ -111,3 +111,9 @@ export interface MedicalCertificateDTO {
     doctor_license: string;
     is_validated: boolean;
 }
+
+export interface UpdateMedicalCertificateRequest {
+    issue_date?: Date | string;
+    expiry_date?: Date | string;
+    doctor_license?: string;
+}

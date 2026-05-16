@@ -18,10 +18,11 @@ import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { SportController } from './delivery/SportController.js';
 import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
-import { CreateMedicalCertificateUseCase } from './application/NewMedicalCertificateUseCase.js';
+import { CreateMedicalCertificateUseCase } from './application/MedicalCertificate/NewMedicalCertificateUseCase.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
-import { DeleteMedicalCertificateUseCase } from './application/DeleteMedicalCertificateUseCase.js';
-
+import { DeleteMedicalCertificateUseCase } from './application/MedicalCertificate/DeleteMedicalCertificateUseCase.js';
+import { UpdateMedicalCertificateUseCase } from './application/MedicalCertificate/UpdateMedicalCertificate.js';
+import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
 
 import { PaymentController } from './delivery/PaymentController.js';
 import { UpdatePaymentUseCase } from './application/Payment/UpdatePaymentUseCase.js';
@@ -86,10 +87,16 @@ export function buildApp() {
     const deleteMedicalCertificateUseCase =
     new DeleteMedicalCertificateUseCase(medicalCertificateRepo);
 
+    const updateMedicalCertificateUseCase = new UpdateMedicalCertificateUseCase(
+        medicalCertificateRepo,
+        new MedicalCertificateValidator()
+    );
+
     const medicalCertificateController =
          new MedicalCertificateController(
             createMedicalCertificateUseCase,
             deleteMedicalCertificateUseCase,
+            updateMedicalCertificateUseCase,
         );
     
     //payment
@@ -116,7 +123,8 @@ export function buildApp() {
     //Medical Certificate Endpoints
     server.post('/api/v1/medicalcertificate',medicalCertificateController.create.bind(medicalCertificateController));
     server.delete('/api/v1/medicalcertificate/:id', medicalCertificateController.delete.bind(medicalCertificateController));
-    
+    server.put('/api/v1/medicalcertificate/:id', medicalCertificateController.update.bind(medicalCertificateController));
+
     //Payments Endpoints
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));

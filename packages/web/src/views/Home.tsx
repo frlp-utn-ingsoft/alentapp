@@ -1,5 +1,5 @@
 import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
-import { LuUsers } from "react-icons/lu";
+import { LuUsers, LuCreditCard } from "react-icons/lu";
 
 import { SectionCard } from "../components/SectionCard";
 import { FcSportsMode } from "react-icons/fc";
@@ -37,6 +37,12 @@ export function HomeView() {
 "
           to="/sports"
           icon={FcSportsMode}
+        />
+        <SectionCard 
+          title="Pagos"
+          description="Administra los pagos de los integrantes de Alentapp."
+          to="/payments"
+          icon={LuCreditCard}
         />
 
         {/* Future sections can be added here following the same pattern */}
