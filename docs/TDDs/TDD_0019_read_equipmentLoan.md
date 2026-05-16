@@ -56,12 +56,12 @@ Permitir la visualización y auditoría de los préstamos registrados en el sist
 ## Casos de Borde y Errores
 
 | **Escenario** | **Resultado Esperado** | **Código HTTP** |
-| --- | --- | --- |
-| **Búsqueda por ID inexistente** | Mensaje: "El préstamo solicitado no fue encontrado." | 404 Not Found |
-| **Búsqueda de un ID eliminado lógicamente** | Mensaje: "El préstamo solicitado no fue encontrado." | 404 Not Found |
-| **Listado general sin registros en la DB** | Devuelve un array vacío: `[]` | 200 OK |
-| **Formato de ID inválido en la URL** | Mensaje: "El formato del ID provisto en la URL no es válido." | 400 Bad Request |
-| **Error de conexión a DB** | Mensaje: "Error interno del servidor, reintente más tarde." | 500 Internal Server Error |
+| :--- | :--- | :--- |
+| **Búsqueda por ID inexistente** | `{ "error": "El préstamo solicitado no fue encontrado." }` | 404 Not Found |
+| **Búsqueda de un ID eliminado lógicamente** | `{ "error": "El préstamo solicitado no fue encontrado." }` | 404 Not Found |
+| **Listado general sin registros en la DB** | `{ "data": [] }` | 200 OK |
+| **Formato de ID inválido en la URL** | `{ "error": "El formato del ID provisto en la URL no es válido." }` | 400 Bad Request |
+| **Error de conexión a DB** | `{ "error": "Error interno del servidor, reintente más tarde." }` | 500 Internal Server Error |
 
 ## Plan de Implementación
 
@@ -83,7 +83,7 @@ Permitir la visualización y auditoría de los préstamos registrados en el sist
 
 ## Fase 3: Lógica de Aplicación (Application)
 
-4. **Desarrollar Casos de Uso**:
+3. **Desarrollar Casos de Uso**:
    - **`GetAllEquipmentLoansUseCase`**:
      1. Solicitar al repositorio la lista de entidades.
      2. Retornar la lista (aunque esté vacía) a la capa de infraestructura.
@@ -96,10 +96,10 @@ Permitir la visualización y auditoría de los préstamos registrados en el sist
 
 ## Fase 4: Infraestructura y Persistencia (Infrastructure)
 
-5. **Adaptador de Persistencia (Salida)**:
+4. **Adaptador de Persistencia (Salida)**:
    - **Filtro de Seguridad**: Implementar `findAll` y `findById` en el `DB persistence adapter` aplicando obligatoriamente la cláusula para validar que no se devuelvan registros borrados logicamente.
    - Utilizar el `EquipmentLoanPersistenceMapper` (`ToDomain`) para transformar los resultados de la base de datos en objetos de dominio.
-6. **Adaptadores de Entrada (Controller)**:
+5. **Adaptadores de Entrada (Controller)**:
    - Implementar los métodos correspondientes en `EquipmentLoanController` para las rutas:
      - `GET /api/v1/equipment-loans`
      - `GET /api/v1/equipment-loans/:id`
