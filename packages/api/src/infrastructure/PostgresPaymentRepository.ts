@@ -56,16 +56,15 @@ export class PostgresPaymentRepository implements PaymentRepository {
 
     async findAll(): Promise<PaymentDTO[]> {
         const payments = await prisma.payment.findMany({
-            include:{
+            include: {
                 member: {
                     select: {
                         name: true,
                         dni: true,
-                    }
-                }
+                    },
+                },
             },
             orderBy: { created_at: 'desc' },
-
         });
         return payments.map(this.mapToDTO);
     }
@@ -79,6 +78,18 @@ export class PostgresPaymentRepository implements PaymentRepository {
             where: { member_id, month, year },
         });
         return payment ? this.mapToDTO(payment) : null;
+    }
+    
+    async cancel(id: string): Promise<PaymentDTO> {
+        const payment = await prisma.payment.update({
+            where: { id },
+            data: {
+                status: 'Cancelado',
+                payment_date: null,
+            },
+        });
+
+        return this.mapToDTO(payment);
     }
 
     private mapToDTO(payment: any): PaymentDTO {
