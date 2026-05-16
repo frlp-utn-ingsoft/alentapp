@@ -18,7 +18,7 @@ export type PaymentFormData = CreatePaymentRequest & {
 
 function getInitialFormData(): PaymentFormData {
     const { month, year } = getPreviousMonthAndYear();
-
+    
     return {
         member_id: '',
         amount: 0,
@@ -29,6 +29,11 @@ function getInitialFormData(): PaymentFormData {
         payment_date: null,
     };
 }
+const toDateInputValue = (date?: string | null): string => {
+    if (!date) return '';
+
+    return date.split('T')[0];
+};
 
 export function usePaymentForm(onSaved: () => void) {
     const [formMode, setFormMode] = useState<PaymentFormMode>('create');
@@ -56,9 +61,9 @@ export function usePaymentForm(onSaved: () => void) {
             amount: payment.amount,
             month: payment.month,
             year: payment.year,
-            due_date: payment.due_date,
+            due_date: toDateInputValue(payment.due_date),
             status: payment.status,
-            payment_date: payment.payment_date,
+            payment_date: toDateInputValue(payment.payment_date),
         });
         setIsDialogOpen(true);
     };
