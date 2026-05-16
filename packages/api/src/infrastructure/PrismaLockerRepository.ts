@@ -80,4 +80,10 @@ export class PrismaLockerRepository implements LockerRepository {
         });
         return lockers.map(this.mapToDTO.bind(this));
     }
+    async findByMemberId(memberId: string): Promise<LockerDTO | null> {
+        const locker = await prisma.locker.findFirst({
+            where: { member_id: memberId },
+        });
+        return locker ? this.mapToDTO(locker) : null;
+    }
 }
