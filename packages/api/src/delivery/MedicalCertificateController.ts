@@ -1,12 +1,16 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateMedicalCertificateRequest } from '@alentapp/shared';
-import { CreateMedicalCertificateUseCase } from '../application/NewMedicalCertificateUseCase.js';
-import { DeleteMedicalCertificateUseCase } from '../application/DeleteMedicalCertificateUseCase.js';
+import { UpdateMedicalCertificateRequest } from '@alentapp/shared';
+import { CreateMedicalCertificateUseCase } from '../application/MedicalCertificate/NewMedicalCertificateUseCase.js';
+import { DeleteMedicalCertificateUseCase } from '../application/MedicalCertificate/DeleteMedicalCertificateUseCase.js';
+import { UpdateMedicalCertificateUseCase } from '../application/MedicalCertificate/UpdateMedicalCertificate.js';
+
 
 export class MedicalCertificateController {
   constructor(
     private readonly createUseCase: CreateMedicalCertificateUseCase,
-    private readonly deleteUseCase: DeleteMedicalCertificateUseCase
+    private readonly deleteUseCase: DeleteMedicalCertificateUseCase,
+    private readonly updateUseCase: UpdateMedicalCertificateUseCase
   ) {}
 
   async create(
@@ -67,4 +71,40 @@ export class MedicalCertificateController {
       });
     }
   }
+    async update(
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: UpdateMedicalCertificateRequest;
+    }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const body = request.body;
+
+      const updatedCertificate =
+        await this.updateUseCase.execute(id, body);
+
+      return reply.code(200).send(updatedCertificate);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'El certificado indicado no se encuentra registrado') {
+          return reply.code(404).send({ message: error.message });
+        }
+
+
+        if (
+          error.message ===
+          'La fecha de vencimiento debe ser posterior a la de emisión'
+        ) {
+          return reply.code(400).send({ message: error.message });
+        }
+      }
+
+      return reply.code(500).send({
+        message: 'Error interno, reintente más tarde',
+      });
+    }
+  }
+
 }

@@ -1,4 +1,4 @@
-import { MedicalCertificateRepository } from '../domain/MedicalCertificateRepository.js';
+import { MedicalCertificateRepository } from '../../domain/MedicalCertificateRepository.js';
 
 export class DeleteMedicalCertificateUseCase {
     constructor(
