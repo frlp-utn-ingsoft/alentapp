@@ -25,6 +25,12 @@ import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
 import { CancelPaymentUseCase } from './application/DeletePaymentUseCase.js'; 
 import { PaymentController } from './delivery/PaymentController.js';
 
+// EquipmentLoan
+import { PrismaEquipmentLoanRepository } from './infrastructure/PrismaEquipmentLoanRepository.js';
+import { CreateEquipmentLoanUseCase } from './application/CreateEquipmentLoanUseCase.js';
+import { EquipmentLoanController } from './delivery/EquipmentLoanController.js';
+
+
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -103,6 +109,15 @@ export function buildApp() {
     server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
     server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));  
+
+    
+    // --- EquipmentLoan ---
+    const equipmentLoanRepo = new PrismaEquipmentLoanRepository();
+    const createEquipmentLoanUseCase = new CreateEquipmentLoanUseCase(equipmentLoanRepo, memberRepo);
+    const equipmentLoanController = new EquipmentLoanController(createEquipmentLoanUseCase);
+
+    server.get('/api/v1/equipment-loans', equipmentLoanController.getAll.bind(equipmentLoanController));
+    server.post('/api/v1/equipment-loans', equipmentLoanController.create.bind(equipmentLoanController));
 
     
     server.get('/', async (req, rep) => {
