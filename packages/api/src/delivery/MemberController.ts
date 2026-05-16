@@ -15,7 +15,9 @@ export class MemberController {
 
     async getAll(_request: FastifyRequest, reply: FastifyReply) {
         try {
-            const socios = await this.getMembersUseCase.execute();
+            const{ search } = _request.query as { search?: string };
+            
+            const socios = await this.getMembersUseCase.execute({search: search?.trim(),});
             return reply.status(200).send({ data: socios });
         } catch (error: any) {
             return reply.status(500).send({ error: error.message });
