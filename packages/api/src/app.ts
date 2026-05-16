@@ -20,6 +20,7 @@ import { PostgresLoanRepository } from './infrastructure/PostgresLoanRepository.
 import { LoanValidator } from './domain/services/LoanValidator.js';
 import { CreateLoanUseCase } from './application/CreateLoanUseCase.js';
 import { GetLoansUseCase } from './application/GetLoansUseCase.js';
+import { DeleteLoanUseCase } from './application/DeleteLoanUseCase.js';
 import { UpdateLoanStatusUseCase } from './application/UpdateLoanStatusUseCase.js';
 import { LoanController } from './delivery/LoanController.js';
 
@@ -63,6 +64,7 @@ export function buildApp() {
     const loanValidator = new LoanValidator();
     const createLoanUseCase = new CreateLoanUseCase(loanRepo, memberRepo, loanValidator);
     const getLoansUseCase = new GetLoansUseCase(loanRepo);
+    const deleteLoanUseCase = new DeleteLoanUseCase(loanRepo);
     const updateLoanStatusUseCase = new UpdateLoanStatusUseCase(loanRepo);
 
     const memberController = new MemberController(
@@ -80,7 +82,7 @@ export function buildApp() {
         deleteDisciplineUseCase
     );
 
-    const loanController = new LoanController(createLoanUseCase, getLoansUseCase, updateLoanStatusUseCase);
+    const loanController = new LoanController(createLoanUseCase, getLoansUseCase, deleteLoanUseCase, updateLoanStatusUseCase);
 
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
@@ -95,6 +97,7 @@ export function buildApp() {
 
     server.post('/api/v1/equipment-loan', loanController.create.bind(loanController));
     server.get('/api/v1/equipment-loan', loanController.getAll.bind(loanController));
+    server.delete('/api/v1/equipment-loan/:id', loanController.delete.bind(loanController));
     server.patch('/api/v1/equipment-loan/:id/status', loanController.updateStatus.bind(loanController));
 
     server.get('/', async (req, rep) => {
