@@ -1,5 +1,13 @@
-import { Box, Button, Input, SimpleGrid, Stack, Text } from '@chakra-ui/react';
-import type { CreatePaymentRequest } from '@alentapp/shared';
+import {
+    Box,
+    Button,
+    Input,
+    SimpleGrid,
+    Stack,
+    Text,
+    NativeSelect,
+} from '@chakra-ui/react';
+import type { CreatePaymentRequest, PaymentStatus } from '@alentapp/shared';
 import {
     DialogActionTrigger,
     DialogBody,
@@ -13,8 +21,16 @@ import { Field } from './ui/field';
 import { MemberSearchInput } from './MemberSearchInput';
 import type { MemberDTO } from '@alentapp/shared';
 
+type PaymentFormMode = 'create' | 'update';
+
+type PaymentFormData = CreatePaymentRequest & {
+    status?: PaymentStatus;
+    payment_date?: string | null;
+};
+
 type Props = {
-    formData: CreatePaymentRequest;
+    mode?: PaymentFormMode;
+    formData: PaymentFormData;
     isSubmitting: boolean;
 
     memberSearch: string;
@@ -33,6 +49,7 @@ type Props = {
 };
 
 export function PaymentFormDialog({
+    mode = 'create',
     formData,
     isSubmitting,
     memberSearch,
@@ -45,11 +62,17 @@ export function PaymentFormDialog({
     onSearchMember,
     onSelectMember,
 }: Props) {
+    const isUpdateMode = mode === 'update';
+
     return (
         <DialogContent>
             <form onSubmit={onSubmit}>
                 <DialogHeader>
-                    <DialogTitle>Agregar Nuevo Pago</DialogTitle>
+                    <DialogTitle>
+                        {isUpdateMode
+                            ? 'Actualizar Pago'
+                            : 'Agregar Nuevo Pago'}
+                    </DialogTitle>
                 </DialogHeader>
 
                 <DialogBody>
@@ -61,6 +84,7 @@ export function PaymentFormDialog({
                                 searchRef={memberSearchRef}
                                 onSearch={onSearchMember}
                                 onSelect={onSelectMember}
+                                disabled={isUpdateMode}
                             />
                         </Field>
 
@@ -74,6 +98,7 @@ export function PaymentFormDialog({
                                         onUpdateMonth(e.target.value)
                                     }
                                     required
+                                    disabled={isUpdateMode}
                                 />
                             </Field>
 
@@ -86,6 +111,7 @@ export function PaymentFormDialog({
                                         onUpdateYear(e.target.value)
                                     }
                                     required
+                                    diabled={isUpdateMode}
                                 />
                             </Field>
                         </SimpleGrid>
@@ -116,6 +142,7 @@ export function PaymentFormDialog({
                                                 Number(e.target.value),
                                             )
                                         }
+                                        disabled={isUpdateMode}
                                         required
                                     />
                                 </Box>
@@ -135,6 +162,54 @@ export function PaymentFormDialog({
                                 />
                             </Field>
                         </SimpleGrid>
+                        {isUpdateMode && (
+                            <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
+                                <Field label="Estado" required>
+                                    <NativeSelect.Root>
+                                        <NativeSelect.Field
+                                            value={formData.status ?? ''}
+                                            onChange={(e) =>
+                                                onUpdateField(
+                                                    'status',
+                                                    e.target
+                                                        .value as PaymentStatus,
+                                                )
+                                            }
+                                            required
+                                        >
+                                            <option value="" disabled>
+                                                Seleccionar Estado
+                                            </option>
+                                            <option value="Pendiente">
+                                                Pendiente
+                                            </option>
+                                            <option value="Pagado">
+                                                Pagado
+                                            </option>
+                                            <option value="Vencido">
+                                                Vencido
+                                            </option>
+                                    
+                                        </NativeSelect.Field>
+                                        <NativeSelect.Indicator/>
+                                    </NativeSelect.Root>
+                                </Field>
+                                {formData.status === 'Pagado' && (
+                                    <Field label="Fecha de Pago">
+                                        <Input
+                                            type="date"
+                                            value={formData.payment_date ?? ''}
+                                            onChange={(e) =>
+                                                onUpdateField(
+                                                    'payment_date',
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </Field>
+                                )}
+                            </SimpleGrid>
+                        )}
                     </Stack>
                 </DialogBody>
 
@@ -148,7 +223,7 @@ export function PaymentFormDialog({
                         colorPalette="blue"
                         loading={isSubmitting}
                     >
-                        Crear Pago
+                        {isUpdateMode ? 'Actualizar Pago' : 'Crear Pago'}
                     </Button>
                 </DialogFooter>
 
