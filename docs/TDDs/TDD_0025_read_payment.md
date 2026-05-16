@@ -116,12 +116,12 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización.
 
 | Escenario                                  | Resultado Esperado                                      | Código HTTP               |
 | ------------------------------------------ | ------------------------------------------------------- | ------------------------- |
-| `id` del pago no existe                    | Mensaje: "El pago indicado no existe"                   | 404 Not Found             |
-| `id` con formato inválido (no UUID)        | Mensaje: "El identificador proporcionado no es válido"  | 400 Bad Request           |
-| Filtro `status` con valor no permitido     | Mensaje: "El estado indicado no es válido"              | 400 Bad Request           |
+| `id` del pago no existe                    | `{ "error": "El pago indicado no existe" }`                   | 404 Not Found             |
+| `id` con formato inválido (no UUID)        | `{ "error": "El identificador proporcionado no es válido" }`  | 400 Bad Request           |
+| Filtro `status` con valor no permitido     | `{ "error": "El estado indicado no es válido" }`              | 400 Bad Request           |
 | Filtro `memberId` de socio inexistente   | Retorna lista vacía `{ "data": [] }`                      | 200 OK                    |
 | No hay pagos registrados (vigentes)        | Retorna lista vacía `{ "data": [] }`                      | 200 OK                    |
-| Error de conexión a DB                     | Mensaje: "Error interno, reintente más tarde"           | 500 Internal Server Error |
+| Error de conexión a DB                     | `{ "error": "Error interno, reintente más tarde" }`           | 500 Internal Server Error |
 
 ## Plan de Implementación
 
@@ -132,11 +132,4 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización.
 5. Crear los endpoints `GET /api/v1/payments/:id` y `GET /api/v1/payments` en `PaymentController`.
 6. Integrar la vista de listado y detalle en el frontend consumiendo los nuevos endpoints.
 
-## Cambios respecto de la versión anterior
-
-- Eliminación de menciones específicas a Prisma/WHERE; filtros descritos como criterios de consulta sobre BD.
-- Nomenclatura en inglés y endpoints `GET /api/v1/payments` / `:id`; query params `memberId` / `status`.
-- GET por ID y listado exponen payloads con `{ "data": ... }` y campos alineados a `PaymentResponse` (incluye `deletedAt`).
-- Alcance explícito: registros dados de baja lógica (`deletedAt != null`) excluidos de listados/most-read operativos.
-- Arquitectura hexagonal con `GetPaymentByIdUseCase`, `ListPaymentsUseCase`, `IPaymentRepository`, `PaymentPrismaRepository`.
 
