@@ -26,6 +26,7 @@ import { UpdateMedicalCertificateUseCase } from './application/MedicalCertificat
 import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
 
 import { PaymentController } from './delivery/PaymentController.js';
+import { UpdatePaymentUseCase } from './application/Payment/UpdatePaymentUseCase.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -106,7 +107,8 @@ export function buildApp() {
     const paymentValidator = new PaymentValidator(paymentRepo);
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, paymentValidator, memberRepo);
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
-    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
+    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase, updatePaymentUseCase);
 
     //Endpoints
 
@@ -130,6 +132,7 @@ export function buildApp() {
     //Payments Endpoints
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
+    server.patch('/api/v1/payments/:id', paymentController.update.bind(paymentController));
 
 
     server.get('/', async (req, rep) => {
