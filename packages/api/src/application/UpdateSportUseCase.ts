@@ -1,0 +1,25 @@
+import { UpdateSportRequest, SportDTO } from '@alentapp/shared';
+import { SportRepository } from '../domain/SportRepository.js';
+import { SportValidator } from '../domain/services/SportValidator.js';
+
+export class UpdateSportUseCase {
+    constructor(
+        private readonly sportRepository: SportRepository,
+        private readonly sportValidator: SportValidator,
+    ) {}
+
+    async execute(id: string, data: UpdateSportRequest & { name?: string }): Promise<SportDTO> {
+        const sport = await this.sportRepository.findById(id);
+        if (!sport) {
+            throw new Error('El deporte no existe');
+        }
+
+        this.sportValidator.validateNameNotModified(data);
+
+        if (data.maxCapacity !== undefined) {
+            this.sportValidator.validateMaxCapacity(data.maxCapacity);
+        }
+
+        return this.sportRepository.update(id, data);
+    }
+}
