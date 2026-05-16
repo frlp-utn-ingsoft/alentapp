@@ -60,21 +60,7 @@ export interface UpdateSportRequest {
   requires_medical_certificate?: boolean;
 }
 
-//datos que el front envía al back para crear un certificado medico
-export interface CreateMedicalCertificateRequest {
-  memberId: string
-  expiryDate: string
-  doctorLicense: string
-}
-
-//(Objeto de Transferencia de Datos) enviada de vuelta al front como respuesta
-export interface MedicalCertificateDTO {
-  id: string
-  issueDate: string
-  expiryDate: string
-  doctorLicense: string
-  isValidated: boolean
-  deletedAt: string | null
-
-  memberId: string
-}
+// ==========================
+// = Payments
+// ==========================
+export * from './payment';
