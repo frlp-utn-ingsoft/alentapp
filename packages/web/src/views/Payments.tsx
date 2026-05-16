@@ -11,9 +11,11 @@ import {
     Spinner,
     Center,
     Input,
+    SimpleGrid,
 } from '@chakra-ui/react';
 import { LuPlus, LuPencil, LuTrash2, LuRefreshCw } from 'react-icons/lu';
-import { useEffect, useState, ChangeEvent } from 'react';
+import { useEffect, useState, useRef, ChangeEvent } from 'react';
+
 import { paymentsService } from '../services/payments';
 import type { PaymentDTO, CreatePaymentRequest } from '@alentapp/shared';
 import {
@@ -35,6 +37,8 @@ import {
     SelectItem,
     createListCollection,
 } from '../components/ui/select';
+import { membersService } from '../services/members';
+import type { MemberDTO } from '@alentapp/shared';
 
 export function PaymentsView() {
     const [payments, setPayments] = useState<PaymentDTO[]>([]);
@@ -45,32 +49,54 @@ export function PaymentsView() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // funcion  para que el vencimiento por defecto sea 7 dias despues de la fecha actual
-    const getDefaultDueDate = () => {
-        const date = new Date();
-        date.setDate(date.getDate() + 7);
-        return date.toISOString().split('T')[0];
+    // State for members
+    const [memberSearch, setMemberSearch] = useState<MemberDTO[]>([]);
+    const [memberResults, setMemberResults] = useState<MemberDTO[]>([]);
+    const [selectedMember, setSelectedMember] = useState<string>('');
+    const [isSearchingMembers, setIsSearchingMembers] = useState(false);
+    const memberSearchRef = useRef<HTMLDivElement | null>(null);
+
+    // funcion que devuelve la fecha de vencimiento por defecto (primer dia del mes siguiente al mes y año seleccionados)
+    const getDefaultDueDate = (month: number, year: number) => {
+        if (
+            !Number.isInteger(month) ||
+            !Number.isInteger(year) ||
+            month < 1 ||
+            month > 12
+        ) {
+            return '';
+        }
+
+        const dueDate = new Date(year, month, 1);
+
+        return dueDate.toISOString().split('T')[0];
     };
 
     const formatDate = (date: string | null) => {
-    if (!date) return 'No pagado';
+        if (!date) return 'No pagado';
 
-    return new Date(date).toLocaleDateString('es-AR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    });
-};
+        return new Date(date).toLocaleDateString('es-AR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+    };
+    // Al abrir el modal, se setea el mes y año por defecto al mes anterior al actual (suponiendo que se paga a mes vencido)
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
 
-    // Form state
+    const initialMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+    const initialYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
     const [formData, setFormData] = useState<
         CreatePaymentRequest & { status?: PaymentStatus }
     >({
         member_id: '',
         amount: 0,
-        month: 1,
-        year: new Date().getFullYear(),
-        due_date: getDefaultDueDate(),
+        month: initialMonth,
+        year: initialYear,
+        due_date: getDefaultDueDate(initialMonth, initialYear),
     });
 
     const fetchPayments = async () => {
@@ -86,20 +112,12 @@ export function PaymentsView() {
         }
     };
 
-    const openCreateModal = () => {
-        setFormData({
-            member_id: '',
-            amount: 0,
-            month: 1,
-            year: new Date().getFullYear(),
-            due_date: getDefaultDueDate(),
-            status: 'Pendiente',
-        });
-        setIsDialogOpen(true);
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.member_id) {
+            alert('Debe seleccionar un socio válido');
+            return;
+        }
         setIsSubmitting(true);
         try {
             await paymentsService.create(formData as CreatePaymentRequest);
@@ -112,6 +130,68 @@ export function PaymentsView() {
         }
     };
 
+    const searchMembers = async (query: string) => {
+        setMemberSearch(query);
+        setSelectedMember(null);
+        if (query.trim().length < 2) {
+            setMemberResults([]);
+            return;
+        }
+        setIsSearchingMembers(true);
+        try {
+            const results = await membersService.getAll(query);
+            setMemberResults(results);
+        } catch (err: any) {
+            console.error('Error al buscar miembros:', err);
+            setMemberResults([]);
+        } finally {
+            setIsSearchingMembers(false);
+        }
+    };
+
+    const handleSelectMember = (member: MemberDTO) => {
+        setSelectedMember(member);
+        setMemberSearch(`${member.name} (${member.dni})`);
+        setFormData({
+            ...formData,
+            member_id: member.id,
+        });
+        setMemberResults([]);
+    };
+    const openCreateModal = () => {
+        const currentMonth = new Date().getMonth() + 1;
+        const currentYear = new Date().getFullYear();
+
+        setFormData({
+            member_id: '',
+            amount: 0,
+            month: currentMonth - 1, // suponiendo que se paga a mes vencido.
+            year: currentYear,
+            due_date: getDefaultDueDate(currentMonth, currentYear),
+            status: 'Pendiente',
+        });
+        setMemberSearch('');
+        setMemberResults([]);
+        setSelectedMember(null);
+
+        setIsDialogOpen(true);
+    };
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                memberSearchRef.current &&
+                !memberSearchRef.current.contains(event.target as Node)
+            ) {
+                setMemberResults([]);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
     useEffect(() => {
         fetchPayments();
     }, []);
@@ -156,77 +236,210 @@ export function PaymentsView() {
                             <DialogTitle>{'Agregar Nuevo Pago'}</DialogTitle>
                         </DialogHeader>
                         <DialogBody>
-                            <Stack gap="4">
-                                <Field label="Id del miembro" required>
-                                    <Input
-                                        placeholder="Ej. 12345"
-                                        value={formData.member_id}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                member_id: e.target.value,
-                                            })
-                                        }
-                                        required
-                                    />
-                                </Field>
-                                <Field label="Monto" required>
-                                    <Input
-                                        type="number"
-                                        placeholder="Ej. 1500"
-                                        value={formData.amount}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                amount: e.target.value,
-                                            })
-                                        }
-                                        required
-                                    />
-                                </Field>
-                                <Field label="Mes" required>
-                                    <Input
-                                        type="number"
-                                        min={1}
-                                        max={12}
-                                        value={formData.month}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                month: Number(e.target.value),
-                                            })
-                                        }
-                                        required
-                                    />
-                                </Field>
+                            
 
-                                <Field label="Año" required>
-                                    <Input
-                                        type="number"
-                                        value={formData.year}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                year: Number(e.target.value),
-                                            })
-                                        }
-                                        required
-                                    />
-                                </Field>
-                                <Field label="Fecha de Vencimiento" required>
-                                    <Input
-                                        type="date"
-                                        value={formData.due_date}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                due_date: e.target.value,
-                                            })
-                                        }
-                                        required
-                                    />
-                                </Field>
-                            </Stack>
+                                <Stack gap="4">
+
+                                    <Field label="Socio" required>
+                                        <Box
+                                            position="relative"
+                                            w="100%"
+                                            ref={memberSearchRef}
+                                        >
+                                            <Input
+                                                placeholder="Buscar por nombre o DNI"
+                                                value={memberSearch}
+                                                onChange={(e) =>
+                                                    searchMembers(
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                required
+                                            />
+
+                                            {memberResults.length > 0 && (
+                                                <Box
+                                                    position="absolute"
+                                                    top="100%"
+                                                    left="0"
+                                                    right="0"
+                                                    zIndex="20"
+                                                    bg="white"
+                                                    borderWidth="1px"
+                                                    borderColor="gray.200"
+                                                    borderRadius="md"
+                                                    mt="1"
+                                                    maxH="220px"
+                                                    overflowY="auto"
+                                                    boxShadow="lg"
+                                                >
+                                                    {memberResults.map(
+                                                        (member) => (
+                                                            <Box
+                                                                key={member.id}
+                                                                px="4"
+                                                                py="3"
+                                                                cursor="pointer"
+                                                                _hover={{
+                                                                    bg: 'gray.50',
+                                                                }}
+                                                                onMouseDown={() =>
+                                                                    handleSelectMember(
+                                                                        member,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Text fontWeight="semibold">
+                                                                    {
+                                                                        member.name
+                                                                    }
+                                                                </Text>
+                                                                <Text
+                                                                    fontSize="sm"
+                                                                    color="fg.muted"
+                                                                >
+                                                                    DNI:{' '}
+                                                                    {member.dni}
+                                                                </Text>
+                                                            </Box>
+                                                        ),
+                                                    )}
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    </Field>
+
+                                    <SimpleGrid
+                                        columns={{ base: 1, md: 2 }}
+                                        gap="4"
+                                    >
+                                        <Field label="Mes" required>
+                                            <Input
+                                                type="text"
+                                                inputMode="numeric"
+                                                value={formData.month}
+                                                onChange={(e) => {
+                                                    const value =
+                                                        e.target.value;
+
+                                                    if (value === '') {
+                                                        setFormData({
+                                                            ...formData,
+                                                            month: 0,
+                                                            due_date: '',
+                                                        });
+                                                        return;
+                                                    }
+
+                                                    const newMonth =
+                                                        Number(value);
+
+                                                    setFormData({
+                                                        ...formData,
+                                                        month: newMonth,
+                                                        due_date:
+                                                            getDefaultDueDate(
+                                                                newMonth,
+                                                                formData.year,
+                                                            ),
+                                                    });
+                                                }}
+                                                required
+                                            />
+                                        </Field>
+
+                                        <Field label="Año" required>
+                                            <Input
+                                                type="text"
+                                                inputMode="numeric"
+                                                value={formData.year}
+                                                onChange={(e) => {
+                                                    const value =
+                                                        e.target.value;
+
+                                                    if (value === '') {
+                                                        setFormData({
+                                                            ...formData,
+                                                            year: 0,
+                                                            due_date: '',
+                                                        });
+                                                        return;
+                                                    }
+
+                                                    const newYear =
+                                                        Number(value);
+
+                                                    setFormData({
+                                                        ...formData,
+                                                        year: newYear,
+                                                        due_date:
+                                                            getDefaultDueDate(
+                                                                formData.month,
+                                                                newYear,
+                                                            ),
+                                                    });
+                                                }}
+                                                required
+                                            />
+                                        </Field>
+                                    </SimpleGrid>
+                                    <SimpleGrid
+                                        columns={{ base: 1, md: 2 }}
+                                        gap="4"
+                                    >
+                                        <Field label="Monto" required>
+                                            <Box position="relative">
+                                                <Text
+                                                    position="absolute"
+                                                    left="3"
+                                                    top="50%"
+                                                    transform="translateY(-50%)"
+                                                    color="fg.muted"
+                                                    pointerEvents="none"
+                                                >
+                                                    $
+                                                </Text>
+
+                                                <Input
+                                                    type="text"
+                                                    inputMode="decimal"
+                                                    placeholder="0"
+                                                    value={formData.amount}
+                                                    pl="7"
+                                                    onChange={(e) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            amount: Number(
+                                                                e.target.value,
+                                                            ),
+                                                        })
+                                                    }
+                                                    required
+                                                />
+                                            </Box>
+                                        </Field>
+
+                                        <Field
+                                            label="Fecha de Vencimiento"
+                                            required
+                                        >
+                                            <Input
+                                                type="date"
+                                                value={formData.due_date}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        due_date:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                                required
+                                            />
+                                        </Field>
+                                    </SimpleGrid>
+                                </Stack>
+                        
+                        
                         </DialogBody>
                         <DialogFooter>
                             <DialogActionTrigger asChild>
@@ -271,9 +484,7 @@ export function PaymentsView() {
                         <Center h="300px">
                             <Stack align="center" gap="4">
                                 <Spinner size="xl" color="blue.500" />
-                                <Text color="fg.muted">
-                                    Cargando pagos...
-                                </Text>
+                                <Text color="fg.muted">Cargando pagos...</Text>
                             </Stack>
                         </Center>
                     ) : payments.length === 0 ? (
@@ -295,7 +506,7 @@ export function PaymentsView() {
                                         Nombre del socio
                                     </Table.ColumnHeader>
                                     <Table.ColumnHeader py="4">
-                                        DNI 
+                                        DNI
                                     </Table.ColumnHeader>
                                     <Table.ColumnHeader py="4">
                                         Monto
@@ -312,7 +523,7 @@ export function PaymentsView() {
                                     <Table.ColumnHeader py="4">
                                         Estado
                                     </Table.ColumnHeader>
-{/*                                     
+                                    {/*                                     
                                     <Table.ColumnHeader py="4" textAlign="end">
                                         Acciones
                                     </Table.ColumnHeader> */}
@@ -324,14 +535,14 @@ export function PaymentsView() {
                                         key={payment.id}
                                         _hover={{ bg: 'bg.muted/30' }}
                                     >
-                                         <Table.Cell
+                                        <Table.Cell
                                             fontWeight="semibold"
                                             color="fg.emphasized"
                                         >
                                             {payment.member?.name || 'N/A'}
                                         </Table.Cell>
-                                        
-                                         <Table.Cell
+
+                                        <Table.Cell
                                             fontWeight="semibold"
                                             color="fg.emphasized"
                                         >
