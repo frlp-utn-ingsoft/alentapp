@@ -18,10 +18,11 @@ import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { SportController } from './delivery/SportController.js';
 import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
-import { CreateMedicalCertificateUseCase } from './application/NewMedicalCertificateUseCase.js';
+import { CreateMedicalCertificateUseCase } from './application/MedicalCertificate/NewMedicalCertificateUseCase.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
-import { DeleteMedicalCertificateUseCase } from './application/DeleteMedicalCertificateUseCase.js';
-
+import { DeleteMedicalCertificateUseCase } from './application/MedicalCertificate/DeleteMedicalCertificateUseCase.js';
+import { UpdateMedicalCertificateUseCase } from './application/MedicalCertificate/UpdateMedicalCertificate.js';
+import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
 
 import { PaymentController } from './delivery/PaymentController.js';
 
@@ -85,10 +86,16 @@ export function buildApp() {
     const deleteMedicalCertificateUseCase =
     new DeleteMedicalCertificateUseCase(medicalCertificateRepo);
 
+    const updateMedicalCertificateUseCase = new UpdateMedicalCertificateUseCase(
+        medicalCertificateRepo,
+        new MedicalCertificateValidator()
+    );
+
     const medicalCertificateController =
          new MedicalCertificateController(
             createMedicalCertificateUseCase,
             deleteMedicalCertificateUseCase,
+            updateMedicalCertificateUseCase,
         );
     
     //payment

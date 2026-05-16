@@ -1,6 +1,7 @@
 import {
   CreateMedicalCertificateRequest,
   MedicalCertificateDTO,
+  UpdateMedicalCertificateRequest,
 } from '@alentapp/shared';
 
 export interface MedicalCertificateRepository {
@@ -21,6 +22,8 @@ export interface MedicalCertificateRepository {
   invalidate(id: string): Promise<void>;
 
   delete(id: string): Promise<void>;
+
+  update(id: string, data: UpdateMedicalCertificateRequest): Promise<MedicalCertificateDTO>;
 }
 
   
