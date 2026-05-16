@@ -34,7 +34,7 @@ Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 
 - `id`: Identificador único universal (UUID).
 - `itemName`: Cadena de texto
-- `status`: Enumeracion (`Prestado`, `Devuelto`, `Dañado`)
+- `status`: Enumeracion (`Loaned`, `Returned`, `Damaged`)
 - `loanDate`: Fecha de creacion.
 - `dueDate`: Fecha.
 - `memberId`: Identificador único universal (UUID) referenciando a “`member`”.
@@ -60,7 +60,7 @@ Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 "data": {
         id: "3b2ca8d7-5e6e-4b67-a8b4-482a201c13d9",
         itemName: "Pelota de Básquet Spalding",
-        status: "Prestado",
+        status: "Loaned",
         loanDate: "2026-05-16T15:30:00Z",
         dueDate: "2026-05-23T15:30:00Z",
         memberId: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
@@ -71,8 +71,8 @@ Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 ### Componentes de Arquitectura Hexagonal
 
 - **Domain**:
-    - `EquipmentLoan` (Maneja su propia invariante: la fecha de devolución debe ser futura al momento del préstamo, su estado inicial es siempre `Prestado`y `deletedAt`en `null`).
-    - **Value Objects:** `EquipmentLoanStatus` ( `'Prestado' | 'Devuelto' | 'Dañado'`).
+    - `EquipmentLoan` (Maneja su propia invariante: la fecha de devolución debe ser futura al momento del préstamo, su estado inicial es siempre `Loaned`y `deletedAt`en `null`).
+    - **Value Objects:** `EquipmentLoanStatus` ( `Loaned`, `Returned`, `Damaged`).
     - **Reglas de negocio:**  Un préstamo de equipamiento no puede existir si el socio solicitante no tiene categoría "Senior" o "Lifetime”(Esta regla se delega al caso de uso)
 - **Application**:
     - Caso de Uso: `CreateEquipmentLoanUseCase` (Consulta la categoría del socio, aplica la restriccion si es necesario, instancia la entidad `EquipmentLoan` y la persiste a traves de `IEquipmentLoanRepository`)
@@ -100,7 +100,7 @@ Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 1. **Definir DTOs y Value Objects**:
    - Crear y exportar `CreateEquipmentLoanRequest` con los campos necesarios.
    - Crear y exportar `EquipmentLoanResponse` para la salida de la API.
-   - Crear el Value Object/Enum `EquipmentLoanStatus` con los estados: `'Prestado'`, `'Devuelto'` y `'Dañado'`.
+   - Crear el Value Object/Enum `EquipmentLoanStatus` con los estados: `Loaned`, `Returned`, `Damaged`.
 
 ---
 
@@ -108,7 +108,7 @@ Se define la entidad `EquipmentLoan` con los siguientes datos y restricciones
 
 2. **Entidad `EquipmentLoan`**:
    - Implementar la clase con sus atributos y lógica de validación interna (invariantes).
-   - El constructor debe asegurar que la fecha de devolución sea futura, el estado inicial sea `'Prestado'` y `deletedAt` sea `null`.
+   - El constructor debe asegurar que la fecha de devolución sea futura, el estado inicial sea `Loaned` y `deletedAt` sea `null`.
 3. **Puertos (Interfaces)**:
    - Crear la interfaz `IEquipmentLoanRepository` con el método `save()`.
 

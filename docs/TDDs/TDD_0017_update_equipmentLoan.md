@@ -21,10 +21,10 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 ### Criterios de Aceptación
 
 - El sistema debe validar que la nueva fecha ingresada sea futura a la fecha de prestamo
-- El sistema debe permitir cambiar el estado de `Prestado` a `Devuelto` o `Dañado` para finalizar el préstamo
-- Si un prestamo ya se encuentra finalizado (`Devuelto` o `Dañado`), el sistema debe permitir alternar entre estos para corregir errores de carga manual
-- El sistema no debe permitir que un prestamo con estado `Devuelto` o `Dañado` vuelva al estado inicial `Prestado` para prevenir inconsistencias en los datos de la entidad. Si un socio quiere el material nuevamente se debe generar un nuevo prestamo.
-- Una vez que el préstamo pasa a un estado final (`Devuelto` o `Dañado`), el sistema debe bloquear la edición de los campos `itemName` y `dueDate`. Solo se permitirá modificar el campo `status` para correcciones.
+- El sistema debe permitir cambiar el estado de `Loaned` a `Returned` o `Damaged` para finalizar el préstamo
+- Si un prestamo ya se encuentra finalizado (`Returned` o `Damaged`), el sistema debe permitir alternar entre estos para corregir errores de carga manual
+- El sistema no debe permitir que un prestamo con estado `Returned` o `Damaged` vuelva al estado inicial `Loaned` para prevenir inconsistencias en los datos de la entidad. Si un socio quiere el material nuevamente se debe generar un nuevo prestamo.
+- Una vez que el préstamo pasa a un estado final (`Returned` o `Damaged`), el sistema debe bloquear la edición de los campos `itemName` y `dueDate`. Solo se permitirá modificar el campo `status` para correcciones.
 - Al finalizar, el sistema debe mostrar un mensaje de exito y retornar los datos actualizados
 
 ## Diseño Técnico (RFC)
@@ -38,7 +38,7 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 {
     itemName?: string;
     dueDate?: string;
-    status?: 'Prestado' | 'Devuelto' | 'Dañado';
+    status?: 'Loaned' | 'Returned' | 'Damaged';
 }
 ```
 
@@ -61,7 +61,7 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 
 - **Domain**:
     - La estructura de la entidad `EquipmentLoan` y el Value Object `EquipmentLoanStatus` son idénticos a los definidos en el documento base de creación
-    - Reglas de Negocio(Transicion de estados): Solo permitir cambiar el estado de `Prestado` a `Devuelto` o `Dañado`y transicionar entre estos ultimos dos. Bloquear el retorno a `Prestado` y congelar la edición de los campos `itemName` y `dueDate` si el préstamo ya está finalizado(`Devuelto` o `Dañado`)."
+    - Reglas de Negocio(Transicion de estados): Solo permitir cambiar el estado de `Loaned` a `Returned` o `Damaged`y transicionar entre estos ultimos dos. Bloquear el retorno a `Loaned` y congelar la edición de los campos `itemName` y `dueDate` si el préstamo ya está finalizado(`Returned` o `Damaged`)."
 - **Application**:
     - Caso de Uso: `UpdateEquipmentLoanUseCase` (Busca el prestamo existente, llama a `EquipmentLoan` para que aplique sus reglas de transicion de estados, bloquea los campos correspondientes si es necesario y persiste la entidad modificada utilizando `IEquipmentLoanRepository`)
     - Puertos de Salida: `IEquipmentLoanRepository` (Interface de dominio, de la cual necesitamos el metodo `findById()` y `update()`)
@@ -93,8 +93,8 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 
 ## Fase 2: Núcleo de Dominio (Domain)
 2. **Comportamiento en la Entidad `EquipmentLoan`**:
-   - Implementar método para actualizar la informacion: Debe lanzar un error de negocio si el estado actual ya es `Devuelto` o `Dañado` (campos congelados).
-   - Implementar método para cambiar el estado: Validar que solo se permita pasar de `Prestado` a `Devuelto`/`Dañado`. Bloquear cualquier intento de volver a `Prestado`.
+   - Implementar método para actualizar la informacion: Debe lanzar un error de negocio si el estado actual ya es `Returned` o `Damaged` (campos congelados).
+   - Implementar método para cambiar el estado: Validar que solo se permita pasar de `Loaned` a `Returned`/`Damaged`. Bloquear cualquier intento de volver a `Loaned`.
 3. **Puertos (Interfaces)**: Asegurar que `IEquipmentLoanRepository` incluya:
    - `findById()`: Para recuperar la versión actual de la base de datos.
    - `update()`: Para persistir los cambios en el registro existente.
