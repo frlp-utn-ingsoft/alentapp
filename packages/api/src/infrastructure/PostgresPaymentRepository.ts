@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { PaymentRepository } from '../domain/PaymentRepository.js';
-import { PaymentDTO, CreatePaymentRequest } from '@alentapp/shared';
+import { PaymentDTO, CreatePaymentRequest, UpdatePaymentRequest } from '@alentapp/shared';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -49,6 +49,19 @@ export class PostgresPaymentRepository implements PaymentRepository {
             orderBy: { due_date: 'desc' },
         });
         return payments.map(this.mapToDTO);
+    }
+
+    async update(id: string, data: UpdatePaymentRequest): Promise<PaymentDTO> {
+        // La lógica de asignar el payment_date la maneja el UseCase, acá solo persistimos
+        const updateData: any = { ...data };
+        if (data.due_date) updateData.due_date = new Date(data.due_date);
+        if (data.status === 'Paid') updateData.payment_date = new Date();
+
+        const payment = await prisma.payment.update({
+            where: { id },
+            data: updateData,
+        });
+        return this.mapToDTO(payment);
     }
 
     private mapToDTO(payment: DBPayment): PaymentDTO {

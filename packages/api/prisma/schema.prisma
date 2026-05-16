@@ -57,6 +57,8 @@ model Payment {
     member       Member        @relation(fields: [member_id], references: [id])
 
     @@map("payments")
+}
+
 model Locker {
   id        String  @id @default(uuid())
   number    Int     @unique
