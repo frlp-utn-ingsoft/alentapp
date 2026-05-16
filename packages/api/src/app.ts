@@ -6,7 +6,7 @@ import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
 import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
-import { MemberController } from './delivery/MemberController.js';
+import { MemberController } from './infrastructure/delivery/MemberController.js';
 
 export function buildApp() {
     const server = Fastify({
