@@ -74,3 +74,14 @@ model Locker {
 
   @@map("lockers")
 }
+
+model Sport {
+        id                           String   @id @default(uuid())
+        name                         String   @unique
+        description                  String
+        max_capacity                 Int
+        additional_price             Float
+        requires_medical_certificate Boolean
+
+        @@map("sports")
+}

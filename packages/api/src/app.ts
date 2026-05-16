@@ -24,6 +24,10 @@ import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
 import { CancelPaymentUseCase } from './application/DeletePaymentUseCase.js'; 
 import { PaymentController } from './delivery/PaymentController.js';
+// Sports
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { SportController } from './delivery/SportController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -106,6 +110,13 @@ export function buildApp() {
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
     server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));
     server.delete('/api/v1/lockers/:id', lockerController.delete.bind(lockerController));
+
+    // --- Sports ---
+    const sportRepo = new PostgresSportRepository();
+    const createSportUseCase = new CreateSportUseCase(sportRepo);
+    const sportController = new SportController(createSportUseCase);
+
+    server.post('/api/v1/deportes', sportController.create.bind(sportController));
     
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
