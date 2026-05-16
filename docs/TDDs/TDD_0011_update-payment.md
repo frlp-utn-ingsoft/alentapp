@@ -149,7 +149,7 @@ model Payment {
    * Si el pago está en `Pagado`: retornar el pago tal cual, con 200 OK. No re-setear `payment_date`, no actualizar `updated_at`, no generar logs ni efectos colaterales.
    * Si el pago está en `Cancelado`: rechazar con error 409.
    * Si el pago está en `Pendiente`: continuar con el flujo.
-5. Setear `status = "Paid"` y `payment_date = Clock.now()`.
+5. Setear `status = "Pagado"` y `payment_date = Clock.now()`.
 6. Persistir cambios usando una transacción que vuelva a verificar el estado actual del pago antes de actualizar (defensa contra concurrencia, ver sección 3.3).
 7. Retornar el pago actualizado.
 
@@ -183,7 +183,7 @@ La clave del diseño es que **`payment_date` se setea una sola vez**, en la prim
 
 #### Manejo del vencimiento sin borrado
 
-Cuando un pago vence sin ser abonado, el sistema **no elimina** ni modifica los datos originales. El job del TDD-0018 transiciona el pago a `Canceled` y setea `canceled_at`, pero conserva `amount`, `due_date`, `month`, `year`, etc. Esto permite:
+Cuando un pago vence sin ser abonado, el sistema **no elimina** ni modifica los datos originales. El job del TDD-0018 transiciona el pago a `Cancelado` y setea `canceled_at`, pero conserva `amount`, `due_date`, `month`, `year`, etc. Esto permite:
 
 * Auditoría completa: se puede reconstruir qué se había cargado, cuándo venció y cuándo fue cancelado.
 * Reportes históricos de morosidad.
@@ -256,7 +256,7 @@ Tanto `MarkPaymentAsPaidUseCase` como `UpdatePaymentUseCase` reciben una depende
 ## 6. Observaciones Adicionales
 
 * La transición `Pendiente → Pagado` es **idempotente**: invocar el endpoint N veces es equivalente a invocarlo una vez. `payment_date` se setea solo en la primera transición real.
-* La transición `Pending → Canceled` se realiza exclusivamente vía `PATCH /payments/:id/cancel` (TDD-0018), no desde estos endpoints.
+* La transición `Pendiente → Cancelado` se realiza exclusivamente vía `PATCH /payments/:id/cancel` (TDD-0018), no desde estos endpoints.
 * Los estados `Pagado` y `Cancelado` son terminales: una vez alcanzados, no se permiten modificaciones de ningún tipo desde el TDD-0011.
 * No existe la transición `Cancelado → Pagado`. Si un pago vencido fue cancelado por el job y el socio efectivamente pagó, el administrador debe crear un nuevo pago vía TDD-0010 (esto es posible porque la unicidad por período solo aplica a pagos activos).
 * `payment_date` se setea automáticamente vía `Clock.now()`. Nunca se acepta desde el cliente.

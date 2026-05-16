@@ -163,6 +163,6 @@ model Payment {
 * `canceled_at` se inicializa en `null` y solo se setea al transicionar a `Cancelado` (ver TDD-0018).
 * `month` y `year` se derivan de `due_date`.
 * No se permite el borrado físico de pagos.
-* **Unicidad por período activo**: solo se bloquea la creación si existe un pago `Pendiente` o `Pagado` para el mismo socio y período. Los pagos `Canceled` no cuentan, lo que permite re-crear un pago para un período cuyo registro previo fue cancelado (por error administrativo o por vencimiento via job).
+* **Unicidad por período activo**: solo se bloquea la creación si existe un pago `Pendiente` o `Pagado` para el mismo socio y período. Los pagos `Cancelado` no cuentan, lo que permite re-crear un pago para un período cuyo registro previo fue cancelado (por error administrativo o por vencimiento via job).
 * La actualización y cobro de pagos se documenta en TDD-0011.
 * La cancelación de pagos (manual y automática vía job) se documenta en TDD-0018.

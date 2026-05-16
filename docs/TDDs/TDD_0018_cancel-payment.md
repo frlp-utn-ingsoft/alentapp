@@ -29,7 +29,7 @@ La cancelación puede originarse de dos formas:
 * Como administrador, quiero cancelar un pago pendiente para anular cargos que ya no corresponden, manteniendo trazabilidad.
 
 - Escenario de éxito (manual): Si el administrador cancela un pago `Pendiente`, el sistema debe actualizar su `status` a `Cancelado` y setear `canceled_at` con la fecha actual.
-- Escenario de éxito (idempotencia): Si el administrador cancela un pago que ya está en `Canceled`, el sistema debe responder 200 OK devolviendo el pago tal cual está, sin modificar `canceled_at` ni generar efectos colaterales.
+- Escenario de éxito (idempotencia): Si el administrador cancela un pago que ya está en `Cancelado`, el sistema debe responder 200 OK devolviendo el pago tal cual está, sin modificar `canceled_at` ni generar efectos colaterales.
 - Escenario de éxito (job de vencimiento): Si un pago tiene `status = Pendiente` y `due_date < hoy`, el job diario debe cancelarlo automáticamente y setear `canceled_at`.
 - Escenario de fallo: Si el administrador intenta cancelar un pago `Pagado`, el sistema debe rechazar la operación.
 - Escenario de fallo: Si el administrador intenta cancelar un pago inexistente, el sistema debe rechazar la operación.
@@ -49,7 +49,7 @@ Entidad `Payment`:
 * `year`: Año del pago (derivado de `due_date`).
 * `due_date`: Fecha de vencimiento (ISO 8601). Debe ser estrictamente posterior al día actual.
 * `payment_date`: Fecha en la que se registró el pago efectivo. Inicialmente `null`.
-* `status`: Estado del pago (`Pendiente`, `Pagado`, `Cancelado`). En la creación es siempre `Pending`.
+* `status`: Estado del pago (`Pendiente`, `Pagado`, `Cancelado`). En la creación es siempre `Pendiente`.
 * `created_at`: Fecha de creación.
 * `updated_at`: Fecha de última modificación.
 * `canceled_at`: Fecha de cancelación. Inicialmente `null`.
@@ -124,7 +124,7 @@ Este caso de uso es invocado tanto por el `PaymentController` (HTTP) como por el
 2. Validar que `id` tenga formato UUID válido.
 3. Buscar pago existente por `id`. Si no existe, retornar error 404.
 4. **Aplicar idempotencia y validar estado**:
-   * Si el pago está en `Canceled`: retornar el pago tal cual, con 200 OK. No re-setear `canceled_at`, no generar logs ni efectos colaterales.
+   * Si el pago está en `Cancelado`: retornar el pago tal cual, con 200 OK. No re-setear `canceled_at`, no generar logs ni efectos colaterales.
    * Si el pago está en `Pagado`: rechazar con error 409.
    * Si el pago está en `Pendiente`: continuar con el flujo.
 5. Setear `status = "Cancelado"` y `canceled_at = Clock.now()`.
@@ -136,7 +136,7 @@ Este caso de uso es invocado tanto por el `PaymentController` (HTTP) como por el
 #### Job: `CancelExpiredPaymentsJob`
 
 * **Disparador**: scheduler diario (cron a las 00:30 hora local).
-* **Selección**: `status = Pending AND due_date < Clock.now()`.
+* **Selección**: `status = Pendiente AND due_date < Clock.now()`.
 * **Acción**: para cada pago seleccionado, invoca `CancelPaymentUseCase`.
 * **Errores parciales**: el fallo en un pago no debe abortar el job. Cada cancelación se procesa de forma independiente y los errores se loguean.
 * **Idempotencia**: si entre la selección y la actualización el pago ya pasó a estado terminal (por intervención del admin), la lógica del caso de uso lo deja sin efecto. El job continúa con los siguientes pagos.
@@ -208,9 +208,9 @@ Esto garantiza que solo una de las operaciones concurrentes materializa el cambi
 ## 6. Observaciones Adicionales
 
 * La cancelación es **idempotente**: invocar el endpoint N veces es equivalente a invocarlo una vez. `canceled_at` se setea solo en la primera transición real.
-* La cancelación es una transición terminal: un pago `Cancelado` no puede volver a `Pendiente` ni transicionar a `Paid`.
+* La cancelación es una transición terminal: un pago `Cancelado` no puede volver a `Pendiente` ni transicionar a `Pagado`.
 * Si un pago fue cancelado automáticamente por vencimiento y el socio efectivamente pagó, el administrador debe crear un nuevo pago vía TDD-0010 en lugar de intentar revivir el cancelado. Esto es posible porque la unicidad por período solo aplica a pagos activos, no cancelados.
-* **Socios inactivos**: si un socio pasa a `Inactive`, sus pagos existentes en `Pending` se mantienen en ese estado. Si no se abonan antes de la `due_date`, el job de vencimiento los cancelará automáticamente. No se realiza una cancelación masiva al momento de la inactivación del socio.
+* **Socios inactivos**: si un socio pasa a `Suspendido`, sus pagos existentes en `Pendiente` se mantienen en ese estado. Si no se abonan antes de la `due_date`, el job de vencimiento los cancelará automáticamente. No se realiza una cancelación masiva al momento de la inactivación del socio.
 * `canceled_at` se setea automáticamente vía `Clock.now()`. Nunca se acepta desde el cliente.
 * No se permite la eliminación física de pagos bajo ninguna circunstancia.
 * El `CancelPaymentUseCase` es el único punto donde se materializa la transición a `Cancelado`. Tanto el endpoint HTTP como el job lo invocan, garantizando reglas idénticas.
