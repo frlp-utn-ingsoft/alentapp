@@ -1,10 +1,12 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateDisciplineUseCase } from '../application/CreateDisciplineUseCase.js';
 import { CreateDisciplineRequest } from '@alentapp/shared';
+import { GetDisciplinesUseCase } from '../application/GetDisciplinesUseCase.js';
 
 export class DisciplineController {
     constructor(
         private readonly createDisciplineUseCase: CreateDisciplineUseCase,
+        private readonly getDisciplinesUseCase: GetDisciplinesUseCase,
     ) {}
     async create(
         request: FastifyRequest<{ Body: CreateDisciplineRequest }>,
@@ -28,6 +30,15 @@ export class DisciplineController {
                 return reply.status(400).send({ message: error.message });
             }
 
+            return reply.status(500).send({ message: "Error interno, reintente más tarde" });
+        }
+    }
+
+    async getAll(_request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const disciplines = await this.getDisciplinesUseCase.execute();
+            return reply.status(200).send({ data: disciplines });
+        } catch (error: any) {
             return reply.status(500).send({ message: "Error interno, reintente más tarde" });
         }
     }
