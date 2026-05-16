@@ -1,6 +1,6 @@
 ---
 id: 0011
-estado: Propuesto
+estado: Implementado
 autor: Sergio Adrián Maldonado
 fecha: 2026-05-01
 titulo: Actualización de Deportes Existentes

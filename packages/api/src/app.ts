@@ -27,6 +27,8 @@ import { PaymentController } from './delivery/PaymentController.js';
 // Sports
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
+import { SportValidator } from './domain/services/SportValidator.js';
 import { SportController } from './delivery/SportController.js';
 
 export function buildApp() {
@@ -113,10 +115,13 @@ export function buildApp() {
 
     // --- Sports ---
     const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator(sportRepo);
     const createSportUseCase = new CreateSportUseCase(sportRepo);
-    const sportController = new SportController(createSportUseCase);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
+    const sportController = new SportController(createSportUseCase, updateSportUseCase);
 
     server.post('/api/v1/deportes', sportController.create.bind(sportController));
+    server.put('/api/v1/deportes/:id', sportController.update.bind(sportController));
     
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
