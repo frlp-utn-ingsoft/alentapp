@@ -52,4 +52,20 @@ export interface CreatePaymentRequest {
   year: number;
   due_date: string; // ISO Date String (YYYY-MM-DD)
   member_id: string;
+// Locker
+// ==========================================
+export type LockerStatus = 'Available' | 'Occupied' | 'Maintenance';
+
+export interface LockerDTO {
+  id: string;
+  number: number;
+  location: string;
+  status: LockerStatus;
+  member_id: string | null;
+}
+
+export interface CreateLockerRequest {
+  number: number;
+  location: string;
+  status: 'Available' | 'Maintenance';
 }

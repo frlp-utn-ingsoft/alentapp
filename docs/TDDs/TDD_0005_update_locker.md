@@ -1,6 +1,6 @@
 ---
 id: 0005
-estado: Pendiente
+estado: Implementado
 autor: Juan Ignacio Wilt
 fecha: 2026-05-01
 titulo: Modificación de Locker
@@ -33,8 +33,8 @@ La entidad se mantiene sin cambios estructurales, operando sobre los atributos e
 *   `member_id`: uuid (Nullable, clave foránea).
 
 ### Contrato de API (@alentapp/shared)
-Se utilizará el verbo PATCH para permitir modificaciones parciales del recurso.
-*   **Endpoint**: `PATCH /api/v1/lockers/:id`
+Se utilizará el verbo PUT para permitir modificaciones parciales del recurso.
+*   **Endpoint**: `PUT /api/v1/lockers/:id`
 *   **Request Body**:
 ```ts
 {
