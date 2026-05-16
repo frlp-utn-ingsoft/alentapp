@@ -8,7 +8,7 @@ titulo: Eliminación de Deportes Existentes
 
 # TDD-0014: Eliminación de Deportes Existentes
 
-## 1. Contexto de Negocio (PRD)
+## 1. Contexto de Negocio
 
 ### 1.1 Objetivo
 
@@ -16,8 +16,8 @@ Permitir que un administrativo dé de baja un deporte que ya no se ofrece en el 
 
 ### 1.2 User Persona
 
-- **Rol:** Administrador.
-- **Necesidad:** Dar de baja un deporte que fue cargado incorrectamente o que dejó de ofrecerse sin perder su historial asociado.
+* **Rol**: Administrador.
+* **Necesidad**: Dar de baja un deporte que fue cargado incorrectamente o que dejó de ofrecerse sin perder su historial asociado.
 
 ### 1.3 Criterios de Aceptación
 
@@ -27,24 +27,30 @@ Permitir que un administrativo dé de baja un deporte que ya no se ofrece en el 
     - Escenario de fallo: "Si el usuario intenta dar de baja un deporte que ya se encuentra dado de baja, el sistema debe bloquear la acción y notificar que el deporte ya fue dado de baja".
     - Escenario de fallo: "Si ocurre un error de conexión con la base de datos, el sistema debe informar un error interno".
 
-## 2. Diseño Técnico (RFC)
+## 2. Diseño Técnico
 
 ### 2.1 Modelo de Dominio
 
 La entidad de dominio `Sport` mantiene los mismos campos definidos para el alta. En esta funcionalidad se modifica únicamente el campo `deleted_at`.
 
-- `id`: Identificador único universal (UUID).
-- `name`: Cadena de texto obligatoria e inmutable.
-- `description`: Cadena de texto obligatoria.
-- `max_capacity`: Número entero obligatorio. Debe ser mayor a cero.
-- `additional_price`: Número decimal obligatorio. No puede ser negativo.
-- `requires_medical_certificate`: Booleano obligatorio.
-- `deleted_at`: Fecha de baja lógica, opcional. Si es `null`, el deporte está activo en el catálogo. Si contiene una fecha, el deporte fue dado de baja.
+* `id`: Identificador único universal (UUID).
+* `name`: Cadena de texto obligatoria e inmutable.
+* `description`: Cadena de texto obligatoria.
+* `max_capacity`: Número entero obligatorio. Debe ser mayor a cero.
+* `additional_price`: Número decimal obligatorio. No puede ser negativo.
+* `requires_medical_certificate`: Booleano obligatorio.
+* `deleted_at`: Fecha de baja lógica, opcional. Si es `null`, el deporte está activo en el catálogo. Si contiene una fecha, el deporte fue dado de baja.
 
 ### 2.2 Contrato de API (@alentapp/shared)
 
-- **Endpoint:** `DELETE /api/v1/sports/:id`
-- **Request Body:** `None`
+* **Endpoint**: `DELETE /api/v1/sports/:id`
+* **Semántica**: Baja lógica del deporte. Esta operación no elimina el recurso físicamente; el servidor setea `deleted_at = now()` y el deporte deja de estar disponible por defecto.
+* **Request Body**: `{}` (vacío). No se requiere información adicional para ejecutar la baja; la marca temporal se determina del lado del servidor.
+* **Response**: `204 No Content` en caso de éxito.
+
+Nota de diseño:
+
+* Se utiliza `DELETE` por decisión grupal. Aunque la operación realiza una baja lógica en lugar de un borrado físico, se prioriza la semántica REST de la operación: el recurso deja de estar disponible para el cliente, lo cual es consistente con el verbo `DELETE`.
 
 ### 2.3 Esquema de Persistencia
 
@@ -64,9 +70,9 @@ model Sport {
 
 ### 3.1 Componentes de Arquitectura Hexagonal
 
-1. **Puerto (Domain):** `SportRepository`, con métodos como `findById(id)` y `softDelete(id)`. 
-2. **Adaptador de Entrada (Delivery):** `SportController`, encargado de recibir el `id` desde la URL y delegar al caso de uso. 
-3. **Adaptador de Salida (Infrastructure):** `PostgresSportRepository`, implementa los métodos `findById` y `softDelete`. 
+1. **Puerto (Domain)**: `SportRepository`, con métodos como `findById(id)` y `softDelete(id)`. 
+2. **Adaptador de Entrada (Delivery)**: `SportController`, encargado de recibir el `id` desde la URL y delegar al caso de uso. 
+3. **Adaptador de Salida (Infrastructure)**: `PostgresSportRepository`, implementa los métodos `findById` y `softDelete`. 
 
 ### 3.2 Lógica del Caso de Uso
 
@@ -83,7 +89,7 @@ model Sport {
 ## 4. Casos de Borde y Errores
 
 | Escenario | Resultado Esperado | Código HTTP |
-| --------- | ------------------ | ----------- |
+| :--- | :--- | :--- |
 | Deporte inexistente | Mensaje: "El deporte no existe" | 404 Not Found |
 | ID con formato inválido | Mensaje: "Formato de ID inválido" | 400 Bad Request | 
 | Deporte ya dado de baja | "El deporte ya fue dado de baja" | 409 Conflict |
