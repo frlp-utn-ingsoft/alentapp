@@ -15,6 +15,7 @@ import { GetPaymentsUseCase } from './application/Payment/GetPaymentsUseCase.js'
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { UpdateSportUseCase } from './application/Sport/UpdateSportUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
+import { DeleteSportUseCase } from './application/Sport/DeleteSportUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { SportController } from './delivery/SportController.js';
 import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
@@ -62,6 +63,7 @@ export function buildApp() {
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
     const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
+    const deleteSportUseCase = new DeleteSportUseCase(sportRepo);
 
     const memberController = new MemberController(
         createMemberUseCase, 
@@ -74,7 +76,8 @@ export function buildApp() {
     const sportController = new SportController(
         createSportUseCase,
         getSportsUseCase,
-        updateSportUseCase
+        updateSportUseCase,
+        deleteSportUseCase
     );
 
     const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
@@ -119,6 +122,7 @@ export function buildApp() {
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
     server.patch('/api/v1/sport/:id', sportController.update.bind(sportController));
+    server.delete('/api/v1/sport/:id', sportController.delete.bind(sportController));
     
     //Medical Certificate Endpoints
     server.post('/api/v1/medicalcertificate',medicalCertificateController.create.bind(medicalCertificateController));
