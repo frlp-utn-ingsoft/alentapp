@@ -1,6 +1,6 @@
 ---
 id: 0004
-estado: Pendiente
+estado: Implementado
 autor: Juan Ignacio Wilt
 fecha: 2026-05-01
 titulo: Alta de Locker
