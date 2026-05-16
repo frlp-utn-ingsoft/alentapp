@@ -39,6 +39,7 @@ export class DisciplineController {
             const disciplines = await this.getDisciplinesUseCase.execute();
             return reply.status(200).send({ data: disciplines });
         } catch (error: any) {
+            console.error(error);
             return reply.status(500).send({ message: "Error interno, reintente más tarde" });
         }
     }

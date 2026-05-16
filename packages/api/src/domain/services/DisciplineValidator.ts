@@ -31,9 +31,15 @@ export class DisciplineValidator {
     }
 
     validateDateFormat(date: string): void {
-        const parseDate = new Date(date);
+        const parsedDate = new Date(date);
 
-        if (Number.isNaN(parseDate.getTime())) {
+        if (Number.isNaN(parsedDate.getTime())) {
+            throw new Error('Formato de fecha inválido');
+        }
+
+        const year = parsedDate.getUTCFullYear();
+
+        if (year < 1000 || year > 9999) {
             throw new Error('Formato de fecha inválido');
         }
     }

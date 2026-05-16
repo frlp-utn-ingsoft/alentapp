@@ -45,7 +45,7 @@ export class PostgresDisciplineRepository implements DisciplineRepository {
             orderBy: { start_date: 'desc' },
         });
     
-        return disciplines.map(this.mapToDTO);
+        return disciplines.map((discipline) => this.mapToDTO(discipline));
     }
 
     private mapToDTO(discipline: DBDiscipline): DisciplineDTO {
