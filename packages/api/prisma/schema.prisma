@@ -33,9 +33,11 @@ model Member {
     category   MemberCategory
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
+    medicalCertificates MedicalCertificate[] //un miembro ouede tener muchos certificados
 
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
 }
+
 
 model Sport {
     id                           String   @id @default(uuid())
@@ -47,4 +49,19 @@ model Sport {
     created_at                   DateTime @default(now())
 
     @@map("sports")
+}
+
+model MedicalCertificate {
+  id             String    @id @default(uuid())
+  issueDate      DateTime  @default(now())
+  expiryDate     DateTime
+  doctorLicense  String
+  isValidated    Boolean   @default(true)
+  deletedAt      DateTime?
+
+  memberId       String
+  member         Member    @relation(fields: [memberId], references: [id])
+
+  @@map("medical_certificates")
+
 }

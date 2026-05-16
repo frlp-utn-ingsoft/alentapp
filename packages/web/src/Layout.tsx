@@ -33,6 +33,18 @@ function Layout() {
                                 Miembros
                             </Text>
                         </RouterLink>
+                        <RouterLink to="/medical-certificates">
+                            <Text
+                                fontWeight="semibold"
+                                fontSize="sm"
+                                textTransform="uppercase"
+                                letterSpacing="wider"
+                                color="fg.muted"
+                                _hover={{ color: "blue.500", textDecoration: "none" }}
+                            >
+                                Certificados
+                            </Text>
+                            </RouterLink>
                         <RouterLink to="/sports">
                             <Text 
                                 fontWeight="semibold" 
