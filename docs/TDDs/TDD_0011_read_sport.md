@@ -22,7 +22,7 @@ Permitir tanto al personal administrativo como a los socios consultar el catálo
 - El sistema debe exponer un endpoint para obtener el detalle de un deporte específico por su `id`.
 - Si el deporte consultado por `id` no existe, el sistema debe retornar un error claro.
 - La respuesta de listado debe incluir todos los campos relevantes de cada deporte.
-- El listado debe poder filtrarse opcionalmente por `requires_medical_certificate`.
+- El listado debe poder filtrarse opcionalmente por `requiresMedicalCertificate`.
 
 ## Diseño Técnico (RFC)
 
