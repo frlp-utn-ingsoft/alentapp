@@ -20,17 +20,25 @@ import { PostgresLoanRepository } from './infrastructure/PostgresLoanRepository.
 import { LoanValidator } from './domain/services/LoanValidator.js';
 import { CreateLoanUseCase } from './application/CreateLoanUseCase.js';
 import { LoanController } from './delivery/LoanController.js';
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
+import { PaymentValidator } from './domain/services/PaymentValidator.js';
+import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
+import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
     const server = Fastify({
         logger: {
             level: 'info',
-            transport: process.env.NODE_ENV === 'development' 
-            ? {
-                target: 'pino-pretty',
-                options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
-                } 
-            : undefined,
+            transport:
+                process.env.NODE_ENV === 'development'
+                    ? {
+                          target: 'pino-pretty',
+                          options: {
+                              translateTime: 'HH:MM:ss Z',
+                              ignore: 'pid,hostname',
+                          },
+                      }
+                    : undefined,
         },
     });
 
@@ -45,27 +53,62 @@ export function buildApp() {
     const memberValidator = new MemberValidator(memberRepo);
     const disciplineRepo = new PostgresDisciplineRepository();
     const disciplineValidator = new DisciplineValidator();
-    
-    const createMemberUseCase = new CreateMemberUseCase(memberRepo, memberValidator);
+
+    const createMemberUseCase = new CreateMemberUseCase(
+        memberRepo,
+        memberValidator,
+    );
     const getMembersUseCase = new GetMembersUseCase(memberRepo);
-    const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
+    const updateMemberUseCase = new UpdateMemberUseCase(
+        memberRepo,
+        memberValidator,
+    );
     const deleteMemberUseCase = new DeleteMemberUseCase(memberRepo);
-    const createDisciplineUseCase = new CreateDisciplineUseCase(disciplineRepo, memberRepo, disciplineValidator);
-    const getDisciplineUseCase = new GetDisciplineUseCase(disciplineRepo, disciplineValidator);
-    const listMemberDisciplinesUseCase = new ListMemberDisciplinesUseCase(disciplineRepo, memberRepo);
-    const getMemberDisciplineStatusUseCase = new GetMemberDisciplineStatusUseCase(disciplineRepo, memberRepo);
-    const updateDisciplineUseCase = new UpdateDisciplineUseCase(disciplineRepo, disciplineValidator);
-    const deleteDisciplineUseCase = new DeleteDisciplineUseCase(disciplineRepo, disciplineValidator);
+    const createDisciplineUseCase = new CreateDisciplineUseCase(
+        disciplineRepo,
+        memberRepo,
+        disciplineValidator,
+    );
+    const getDisciplineUseCase = new GetDisciplineUseCase(
+        disciplineRepo,
+        disciplineValidator,
+    );
+    const listMemberDisciplinesUseCase = new ListMemberDisciplinesUseCase(
+        disciplineRepo,
+        memberRepo,
+    );
+    const getMemberDisciplineStatusUseCase =
+        new GetMemberDisciplineStatusUseCase(disciplineRepo, memberRepo);
+    const updateDisciplineUseCase = new UpdateDisciplineUseCase(
+        disciplineRepo,
+        disciplineValidator,
+    );
+    const deleteDisciplineUseCase = new DeleteDisciplineUseCase(
+        disciplineRepo,
+        disciplineValidator,
+    );
 
     const loanRepo = new PostgresLoanRepository();
     const loanValidator = new LoanValidator();
-    const createLoanUseCase = new CreateLoanUseCase(loanRepo, memberRepo, loanValidator);
+    const createLoanUseCase = new CreateLoanUseCase(
+        loanRepo,
+        memberRepo,
+        loanValidator,
+    );
+
+    const paymentRepo = new PostgresPaymentRepository();
+    const paymentValidator = new PaymentValidator();
+    const createPaymentUseCase = new CreatePaymentUseCase(
+        paymentRepo,
+        memberRepo,
+        paymentValidator,
+    );
 
     const memberController = new MemberController(
-        createMemberUseCase, 
+        createMemberUseCase,
         getMembersUseCase,
         updateMemberUseCase,
-        deleteMemberUseCase
+        deleteMemberUseCase,
     );
     const disciplineController = new DisciplineController(
         createDisciplineUseCase,
@@ -73,26 +116,66 @@ export function buildApp() {
         listMemberDisciplinesUseCase,
         getMemberDisciplineStatusUseCase,
         updateDisciplineUseCase,
-        deleteDisciplineUseCase
+        deleteDisciplineUseCase,
     );
 
     const loanController = new LoanController(createLoanUseCase);
 
-    server.get('/api/v1/socios', memberController.getAll.bind(memberController));
-    server.post('/api/v1/socios', memberController.create.bind(memberController));
-    server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
-    server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
-    server.get('/api/v1/disciplines/:id', disciplineController.getById.bind(disciplineController));
-    server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
-    server.put('/api/v1/disciplines/:id', disciplineController.update.bind(disciplineController));
-    server.delete('/api/v1/disciplines/:id', disciplineController.delete.bind(disciplineController));
-    server.get('/api/v1/members/:memberId/disciplines', disciplineController.getByMember.bind(disciplineController));
-    server.get('/api/v1/members/:memberId/discipline-status', disciplineController.getMemberStatus.bind(disciplineController));
+    const paymentController = new PaymentController(createPaymentUseCase);
 
-    server.post('/api/v1/equipment-loan', loanController.create.bind(loanController));
+    server.get(
+        '/api/v1/socios',
+        memberController.getAll.bind(memberController),
+    );
+    server.post(
+        '/api/v1/socios',
+        memberController.create.bind(memberController),
+    );
+    server.put(
+        '/api/v1/socios/:id',
+        memberController.update.bind(memberController),
+    );
+    server.delete(
+        '/api/v1/socios/:id',
+        memberController.delete.bind(memberController),
+    );
+    server.get(
+        '/api/v1/disciplines/:id',
+        disciplineController.getById.bind(disciplineController),
+    );
+    server.post(
+        '/api/v1/disciplines',
+        disciplineController.create.bind(disciplineController),
+    );
+    server.put(
+        '/api/v1/disciplines/:id',
+        disciplineController.update.bind(disciplineController),
+    );
+    server.delete(
+        '/api/v1/disciplines/:id',
+        disciplineController.delete.bind(disciplineController),
+    );
+    server.get(
+        '/api/v1/members/:memberId/disciplines',
+        disciplineController.getByMember.bind(disciplineController),
+    );
+    server.get(
+        '/api/v1/members/:memberId/discipline-status',
+        disciplineController.getMemberStatus.bind(disciplineController),
+    );
+
+    server.post(
+        '/api/v1/equipment-loan',
+        loanController.create.bind(loanController),
+    );
+
+    server.post(
+        '/api/v1/payments',
+        paymentController.create.bind(paymentController),
+    );
 
     server.get('/', async (req, rep) => {
-        rep.status(200).send({ msg: 'asd' })
+        rep.status(200).send({ msg: 'asd' });
     });
 
     return server;
@@ -104,7 +187,7 @@ if (process.argv[1] && process.argv[1].endsWith('app.ts')) {
     const port = parseInt(process.env.PORT || '3000', 10);
 
     server.listen({ port, host: '0.0.0.0' }, () =>
-        server.log.info(`API server running on http://localhost:${port}`)
+        server.log.info(`API server running on http://localhost:${port}`),
     );
 
     ['SIGINT', 'SIGTERM'].forEach((signal) => {
