@@ -1,0 +1,80 @@
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { CreatePaymentRequest, UpdatePaymentRequest } from '@alentapp/shared';
+
+// Importamos las interfaces de los casos de uso (que crearemos en la próxima iteración)
+export class PaymentController {
+    constructor(
+        private readonly createPaymentUseCase: any, // TODO: Tipar con CreatePaymentUseCase
+        private readonly getPaymentsUseCase: any,   // TODO: Tipar con GetPaymentsUseCase
+        private readonly updatePaymentUseCase: any, // TODO: Tipar con UpdatePaymentUseCase
+        private readonly cancelPaymentUseCase: any, // TODO: Tipar con CancelPaymentUseCase
+    ) {}
+
+    async getAll(_request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const payments = await this.getPaymentsUseCase.execute();
+            return reply.status(200).send({ data: payments });
+        } catch (error: any) {
+            return reply.status(500).send({ error: error.message });
+        }
+    }
+
+    async create(
+        request: FastifyRequest<{ Body: CreatePaymentRequest }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const payment = await this.createPaymentUseCase.execute(request.body);
+            return reply.status(201).send({ data: payment });
+        } catch (error: any) {
+            if (error.message.includes('socio especificado no existe')) {
+                return reply.status(404).send({ error: error.message });
+            }
+            if (error.message.includes('monto debe ser mayor')) {
+                return reply.status(400).send({ error: error.message });
+            }
+            return reply.status(500).send({ error: "Error interno, reintente más tarde" });
+        }
+    }
+
+    async update(
+        request: FastifyRequest<{ Params: { id: string }; Body: UpdatePaymentRequest }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const { id } = request.params;
+            const payment = await this.updatePaymentUseCase.execute(id, request.body);
+            return reply.status(200).send({ data: payment });
+        } catch (error: any) {
+            if (error.message.includes('No se puede editar un pago cerrado')) {
+                return reply.status(409).send({ error: error.message });
+            }
+            if (error.message.includes('El pago no existe')) {
+                return reply.status(404).send({ error: error.message });
+            }
+            if (error.message.includes('monto debe ser mayor')) {
+                return reply.status(400).send({ error: error.message });
+            }
+            return reply.status(500).send({ error: "Error interno, reintente más tarde" });
+        }
+    }
+
+    async delete(
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const { id } = request.params;
+            await this.cancelPaymentUseCase.execute(id);
+            return reply.status(204).send(); // 204 No Content según TDD-0015
+        } catch (error: any) {
+            if (error.message.includes('No se puede anular un pago cobrado')) {
+                return reply.status(409).send({ error: error.message });
+            }
+            if (error.message.includes('El pago no existe')) {
+                return reply.status(404).send({ error: error.message });
+            }
+            return reply.status(500).send({ error: error.message });
+        }
+    }
+}

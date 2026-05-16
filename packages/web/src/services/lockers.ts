@@ -28,7 +28,7 @@ export const lockersService = {
 
   async update(id: string, data: Partial<CreateLockerRequest & { member_id: string | null }>): Promise<LockerDTO> {
     const response = await fetch(`${API_URL}/lockers/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });

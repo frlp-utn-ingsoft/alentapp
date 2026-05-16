@@ -1,4 +1,4 @@
-import { LuUsers, LuWarehouse } from "react-icons/lu";
+import { LuUsers, LuWarehouse, LuCreditCard } from "react-icons/lu";
 import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
 import { SectionCard } from "../components/SectionCard";
 
@@ -29,6 +29,14 @@ export function HomeView() {
           description="Administra el padrón de socios, sus categorías, estados de cuenta y datos personales."
           to="/members"
           icon={LuUsers}
+        />
+
+        {/* Tarjeta de Pagos */}
+        <SectionCard 
+          title="Pagos y Cuotas"
+          description="Registra los pagos de los socios, controla los vencimientos y el estado de las cuotas."
+          to="/payments"
+          icon={LuCreditCard}
         />
           <SectionCard 
           title="Casilleros"
