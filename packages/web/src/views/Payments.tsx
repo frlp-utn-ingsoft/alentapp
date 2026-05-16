@@ -11,22 +11,32 @@ import {
     Table,
     Text,
 } from '@chakra-ui/react';
-import { LuPlus, LuPencil, LuRefreshCw } from 'react-icons/lu';
+import { LuPlus, LuPencil, LuTrash2, LuRefreshCw } from 'react-icons/lu';
 import { DialogRoot } from '../components/ui/dialog';
 import type { PaymentDTO } from '@alentapp/shared';
 import { usePayments } from '../hooks/usePayments';
 import { usePaymentForm } from '../hooks/usePaymentForm';
 import { useMemberSearch } from '../hooks/useMemberSearch';
-
+import { ConfirmActionDialog } from '../components/ConfirmActionDialog';
 import { PaymentFormDialog } from '../components/PaymentFormDialog';
 
 import { formatDate } from '../utils/paymentDates';
 import { formatCurrency } from '../utils/currency';
 
 export function PaymentsView() {
-    const { payments, isLoading, error, fetchPayments } = usePayments();
+    const {
+        payments,
+        isLoading,
+        error,
+        paymentToCancel,
+        isCancellingPayment,
+        cancelError,
+        fetchPayments,
+        openCancelPaymentDialog,
+        closeCancelPaymentDialog,
+        cancelPayment,
+    } = usePayments();
     const paymentList = Array.isArray(payments) ? payments : [];
-
     const {
         formMode,
         formData,
@@ -63,6 +73,9 @@ export function PaymentsView() {
             : payment.member_id;
         setMemberSearchValue(memberLabel);
         openUpdateModal(payment);
+    };
+    const handleOpenDeleteModal = (payment: PaymentDTO) => {
+        openCancelPaymentDialog(payment);
     };
 
     const getStatusStyles = (status: string) => {
@@ -299,10 +312,33 @@ export function PaymentsView() {
                                                                 payment,
                                                             )
                                                         }
-                                                        disabled={payment.status === 'Pagado' || payment.status === 'Cancelado'}
+                                                        disabled={
+                                                            payment.status ===
+                                                                'Pagado' ||
+                                                            payment.status ===
+                                                                'Cancelado'
+                                                        }
                                                     >
                                                         {' '}
                                                         <LuPencil />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        aria-label="Cancelar pago"
+                                                        onClick={() =>
+                                                            openCancelPaymentDialog(
+                                                                payment,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            payment.status ===
+                                                            'Cancelado'
+                                                        }
+                                                    >
+                                                        {' '}
+                                                        <LuTrash2 />
                                                     </IconButton>
                                                 </HStack>
                                             </Table.Cell>
@@ -313,6 +349,55 @@ export function PaymentsView() {
                         </Table.Root>
                     )}
                 </Box>
+                <DialogRoot
+                    open={!!paymentToCancel}
+                    onOpenChange={(details) => {
+                        if (!details.open) {
+                            closeCancelPaymentDialog();
+                        }
+                    }}
+                >
+                    <ConfirmActionDialog
+                        title="Cancelar pago"
+                        description="Esta acción es destructiva y no tiene vuelta atrás. El pago no será eliminado físicamente, pero quedará marcado como Cancelado en el historial financiero del socio."
+                        confirmLabel="Sí, cancelar pago"
+                        cancelLabel="Volver"
+                        variant="danger"
+                        isLoading={isCancellingPayment}
+                        error={cancelError}
+                        onConfirm={cancelPayment}
+                    >
+                        {paymentToCancel && (
+                            <>
+                                <Text>
+                                    Vas a cancelar el pago correspondiente al
+                                    período{' '}
+                                    <strong>
+                                        {paymentToCancel.month}/
+                                        {paymentToCancel.year}
+                                    </strong>
+                                    .
+                                </Text>
+
+                                <Text mt="1">
+                                    Monto:{' '}
+                                    <strong>
+                                        {formatCurrency(paymentToCancel.amount)}
+                                    </strong>
+                                </Text>
+
+                                {paymentToCancel.status === 'Pagado' && (
+                                    <Text mt="2">
+                                        Este pago figura como{' '}
+                                        <strong>Pagado</strong>. Al cancelarlo,
+                                        se limpiará la fecha de pago y quedará
+                                        como <strong>Cancelado</strong>.
+                                    </Text>
+                                )}
+                            </>
+                        )}
+                    </ConfirmActionDialog>
+                </DialogRoot>
             </Stack>
         </DialogRoot>
     );
