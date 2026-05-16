@@ -17,7 +17,24 @@ type DBMedicalCertificate = {
 export class PostgresMedicalCertificateRepository
   implements MedicalCertificateRepository
 {
+
   private prisma?: PrismaClient;
+
+
+  async findById(id: string): Promise<MedicalCertificateDTO | null> {
+    const certificate = await this.getPrisma().medicalCertificate.findUnique({
+      where: { id },
+    });
+
+    return certificate ? this.mapToDTO(certificate) : null;
+  }
+
+  async delete(id: string): Promise<void> {
+    //hard delete
+    await this.getPrisma().medicalCertificate.delete({
+      where: { id },
+    });
+  }
 
   private getPrisma(): PrismaClient {
     if (!process.env.DATABASE_URL) {
