@@ -1,20 +1,29 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { CreatePaymentRequest } from '@alentapp/shared';
+import {
+    CreatePaymentRequest,
+    UpdatePaymentRequest,
+} from '@alentapp/shared';
+
 import { CreatePaymentUseCase } from '../application/Payment/NewPaymentUseCase.js';
 import { GetPaymentsUseCase } from '../application/Payment/GetPaymentsUseCase.js';
+import { UpdatePaymentUseCase } from '../application/Payment/UpdatePaymentUseCase.js';
 
 export class PaymentController {
     constructor(
         private readonly createPaymentUseCase: CreatePaymentUseCase,
         private readonly getPaymentsUseCase: GetPaymentsUseCase,
+        private readonly updatePaymentUseCase: UpdatePaymentUseCase,
     ) {}
+
     async create(
         request: FastifyRequest<{ Body: CreatePaymentRequest }>,
         reply: FastifyReply,
     ) {
         try {
             request.log.info('Alguien pegó al endpoint de crear pago');
+
             const payment = await this.createPaymentUseCase.execute(request.body);
+
             return reply.status(201).send({ data: payment });
         } catch (error: any) {
             if (
@@ -27,6 +36,7 @@ export class PaymentController {
             ) {
                 return reply.status(400).send({ error: error.message });
             }
+
             if (
                 error.message.includes(
                     'Ya existe un pago para este miembro en el mes y año especificados',
@@ -34,23 +44,88 @@ export class PaymentController {
             ) {
                 return reply.status(409).send({ error: error.message });
             }
+
             if (error.message.includes('El miembro especificado no existe')) {
                 return reply.status(404).send({ error: error.message });
             }
+
             return reply
                 .status(500)
                 .send({ error: 'Error interno, reintente más tarde' });
         }
     }
+
     async getAll(_request: FastifyRequest, reply: FastifyReply) {
         try {
             const payments = await this.getPaymentsUseCase.execute();
+
             return reply.status(200).send({ data: payments });
         } catch (error: any) {
             console.error('Error obteniendo pagos:', error);
+
             return reply
                 .status(500)
                 .send({ error: 'Error interno, reintente más tarde' });
         }
     }
+
+    async update(
+    request: FastifyRequest<{
+        Params: { id: string };
+        Body: UpdatePaymentRequest;
+    }>,
+    reply: FastifyReply,
+) {
+    try {
+        const { id } = request.params;
+
+        request.log.info(
+            { id, body: request.body },
+            'Actualizando pago',
+        );
+
+        const payment = await this.updatePaymentUseCase.execute(
+            id,
+            request.body,
+        );
+
+        return reply.status(200).send({ data: payment });
+    } catch (error: any) {
+        request.log.error(
+            {
+                message: error?.message,
+                stack: error?.stack,
+                error,
+            },
+            'Error al actualizar pago',
+        );
+
+        const message =
+            error instanceof Error ? error.message : 'Error desconocido';
+
+        if (
+            message === 'Estado inválido' ||
+            message === 'El estado es obligatorio' ||
+            message === 'La fecha de pago es inválida' ||
+            message === 'Debe informar al menos un campo para actualizar' ||
+            message.startsWith('No se puede actualizar el campo')
+        ) {
+            return reply.status(400).send({ error: message });
+        }
+
+        if (message === 'Pago no encontrado') {
+            return reply.status(404).send({ error: message });
+        }
+        
+        if (message === 'No se puede actualizar un pago ya pagado' ||
+            message === 'No se puede actualizar un pago cancelado') {
+            return reply.status(409).send({ error: message });
+        }
+
+
+        return reply.status(500).send({
+            error: 'Error interno, reintente más tarde',
+        });
+    }
+}
 }
