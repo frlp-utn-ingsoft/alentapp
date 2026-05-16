@@ -34,6 +34,7 @@ function Layout() {
                             </Text>
                         </RouterLink>
 
+                        {/* ¡Tu nueva sección agregada a la barra superior! */}
                         <RouterLink to="/lockers">
                             <Text 
                                 fontWeight="semibold" 
@@ -56,4 +57,3 @@ function Layout() {
     );
 }
 export default Layout;
-

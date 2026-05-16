@@ -1,7 +1,7 @@
 const API_URL = 'http://192.168.0.71:3000/api/v1/lockers';
 
 export const lockerService = {
-  // ACÁ LE AGREGAMOS EL CREATE (POST)
+  // Método para dar de alta un casillero (POST)
   createLocker: async (number: number, location: string) => {
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -17,7 +17,7 @@ export const lockerService = {
     return response.json();
   },
 
-  // Tu lógica de reserva por PATCH
+  // Para reservar el casillero (PATCH)
   reserveLocker: async (id: string, memberId: string) => {
     const response = await fetch(`${API_URL}/${id}/reserve`, {
       method: 'PATCH',
@@ -33,7 +33,7 @@ export const lockerService = {
     return response.json();
   },
 
-  // Tu lógica de liberación por PATCH con cabecera
+  // Para liberar el casillero (PATCH con cabecera)
   releaseLocker: async (id: string, memberId: string) => {
     const response = await fetch(`${API_URL}/${id}/release`, {
       method: 'PATCH',

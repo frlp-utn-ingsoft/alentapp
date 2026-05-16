@@ -57,9 +57,9 @@ export function LockersView() {
     try {
       await lockerService.reserveLocker(id, SIMULATED_MEMBER_ID);
       setLockers(lockers.map(l => l.id === id ? { ...l, status: 'Occupied', member_id: SIMULATED_MEMBER_ID } : l));
-      alert("¡Casillero reservado!");
+      alert("¡Casillero reservado con éxito!");
     } catch (error) {
-      alert("Error al reservar");
+      alert("Error al reservar el casillero");
     } finally {
       setLoading(false);
     }
@@ -70,9 +70,9 @@ export function LockersView() {
     try {
       await lockerService.releaseLocker(id, SIMULATED_MEMBER_ID);
       setLockers(lockers.map(l => l.id === id ? { ...l, status: 'Available', member_id: null } : l));
-      alert("¡Casillero liberado!");
+      alert("¡Casillero liberado correctamente!");
     } catch (error) {
-      alert("Error al liberar");
+      alert("Error al liberar el casillero");
     } finally {
       setLoading(false);
     }
