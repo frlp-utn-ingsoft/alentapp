@@ -65,6 +65,18 @@ export class PostgresSportRepository implements SportRepository {
         return this.mapToDTO(sport);
     }
 
+    async delete(id: string): Promise<void> {
+        await prisma.sport.delete({
+            where: { id },
+        });
+    }
+
+    async hasActiveEnrollments(sportId: string): Promise<boolean> {
+        // TODO: Implement when Enrollment model is created
+        // For now, returns false as placeholder
+        return false;
+    }
+
     private mapToDTO(sport: DBSport): SportDTO {
         return {
             id: sport.id,
