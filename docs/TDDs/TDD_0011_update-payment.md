@@ -12,12 +12,12 @@ titulo: Actualización de Pagos
 
 ### 1.1. Objetivo
 
-Permitir al administrador gestionar el ciclo de vida de los pagos creados en el TDD-0010, registrando abonos y corrigiendo datos administrativos básicos mientras el pago se encuentre en estado `Pending`. La cancelación de pagos se documenta en el TDD-0015.
+Permitir al administrador gestionar el ciclo de vida de los pagos creados en el TDD-0010, registrando abonos y corrigiendo datos administrativos básicos mientras el pago se encuentre en estado `Pendiente`. La cancelación de pagos se documenta en el TDD-0018.
 
 Este TDD define dos operaciones separadas semánticamente:
 
-* **Registrar cobro**: marcar un pago como `Paid`. Operación idempotente.
-* **Editar datos administrativos**: corregir `amount` y/o `due_date` mientras el pago siga en `Pending`.
+* **Registrar cobro**: marcar un pago como `Pagado`. Operación idempotente.
+* **Editar datos administrativos**: corregir `amount` y/o `due_date` mientras el pago siga en `Pendiente`.
 
 ### 1.2. User Persona
 
@@ -31,15 +31,14 @@ Este TDD define dos operaciones separadas semánticamente:
 
 #### Registrar cobro (`PATCH /payments/:id/pay`)
 
-- Escenario de éxito: Si el administrador registra el cobro de un pago `Pending`, el sistema debe transicionarlo a `Paid` y registrar `payment_date` con la fecha actual.
-- Escenario de éxito (idempotencia): Si el administrador registra el cobro de un pago que ya está en `Paid`, el sistema debe responder 200 OK devolviendo el pago tal cual está, sin modificar `payment_date` ni generar ningún efecto colateral.
-- Escenario de fallo: Si el administrador intenta registrar el cobro de un pago `Canceled`, el sistema debe rechazar la operación.
-- Escenario de fallo: Si el pago no existe, el sistema debe rechazar la operación.
+- Escenario de éxito: Si el administrador registra el cobro de un pago `Pendiente`, el sistema debe transicionarlo a `Pagado` y registrar `payment_date` con la fecha actual.
+- Escenario de éxito (idempotencia): Si el administrador registra el cobro de un pago que ya está en `Pagado`, el sistema debe responder 200 OK devolviendo el pago tal cual está, sin modificar `payment_date` ni generar ningún efecto colateral.
+- Escenario de fallo: Si el administrador intenta registrar el cobro de un pago `Cancelado`, el sistema debe rechazar la operación.
 
 #### Editar datos (`PATCH /payments/:id`)
 
-- Escenario de éxito: Si el administrador modifica `amount` y/o `due_date` de un pago `Pending` con datos válidos, el sistema debe persistir los cambios. Si cambia `due_date`, el sistema recalcula `month` y `year`.
-- Escenario de fallo: Si el administrador intenta editar un pago `Paid` o `Canceled`, el sistema debe rechazar la operación.
+- Escenario de éxito: Si el administrador modifica `amount` y/o `due_date` de un pago `Pendiente` con datos válidos, el sistema debe persistir los cambios. Si cambia `due_date`, el sistema recalcula `month` y `year`.
+- Escenario de fallo: Si el administrador intenta editar un pago `Pagado` o `Cancelado`, el sistema debe rechazar la operación.
 - Escenario de fallo: Si el administrador envía un monto inválido (menor o igual a cero), el sistema debe rechazar la actualización.
 - Escenario de fallo: Si el administrador envía una `due_date` mal formada, el sistema debe rechazar la actualización.
 - Escenario de fallo: Si el administrador envía una `due_date` que no es estrictamente posterior al día actual, el sistema debe rechazar la actualización.
@@ -50,7 +49,19 @@ Este TDD define dos operaciones separadas semánticamente:
 
 ### 2.1. Modelo de Dominio
 
-Se utiliza la entidad `Payment` definida en el TDD-0010. No se redefine acá para evitar duplicación.
+Entidad `Payment`:
+
+* `id`: Identificador único universal (UUID).
+* `member_id`: Identificador del socio.
+* `amount`: Monto decimal positivo.
+* `month`: Mes del pago (derivado de `due_date`). Valor entre 1 y 12.
+* `year`: Año del pago (derivado de `due_date`).
+* `due_date`: Fecha de vencimiento (ISO 8601). Debe ser estrictamente posterior al día actual.
+* `payment_date`: Fecha en la que se registró el pago efectivo. Inicialmente `null`.
+* `status`: Estado del pago (`Pendiente`, `Pagado`, `Cancelado`). En la creación es siempre `Pendiente`.
+* `created_at`: Fecha de creación.
+* `updated_at`: Fecha de última modificación.
+* `canceled_at`: Fecha de cancelación. Inicialmente `null`.
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
@@ -60,10 +71,10 @@ Se utiliza la entidad `Payment` definida en el TDD-0010. No se redefine acá par
 
 **Request Body:** vacío. La intención queda expresada en la URL.
 
-**Response (200 OK):** El pago completo, con `status = "Paid"` y `payment_date` seteado.
+**Response (200 OK):** El pago completo, con `status = "Pagado"` y `payment_date` seteado.
 
 ```ts
-{
+type PaymentResponseDTO = {
   id: string;
   member_id: string;
   amount: number;
@@ -71,7 +82,7 @@ Se utiliza la entidad `Payment` definida en el TDD-0010. No se redefine acá par
   year: number;
   due_date: string;
   payment_date: string;
-  status: "Paid";
+  status: "Pagado";
   created_at: string;
   updated_at: string;
   canceled_at: null;
@@ -96,7 +107,23 @@ Se utiliza la entidad `Payment` definida en el TDD-0010. No se redefine acá par
 
 ### 2.3. Esquema de Persistencia
 
-Se utiliza el modelo Prisma definido en el TDD-0010.
+```prisma
+model Payment {
+  id           String    @id @default(uuid())
+  member_id    String
+  amount       Decimal
+  month        Int
+  year         Int
+  status       String    @default("Pendiente")
+  due_date     DateTime
+  payment_date DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  canceled_at  DateTime?
+
+  member       Member    @relation(fields: [member_id], references: [id])
+}
+```
 
 ## 3. Arquitectura y Flujo
 
@@ -119,9 +146,9 @@ Se utiliza el modelo Prisma definido en el TDD-0010.
 2. Validar que `id` tenga formato UUID válido.
 3. Buscar pago existente por `id`. Si no existe, retornar error 404.
 4. **Aplicar idempotencia**:
-   * Si el pago está en `Paid`: retornar el pago tal cual, con 200 OK. No re-setear `payment_date`, no actualizar `updated_at`, no generar logs ni efectos colaterales.
-   * Si el pago está en `Canceled`: rechazar con error 409.
-   * Si el pago está en `Pending`: continuar con el flujo.
+   * Si el pago está en `Pagado`: retornar el pago tal cual, con 200 OK. No re-setear `payment_date`, no actualizar `updated_at`, no generar logs ni efectos colaterales.
+   * Si el pago está en `Cancelado`: rechazar con error 409.
+   * Si el pago está en `Pendiente`: continuar con el flujo.
 5. Setear `status = "Paid"` y `payment_date = Clock.now()`.
 6. Persistir cambios usando una transacción que vuelva a verificar el estado actual del pago antes de actualizar (defensa contra concurrencia, ver sección 3.3).
 7. Retornar el pago actualizado.
@@ -132,11 +159,11 @@ Se utiliza el modelo Prisma definido en el TDD-0010.
 2. Validar que `id` tenga formato UUID válido.
 3. Validar que el request body tenga al menos un campo (`amount` o `due_date`).
 4. Buscar pago existente por `id`. Si no existe, retornar error 404.
-5. **Validar inmutabilidad**: si el estado actual es `Paid` o `Canceled`, rechazar la operación con 409.
+5. **Validar inmutabilidad**: si el estado actual es `Pagado` o `Cancelado`, rechazar la operación con 409.
 6. Validar campos individualmente:
    * Si viene `amount`: debe ser mayor a cero.
    * Si viene `due_date`: debe cumplir formato ISO 8601 y ser estrictamente posterior al día actual (`Clock.now()`).
-7. Si se actualiza `due_date`, recalcular `month` y `year`. Verificar que el nuevo período no choque con otro pago activo (`Pending` o `Paid`) del mismo socio, excluyendo el pago que se está editando (`existsActiveByMemberAndPeriod` con `excluding_payment_id`).
+7. Si se actualiza `due_date`, recalcular `month` y `year`. Verificar que el nuevo período no choque con otro pago activo (`Pendiente` o `Pagado`) del mismo socio, excluyendo el pago que se está editando (`existsActiveByMemberAndPeriod` con `excluding_payment_id`).
 8. Persistir cambios.
 9. Retornar pago actualizado.
 
@@ -146,13 +173,13 @@ La entidad Payment es un caso paradigmático del manejo de idempotencia y estado
 
 #### Idempotencia en el cobro
 
-El endpoint `PATCH /payments/:id/pay` es **idempotente por naturaleza**: ejecutarlo N veces produce el mismo estado final (`status = Paid` con un `payment_date` único). Esto resuelve los siguientes escenarios reales:
+El endpoint `PATCH /payments/:id/pay` es **idempotente por naturaleza**: ejecutarlo N veces produce el mismo estado final (`status = Pagado` con un `payment_date` único). Esto resuelve los siguientes escenarios reales:
 
 * **Doble-click del administrador**: si el operador hace click dos veces antes de que llegue la primera respuesta, ambas requests responden 200 OK con el mismo pago. No se duplica ningún registro ni se modifica `payment_date`.
 * **Reintento por timeout de red**: si el cliente no recibió la primera respuesta y reintenta, el comportamiento es idéntico.
 * **Reintento automático del frontend ante errores transitorios**: si el frontend implementa retry, no hay riesgo de "cobrar dos veces" desde la perspectiva del modelo.
 
-La clave del diseño es que **`payment_date` se setea una sola vez**, en la primera transición exitosa de `Pending → Paid`. Las invocaciones posteriores ven el pago ya en `Paid` y retornan sin tocar el registro. Esto preserva la trazabilidad del momento real del cobro.
+La clave del diseño es que **`payment_date` se setea una sola vez**, en la primera transición exitosa de `Pendiente → Pagado`. Las invocaciones posteriores ven el pago ya en `Pagado` y retornan sin tocar el registro. Esto preserva la trazabilidad del momento real del cobro.
 
 #### Manejo del vencimiento sin borrado
 
@@ -173,10 +200,10 @@ La estrategia adoptada es **transacción con relectura del estado**:
 
 1. El caso de uso, antes de persistir, abre una transacción.
 2. Dentro de la transacción se vuelve a leer el estado del pago.
-3. Si el estado ya no es `Pending`, la operación se aborta:
-   * En `MarkPaymentAsPaidUseCase`: si encontró `Paid`, devuelve idempotentemente; si encontró `Canceled`, devuelve 409.
+3. Si el estado ya no es `Pendiente`, la operación se aborta:
+   * En `MarkPaymentAsPaidUseCase`: si encontró `Pagado`, devuelve idempotentemente; si encontró `Cancelado`, devuelve 409.
    * En `UpdatePaymentUseCase`: si encontró estado terminal, devuelve 409.
-4. Si el estado sigue siendo `Pending`, se aplica la actualización y se commitea la transacción.
+4. Si el estado sigue siendo `Pendiente`, se aplica la actualización y se commitea la transacción.
 
 Esto garantiza que entre dos requests concurrentes, **solo una efectivamente modifica el pago**, y la otra responde de forma consistente con el estado final.
 
@@ -194,9 +221,9 @@ Tanto `MarkPaymentAsPaidUseCase` como `UpdatePaymentUseCase` reciben una depende
 | Escenario                                                   | Resultado Esperado                                      | Código HTTP |
 | ----------------------------------------------------------- | ------------------------------------------------------- | ----------- |
 | Pago inexistente                                            | El pago no existe                                       | 404         |
-| Pago en `Pending`                                           | Se cobra exitosamente, `payment_date` seteado           | 200         |
-| Pago ya en `Paid` (idempotencia)                            | Se retorna el pago sin modificar                        | 200         |
-| Pago en `Canceled`                                          | No se puede cobrar un pago cancelado                    | 409         |
+| Pago en `Pendiente`                                           | Se cobra exitosamente, `payment_date` seteado           | 200         |
+| Pago ya en `Pagado` (idempotencia)                            | Se retorna el pago sin modificar                        | 200         |
+| Pago en `Cancelado`                                          | No se puede cobrar un pago cancelado                    | 409         |
 | ID con formato inválido                                     | Formato de ID inválido                                  | 400         |
 | Error de DB                                                 | Error interno                                           | 500         |
 
@@ -228,10 +255,10 @@ Tanto `MarkPaymentAsPaidUseCase` como `UpdatePaymentUseCase` reciben una depende
 
 ## 6. Observaciones Adicionales
 
-* La transición `Pending → Paid` es **idempotente**: invocar el endpoint N veces es equivalente a invocarlo una vez. `payment_date` se setea solo en la primera transición real.
+* La transición `Pendiente → Pagado` es **idempotente**: invocar el endpoint N veces es equivalente a invocarlo una vez. `payment_date` se setea solo en la primera transición real.
 * La transición `Pending → Canceled` se realiza exclusivamente vía `PATCH /payments/:id/cancel` (TDD-0018), no desde estos endpoints.
-* Los estados `Paid` y `Canceled` son terminales: una vez alcanzados, no se permiten modificaciones de ningún tipo desde el TDD-0011.
-* No existe la transición `Canceled → Paid`. Si un pago vencido fue cancelado por el job y el socio efectivamente pagó, el administrador debe crear un nuevo pago vía TDD-0010 (esto es posible porque la unicidad por período solo aplica a pagos activos).
+* Los estados `Pagado` y `Cancelado` son terminales: una vez alcanzados, no se permiten modificaciones de ningún tipo desde el TDD-0011.
+* No existe la transición `Cancelado → Pagado`. Si un pago vencido fue cancelado por el job y el socio efectivamente pagó, el administrador debe crear un nuevo pago vía TDD-0010 (esto es posible porque la unicidad por período solo aplica a pagos activos).
 * `payment_date` se setea automáticamente vía `Clock.now()`. Nunca se acepta desde el cliente.
 * `member_id`, `month` y `year` no se modifican directamente. `month` y `year` se recalculan al cambiar `due_date`.
 * La regla de `due_date` estrictamente futura aplica tanto en creación (TDD-0010) como en edición.

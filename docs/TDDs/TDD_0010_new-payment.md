@@ -12,7 +12,7 @@ titulo: Registro de Pagos
 
 ### 1.1. Objetivo
 
-Permitir al administrador registrar manualmente pagos asociados a socios activos del club, dejando constancia de obligaciones económicas pendientes. Todo pago se crea siempre en estado `Pending` y representa una (1) cuota del socio: no se permiten registros parciales ni fiados. La gestión del ciclo de vida posterior se documenta en TDD-0011 (actualización y cobro) y TDD-0015 (cancelación).
+Permitir al administrador registrar manualmente pagos asociados a socios activos del club, dejando constancia de obligaciones económicas pendientes. Todo pago se crea siempre en estado `Pendiente` y representa una (1) cuota del socio: no se permiten registros parciales ni fiados. La gestión del ciclo de vida posterior se documenta en TDD-0011 (actualización y cobro) y TDD-0018 (cancelación).
 
 ### 1.2. User Persona
 
@@ -23,12 +23,12 @@ Permitir al administrador registrar manualmente pagos asociados a socios activos
 
 * Como administrador, quiero registrar pagos de socios para mantener actualizado el estado financiero.
 
-- Escenario de éxito: Si el administrador carga un pago con datos válidos para un socio activo, el sistema debe crear el registro en estado `Pending` con `payment_date` y `canceled_at` en `null`.
-- Escenario de fallo: Si el administrador intenta crear un pago para un socio inactivo, el sistema debe rechazar la operación.
+- Escenario de éxito: Si el administrador carga un pago con datos válidos para un socio activo, el sistema debe crear el registro en estado `Pendiente` con `payment_date` y `canceled_at` en `null`.
+- Escenario de fallo: Si el administrador intenta crear un pago para un socio supendido, el sistema debe rechazar la operación.
 - Escenario de fallo: Si el administrador intenta crear un pago con monto inválido (menor o igual a cero), el sistema debe rechazar la operación.
 - Escenario de fallo: Si el administrador intenta crear un pago con `due_date` mal formada (no ISO 8601), el sistema debe rechazar la operación.
 - Escenario de fallo: Si el administrador intenta crear un pago cuya `due_date` no sea estrictamente posterior al día actual, el sistema debe rechazar la operación.
-- Escenario de fallo: Si ya existe un pago activo (`Pending` o `Paid`) para el mismo socio y período, el sistema debe rechazar la duplicación.
+- Escenario de fallo: Si ya existe un pago activo (`Pendiente` o `Pagado`) para el mismo socio y período, el sistema debe rechazar la duplicación.
 
 ## 2. Diseño Técnico
 
@@ -43,7 +43,7 @@ Entidad `Payment`:
 * `year`: Año del pago (derivado de `due_date`).
 * `due_date`: Fecha de vencimiento (ISO 8601). Debe ser estrictamente posterior al día actual.
 * `payment_date`: Fecha en la que se registró el pago efectivo. Inicialmente `null`.
-* `status`: Estado del pago (`Pending`, `Paid`, `Canceled`). En la creación es siempre `Pending`.
+* `status`: Estado del pago (`Pendiente`, `Pagado`, `Cancelado`). En la creación es siempre `Pendiente`.
 * `created_at`: Fecha de creación.
 * `updated_at`: Fecha de última modificación.
 * `canceled_at`: Fecha de cancelación. Inicialmente `null`.
@@ -67,7 +67,7 @@ Entidad `Payment`:
 **Response (201 Created):**
 
 ```ts
-{
+  type PaymentResponseDTO = {
   id: string;
   member_id: string;
   amount: number;
@@ -75,7 +75,7 @@ Entidad `Payment`:
   year: number;
   due_date: string;
   payment_date: null;
-  status: "Pending";
+  status: "Pendiente";
   created_at: string;
   updated_at: string;
   canceled_at: null;
@@ -91,7 +91,7 @@ model Payment {
   amount       Decimal
   month        Int
   year         Int
-  status       String    @default("Pending")
+  status       String    @default("Pendiente")
   due_date     DateTime
   payment_date DateTime?
   created_at   DateTime  @default(now())
@@ -123,10 +123,10 @@ model Payment {
 4. Validar que `due_date` sea estrictamente posterior al día actual (`Clock.now()`).
 5. Validar que `amount > 0`.
 6. Verificar existencia del socio. Si no existe, retornar error.
-7. Verificar que el socio se encuentre activo (`account_status = Active` o `Delinquent`). Si está `Inactive`, rechazar la operación.
+7. Verificar que el socio se encuentre activo (`account_status = Activo` o `Moroso`). Si está `Suspendido`, rechazar la operación.
 8. Extraer `month` y `year` a partir de `due_date`.
-9. Verificar que no exista otro pago activo (`Pending` o `Paid`) para el mismo `member_id`, `month` y `year`. Los pagos en `Canceled` no bloquean la creación.
-10. Crear el pago con `status = Pending`, `payment_date = null` y `canceled_at = null`.
+9. Verificar que no exista otro pago activo (`Pendiente` o `Pagado`) para el mismo `member_id`, `month` y `year`. Los pagos en `Cancelado` no bloquean la creación.
+10. Crear el pago con `status = Pendiente`, `payment_date = null` y `canceled_at = null`.
 11. Persistir registro.
 12. Retornar pago creado.
 
@@ -157,12 +157,12 @@ model Payment {
 ## 6. Observaciones Adicionales
 
 * Todo pago creado equivale a una (1) cuota del socio. No se permiten registros parciales ni fiados. 
-* Todo pago nuevo se crea en estado `Pending`. El status no se acepta desde el cliente.
+* Todo pago nuevo se crea en estado `Pendiente`. El status no se acepta desde el cliente.
 * `due_date` debe ser estrictamente posterior al día actual: no se permite cargar pagos retroactivos.
-* `payment_date` se inicializa en `null` y solo se setea al transicionar a `Paid` (ver TDD-0011).
-* `canceled_at` se inicializa en `null` y solo se setea al transicionar a `Canceled` (ver TDD-0018).
+* `payment_date` se inicializa en `null` y solo se setea al transicionar a `Pagado` (ver TDD-0011).
+* `canceled_at` se inicializa en `null` y solo se setea al transicionar a `Cancelado` (ver TDD-0018).
 * `month` y `year` se derivan de `due_date`.
 * No se permite el borrado físico de pagos.
-* **Unicidad por período activo**: solo se bloquea la creación si existe un pago `Pending` o `Paid` para el mismo socio y período. Los pagos `Canceled` no cuentan, lo que permite re-crear un pago para un período cuyo registro previo fue cancelado (por error administrativo o por vencimiento via job).
+* **Unicidad por período activo**: solo se bloquea la creación si existe un pago `Pendiente` o `Pagado` para el mismo socio y período. Los pagos `Canceled` no cuentan, lo que permite re-crear un pago para un período cuyo registro previo fue cancelado (por error administrativo o por vencimiento via job).
 * La actualización y cobro de pagos se documenta en TDD-0011.
 * La cancelación de pagos (manual y automática vía job) se documenta en TDD-0018.
