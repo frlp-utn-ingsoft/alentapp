@@ -60,6 +60,15 @@ export interface UpdateSportRequest {
   requires_medical_certificate?: boolean;
 }
 
+// ==========================
+// = Payments
+// ==========================
+export * from './payment';
+
+// ==========================
+// = MedicalCertificate
+// ==========================
+
 //datos que el front envía al back para crear un certificado medico
 export interface CreateMedicalCertificateRequest {
   memberId: string
