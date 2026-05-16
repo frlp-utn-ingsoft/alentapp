@@ -101,3 +101,27 @@ export interface LoanWithMemberDTO extends LoanDTO {
 export interface UpdateLoanStatusRequest {
   status: 'Returned' | 'Damaged';
 }
+
+// ==========================================
+// Sport
+// ==========================================
+
+export interface SportDTO {
+  id: string; // UUID
+  name: string;
+  description: string;
+  max_capacity: number;
+  current_enrollment_count: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+}
+
+export type SportResponse = SportDTO;
+
+export interface CreateSportRequest {
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+}
