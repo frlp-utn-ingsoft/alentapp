@@ -16,7 +16,7 @@ import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
 import { LockerController } from './delivery/LockerController.js';
 import { GetLockersUseCase } from './application/GetLockersUseCase.js';
 import { UpdateLockerUseCase } from './application/UpdateLockerUseCase.js';
-
+import { DeleteLockerUseCase } from './application/DeleteLockerUseCase.js';
 // Payments
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { CreatePaymentUseCase } from './application/NewPaymentUseCase.js'; 
@@ -94,16 +94,18 @@ export function buildApp() {
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo);
     const getLockersUseCase = new GetLockersUseCase(lockerRepo);
     const updateLockerUseCase = new UpdateLockerUseCase(lockerRepo);
+    const deleteLockerUseCase = new DeleteLockerUseCase(lockerRepo);
     const lockerController = new LockerController(
         createLockerUseCase,
         getLockersUseCase,
         updateLockerUseCase,
+        deleteLockerUseCase,
     );
 
     server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
-    server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));  
-
+    server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));
+    server.delete('/api/v1/lockers/:id', lockerController.delete.bind(lockerController));
     
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
