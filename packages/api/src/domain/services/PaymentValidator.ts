@@ -133,9 +133,6 @@ export class PaymentValidator {
     }
 
     validatePaymentCanBeUpdated(payment: PaymentDTO): void {
-    if (payment.status === 'Pagado') {
-        throw new Error('No se puede actualizar un pago ya pagado');
-    }
 
     if (payment.status === 'Cancelado') {
         throw new Error('No se puede actualizar un pago cancelado');
