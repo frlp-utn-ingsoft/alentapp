@@ -6,7 +6,7 @@ fecha: 2026-05-01
 titulo: Eliminación (Baja Lógica) de Pagos Existentes
 ---
 
-# TDD-0006: Eliminación (Baja Lógica) de Pagos Existentes
+# TDD-0015: Eliminación (Baja Lógica) de Pagos Existentes
 
 ## Contexto de Negocio (PRD)
 

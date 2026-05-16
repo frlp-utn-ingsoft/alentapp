@@ -6,7 +6,7 @@ fecha: 2026-05-01
 titulo: Registro de Nuevos Pagos
 ---
 
-# TDD-0004: Registro de Nuevos Pagos
+# TDD-0013: Registro de Nuevos Pagos
 
 ## Contexto de Negocio (PRD)
 
