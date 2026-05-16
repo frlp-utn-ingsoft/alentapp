@@ -1,11 +1,11 @@
 import { 
-  Table, Button, Heading, HStack, Stack, Text, Box, Flex, Spinner, Center, Input
+  Table, Button, Heading, HStack, IconButton, Stack, Text, Box, Flex, Spinner, Center, Input
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw } from "react-icons/lu";
+import { LuPlus, LuPencil, LuRefreshCw } from "react-icons/lu"; // Volvió LuPencil
 import { useEffect, useState, useMemo } from "react";
 import { paymentsService } from "../services/payments";
 import { membersService } from "../services/members"; 
-import type { PaymentDTO, CreatePaymentRequest, MemberDTO } from "@alentapp/shared";
+import type { PaymentDTO, CreatePaymentRequest, UpdatePaymentRequest, PaymentStatus, MemberDTO } from "@alentapp/shared";
 import { 
   DialogRoot, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogActionTrigger, DialogCloseTrigger
 } from "../components/ui/dialog";
@@ -13,6 +13,15 @@ import { Field } from "../components/ui/field";
 import { 
   SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem, createListCollection 
 } from "../components/ui/select";
+
+// Volvieron los estados
+const statusCategories = createListCollection({
+  items: [
+    { label: "Pendiente", value: "Pending" },
+    { label: "Pagado", value: "Paid" },
+    { label: "Cancelado", value: "Canceled" },
+  ],
+});
 
 export function PaymentsView() {
   const [payments, setPayments] = useState<PaymentDTO[]>([]);
@@ -22,9 +31,9 @@ export function PaymentsView() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null); // Volvió el ID de edición
 
-  // Solo necesitamos el Request de creación
-  const [formData, setFormData] = useState<CreatePaymentRequest>({
+  const [formData, setFormData] = useState<CreatePaymentRequest & { status?: PaymentStatus }>({
     member_id: "",
     amount: "" as unknown as number,
     month: new Date().getMonth() + 1,
@@ -54,6 +63,7 @@ export function PaymentsView() {
   };
 
   const openCreateModal = () => {
+    setEditingPaymentId(null);
     setFormData({ 
       member_id: "", 
       amount: "" as unknown as number, 
@@ -64,18 +74,40 @@ export function PaymentsView() {
     setIsDialogOpen(true);
   };
 
+  // Volvió la función para abrir el modal en modo edición
+  const openEditModal = (payment: PaymentDTO) => {
+    setEditingPaymentId(payment.id);
+    setFormData({
+      member_id: payment.member_id,
+      amount: payment.amount,
+      month: payment.month,
+      year: payment.year,
+      due_date: payment.due_date,
+      status: payment.status,
+    });
+    setIsDialogOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // Solo creamos el pago, el backend por defecto lo pondrá en 'Pending'
-      await paymentsService.create({
-        ...formData,
-        amount: Number(formData.amount),
-        month: Number(formData.month),
-        year: Number(formData.year)
-      } as CreatePaymentRequest);
-      
+      if (editingPaymentId) {
+        // Lógica de Update
+        await paymentsService.update(editingPaymentId, {
+          amount: Number(formData.amount),
+          due_date: formData.due_date,
+          status: formData.status
+        } as UpdatePaymentRequest);
+      } else {
+        // Lógica de Create
+        await paymentsService.create({
+          ...formData,
+          amount: Number(formData.amount),
+          month: Number(formData.month),
+          year: Number(formData.year)
+        } as CreatePaymentRequest);
+      }
       setIsDialogOpen(false);
       fetchData();
     } catch (err: any) {
@@ -114,32 +146,33 @@ export function PaymentsView() {
           </HStack>
         </Flex>
 
-        {/* Modal Form Solo para Crear */}
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Registrar Nuevo Pago</DialogTitle>
+              <DialogTitle>{editingPaymentId ? "Editar Pago" : "Registrar Nuevo Pago"}</DialogTitle>
             </DialogHeader>
             <DialogBody>
               <Stack gap="4">
-                <Field label="Socio" required>
-                  <SelectRoot
-                    collection={membersCollection} 
-                    value={formData.member_id ? [formData.member_id]: []}
-                    onValueChange={(e) => setFormData({ ...formData, member_id: e.value[0] })}
-                  >
-                    <SelectTrigger>
-                      <SelectValueText placeholder="Ej. Juan Pérez" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {membersCollection.items.map((item) => (
-                        <SelectItem item={item} key={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </SelectRoot>
-                </Field>
+                {!editingPaymentId && (
+                  <Field label="Socio" required>
+                    <SelectRoot
+                      collection={membersCollection} 
+                      value={formData.member_id ? [formData.member_id]: []}
+                      onValueChange={(e) => setFormData({ ...formData, member_id: e.value[0] })}
+                    >
+                      <SelectTrigger>
+                        <SelectValueText placeholder="Ej. Juan Pérez" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {membersCollection.items.map((item) => (
+                          <SelectItem item={item} key={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectRoot>
+                  </Field>
+                )}
 
                 <HStack gap="4">
                   <Field label="Monto ($)" required>
@@ -161,24 +194,46 @@ export function PaymentsView() {
                   </Field>
                 </HStack>
 
-                <HStack gap="4">
-                  <Field label="Mes" required>
-                    <Input 
-                      type="number" min="1" max="12"
-                      value={formData.month}
-                      onChange={(e) => setFormData({ ...formData, month: Number(e.target.value) })}
-                      required
-                    />
+                {!editingPaymentId && (
+                  <HStack gap="4">
+                    <Field label="Mes" required>
+                      <Input 
+                        type="number" min="1" max="12"
+                        value={formData.month}
+                        onChange={(e) => setFormData({ ...formData, month: Number(e.target.value) })}
+                        required
+                      />
+                    </Field>
+                    <Field label="Año" required>
+                      <Input 
+                        type="number" min="2020" max="2100"
+                        value={formData.year}
+                        onChange={(e) => setFormData({ ...formData, year: Number(e.target.value) })}
+                        required
+                      />
+                    </Field>
+                  </HStack>
+                )}
+                
+                {/* Volvió el selector de estado para cuando editamos */}
+                {editingPaymentId && formData.status && (
+                  <Field label="Estado del Pago" required>
+                    <SelectRoot 
+                      collection={statusCategories} 
+                      value={[formData.status]}
+                      onValueChange={(e) => setFormData({ ...formData, status: e.value[0] as PaymentStatus })}
+                    >
+                      <SelectTrigger>
+                        <SelectValueText placeholder="Seleccione el estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusCategories.items.map((stat) => (
+                          <SelectItem item={stat} key={stat.value}>{stat.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectRoot>
                   </Field>
-                  <Field label="Año" required>
-                    <Input 
-                      type="number" min="2020" max="2100"
-                      value={formData.year}
-                      onChange={(e) => setFormData({ ...formData, year: Number(e.target.value) })}
-                      required
-                    />
-                  </Field>
-                </HStack>
+                )}
               </Stack>
             </DialogBody>
             <DialogFooter>
@@ -186,7 +241,7 @@ export function PaymentsView() {
                 <Button variant="outline">Cancelar</Button>
               </DialogActionTrigger>
               <Button type="submit" colorPalette="blue" loading={isSubmitting}>
-                Registrar Pago
+                {editingPaymentId ? "Guardar Cambios" : "Registrar Pago"}
               </Button>
             </DialogFooter>
             <DialogCloseTrigger />
@@ -217,7 +272,7 @@ export function PaymentsView() {
                   <Table.ColumnHeader py="4">Monto</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Vencimiento</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Estado</Table.ColumnHeader>
-                  {/* Removimos la columna Acciones */}
+                  <Table.ColumnHeader py="4" textAlign="end">Acciones</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -236,7 +291,13 @@ export function PaymentsView() {
                         {payment.status === 'Paid' ? 'Pagado' : payment.status === 'Pending' ? 'Pendiente' : 'Cancelado'}
                       </Box>
                     </Table.Cell>
-                    {/* Removimos las celdas de acciones (lápiz y tachito) */}
+                    <Table.Cell textAlign="end">
+                      <HStack gap="2" justify="flex-end">
+                        <IconButton variant="ghost" size="sm" onClick={() => openEditModal(payment)}>
+                          <LuPencil />
+                        </IconButton>
+                      </HStack>
+                    </Table.Cell>
                   </Table.Row>
                 ))}
               </Table.Body>
