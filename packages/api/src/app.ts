@@ -7,10 +7,10 @@ import { MemberValidator } from './domain/services/MemberValidator.js';
 import { SportValidator } from './domain/services/SportValidator.js'
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
-import { CreateSportUseCase } from './application/NewSportUseCase.js';
+import { CreateSportUseCase } from './application/Sport/NewSportUseCase.js';
 import { CreatePaymentUseCase } from './application/Payment/NewPaymentUseCase.js';
 import { GetMembersUseCase } from './application/GetMembersUseCase.js';
-import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { GetSportsUseCase } from './application/Sport/GetSportsUseCase.js';
 import { GetPaymentsUseCase } from './application/Payment/GetPaymentsUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';

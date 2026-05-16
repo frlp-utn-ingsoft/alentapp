@@ -1,5 +1,5 @@
-import { SportRepository } from '../domain/SportRepository.js';
-import { SportValidator } from '../domain/services/SportValidator.js';
+import { SportRepository } from '../../domain/SportRepository.js';
+import { SportValidator } from '../../domain/services/SportValidator.js';
 import { CreateSportRequest, SportDTO } from '@alentapp/shared';
 
 export class CreateSportUseCase {
