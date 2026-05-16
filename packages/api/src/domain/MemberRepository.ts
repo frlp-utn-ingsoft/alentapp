@@ -7,7 +7,7 @@ export interface MemberRepository {
   create(member: Omit<MemberDTO, 'id'>): Promise<MemberDTO>;
   findById(id: string): Promise<MemberDTO | null>;
   findByDni(dni: string): Promise<MemberDTO | null>;
-  findAll(): Promise<MemberDTO[]>;
+  findAll(filters?: {search?: string}): Promise<MemberDTO[]>;
   update(id: string, data: UpdateMemberRequest): Promise<MemberDTO>;
   delete(id: string): Promise<void>;
 }

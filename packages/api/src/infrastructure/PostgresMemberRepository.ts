@@ -59,9 +59,17 @@ export class PostgresMemberRepository implements MemberRepository {
         return member ? this.mapToDTO(member) : null;
     }
 
-    async findAll(): Promise<MemberDTO[]> {
+    async findAll(filters?: {search?: string}): Promise<MemberDTO[]> {
         const members = await this.getPrisma().member.findMany({
-            orderBy: { created_at: 'desc' },
+            where: filters?.search
+                ? {
+                      OR: [
+                          { name: { contains: filters.search, mode: 'insensitive' } },
+                          { dni: { contains: filters.search, mode: 'insensitive' } },
+                      ],
+                  }
+                : undefined,
+            orderBy: { name: 'asc' },
         });
 
         return members.map(this.mapToDTO);
