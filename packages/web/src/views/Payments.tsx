@@ -5,36 +5,41 @@ import {
     Flex,
     Heading,
     HStack,
+    IconButton,
     Spinner,
     Stack,
     Table,
     Text,
 } from '@chakra-ui/react';
-import { LuPlus, LuRefreshCw } from 'react-icons/lu';
+import { LuPlus, LuPencil, LuRefreshCw } from 'react-icons/lu';
 import { DialogRoot } from '../components/ui/dialog';
-
+import type { PaymentDTO } from '@alentapp/shared';
 import { usePayments } from '../hooks/usePayments';
-import { useCreatePaymentForm } from '../hooks/useCreatePaymentForm';
+import { usePaymentForm } from '../hooks/usePaymentForm';
 import { useMemberSearch } from '../hooks/useMemberSearch';
 
 import { PaymentFormDialog } from '../components/PaymentFormDialog';
 
 import { formatDate } from '../utils/paymentDates';
+import { formatCurrency } from '../utils/currency';
 
 export function PaymentsView() {
     const { payments, isLoading, error, fetchPayments } = usePayments();
+    const paymentList = Array.isArray(payments) ? payments : [];
 
     const {
+        formMode,
         formData,
         isDialogOpen,
         isSubmitting,
         setIsDialogOpen,
         openCreateModal,
+        openUpdateModal,
         updateField,
         updateMonth,
         updateYear,
         submitPayment,
-    } = useCreatePaymentForm(fetchPayments);
+    } = usePaymentForm(fetchPayments);
 
     const {
         memberSearch,
@@ -43,6 +48,7 @@ export function PaymentsView() {
         searchMembers,
         handleSelectMember,
         resetMemberSearch,
+        setMemberSearchValue,
     } = useMemberSearch((member) => {
         updateField('member_id', member.id);
     });
@@ -50,6 +56,13 @@ export function PaymentsView() {
     const handleOpenCreateModal = () => {
         resetMemberSearch();
         openCreateModal();
+    };
+    const handleOpenUpdateModal = (payment: PaymentDTO) => {
+        const memberLabel = payment.member
+            ? `${payment.member.name} - DNI: ${payment.member.dni}`
+            : payment.member_id;
+        setMemberSearchValue(memberLabel);
+        openUpdateModal(payment);
     };
 
     const getStatusStyles = (status: string) => {
@@ -118,6 +131,7 @@ export function PaymentsView() {
                 </Flex>
 
                 <PaymentFormDialog
+                    mode={formMode}
                     formData={formData}
                     isSubmitting={isSubmitting}
                     memberSearch={memberSearch}
@@ -161,7 +175,7 @@ export function PaymentsView() {
                                 <Text color="fg.muted">Cargando pagos...</Text>
                             </Stack>
                         </Center>
-                    ) : payments.length === 0 ? (
+                    ) : paymentList.length === 0 ? (
                         <Center h="300px">
                             <Stack align="center" gap="4">
                                 <Text color="fg.muted">
@@ -204,11 +218,14 @@ export function PaymentsView() {
                                     <Table.ColumnHeader py="4">
                                         Estado
                                     </Table.ColumnHeader>
+                                    <Table.ColumnHeader py="4">
+                                        Acciones
+                                    </Table.ColumnHeader>
                                 </Table.Row>
                             </Table.Header>
 
                             <Table.Body>
-                                {payments.map((payment) => {
+                                {paymentList.map((payment) => {
                                     const statusStyles = getStatusStyles(
                                         payment.status,
                                     );
@@ -236,7 +253,7 @@ export function PaymentsView() {
                                                 fontWeight="semibold"
                                                 color="fg.emphasized"
                                             >
-                                                ${payment.amount}
+                                                {formatCurrency(payment.amount)}
                                             </Table.Cell>
 
                                             <Table.Cell color="fg.muted">
@@ -266,6 +283,28 @@ export function PaymentsView() {
                                                 >
                                                     {payment.status}
                                                 </Box>
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                <HStack
+                                                    gap="2"
+                                                    justify="flex-end"
+                                                >
+                                                    <IconButton
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        aria-label="Editar miembro"
+                                                        onClick={() =>
+                                                            handleOpenUpdateModal(
+                                                                payment,
+                                                            )
+                                                        }
+                                                        disabled={payment.status === 'Pagado' || payment.status === 'Cancelado'}
+                                                    >
+                                                        {' '}
+                                                        <LuPencil />
+                                                    </IconButton>
+                                                </HStack>
                                             </Table.Cell>
                                         </Table.Row>
                                     );
