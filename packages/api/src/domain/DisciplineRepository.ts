@@ -5,5 +5,6 @@ import { DisciplineDTO } from '@alentapp/shared';
 
 export interface DisciplineRepository {
     create(discipline: Omit<DisciplineDTO, 'id'>): Promise<DisciplineDTO>;
+    findAll(): Promise<DisciplineDTO[]>;
 }
 
