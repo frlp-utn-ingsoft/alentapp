@@ -76,7 +76,7 @@ Array<{
 - **Infrastructure**:
   - `SportController`: recibe los requests HTTP y los delega a los casos de uso correspondientes.
   - `SportRouter`: registra las rutas `GET /api/v1/sports` y `GET /api/v1/sports/:id` y las conecta al controlador.
-  - `PrismaSportRepository`: implementación del puerto `ISportRepository`.
+  - `PostgresSportRepository`: implementación del puerto `ISportRepository`.
   - `SportPersistenceMapper`: convierte entre la entidad de dominio `Sport` y el modelo de Prisma (`toPersistence`, `toDomain`).
   - `SportDTOMapper`: convierte la entidad de dominio a `SportResponse` (`toDTO`).
 

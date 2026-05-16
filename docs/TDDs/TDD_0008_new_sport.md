@@ -66,7 +66,7 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 
 - **Domain**:
   - Entidad `Sport`.
-  - Value Object `MaxCapacity` (en Shared) que encapsula la validación de capacidad > 0.
+  - La entidad `Sport` valida internamente que `max_capacity` sea mayor a cero.
   - Regla de negocio: `name` es inmutable (se valida al construir la entidad, no se expone setter).
 - **Application**:
   - Caso de Uso `CreateSportUseCase`.
@@ -92,14 +92,13 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 
 ## Plan de Implementación
 1. Definir tipos `CreateSportRequest` y `SportResponse` en Shared (`@alentapp/shared`).
-2. Implementar el Value Object `MaxCapacity` en Shared con su validación.
-3. Implementar la entidad `Sport` en el Domain.
-4. Definir el puerto `ISportRepository` en Application.
-5. Implementar `CreateSportUseCase` en Application (validar unicidad de nombre, construir entidad, persistir).
-6. Implementar `SportPersistenceMapper` con los métodos `toPersistence` y `toDomain`.
-7. Implementar `SportDTOMapper` con el método `toDTO`.
-8. Implementar `PrismaSportRepository` en Infrastructure.
-9. Implementar `SportController` en Infrastructure.
-10. Implementar `SportRouter` y registrarlo en la aplicación.
-11. Escribir tests unitarios para el caso de uso y el Value Object.
-12. Escribir tests de integración para el endpoint.
+2. Implementar la entidad `Sport` en el Domain con la validación de `max_capacity > 0`.
+3. Definir el puerto `ISportRepository` en Application.
+4. Implementar `CreateSportUseCase` en Application (validar unicidad de nombre, construir entidad, persistir).
+5. Implementar `SportPersistenceMapper` con los métodos `toPersistence` y `toDomain`.
+6. Implementar `SportDTOMapper` con el método `toDTO`.
+7. Implementar `PrismaSportRepository` en Infrastructure.
+8. Implementar `SportController` en Infrastructure.
+9. Implementar `SportRouter` y registrarlo en la aplicación.
+10. Escribir tests unitarios para el caso de uso y el Value Object.
+11. Escribir tests de integración para el endpoint. 

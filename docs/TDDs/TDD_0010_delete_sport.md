@@ -46,8 +46,8 @@ Sin cambios en el schema. La operación es un borrado físico (`DELETE`) del reg
 - **Infrastructure**:
   - `SportController`: recibe el request HTTP y lo delega al caso de uso.
   - `SportRouter`: registra la ruta `DELETE /api/v1/sports/:id` y la conecta al controlador.
-  - `PrismaSportRepository`: implementación del puerto `ISportRepository`.
-  - `PrismaEnrollmentRepository`: implementación del puerto `IEnrollmentRepository`.
+  - `PostgresSportRepository`: implementación del puerto `ISportRepository`.
+  - `PostgresEnrollmentRepository`: implementación del puerto `IEnrollmentRepository`.
   - `SportPersistenceMapper`: convierte entre la entidad de dominio `Sport` y el modelo de Prisma (`toPersistence`, `toDomain`).
 
 ## Casos de Borde y Errores
