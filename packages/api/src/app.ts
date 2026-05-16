@@ -48,17 +48,6 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
-    server.get('/api/v1/socios', memberController.getAll.bind(memberController));
-    server.post('/api/v1/socios', memberController.create.bind(memberController));
-    server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
-    server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
-
-    server.get('/', async (req, rep) => {
-        rep.status(200).send({ msg: 'asd' })
-    });
-
-    return server;
-
     const sportRepo = new PostgresSportRepository();
     const sportValidator = new SportValidator();
 
@@ -74,8 +63,19 @@ export function buildApp() {
         getSportsUseCase,
     );
 
+    server.get('/api/v1/socios', memberController.getAll.bind(memberController));
+    server.post('/api/v1/socios', memberController.create.bind(memberController));
+    server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
+    server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
+    
+    server.get('/', async (req, rep) => {
+        rep.status(200).send({ msg: 'asd' })
+    });
+
+    return server;
 }
 
 // Solo iniciar el servidor si el script se ejecuta directamente (no cuando es importado por vitest)
