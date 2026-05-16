@@ -13,6 +13,7 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { GetSportsUseCase } from './application/Sport/GetSportsUseCase.js';
 import { GetPaymentsUseCase } from './application/Payment/GetPaymentsUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
+import { UpdateSportUseCase } from './application/Sport/UpdateSportUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { SportController } from './delivery/SportController.js';
@@ -23,6 +24,7 @@ import { DeleteMedicalCertificateUseCase } from './application/DeleteMedicalCert
 
 
 import { PaymentController } from './delivery/PaymentController.js';
+
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -57,6 +59,7 @@ export function buildApp() {
 
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
 
     const memberController = new MemberController(
         createMemberUseCase, 
@@ -68,7 +71,8 @@ export function buildApp() {
 
     const sportController = new SportController(
         createSportUseCase,
-        getSportsUseCase
+        getSportsUseCase,
+        updateSportUseCase
     );
 
     const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
@@ -105,6 +109,7 @@ export function buildApp() {
     //Sport EndPoints
     server.get('/api/v1/sport', sportController.getAll.bind(sportController));
     server.post('/api/v1/sport', sportController.create.bind(sportController));
+    server.patch('/api/v1/sport/:id', sportController.update.bind(sportController));
     
     //Medical Certificate Endpoints
     server.post('/api/v1/medicalcertificate',medicalCertificateController.create.bind(medicalCertificateController));
