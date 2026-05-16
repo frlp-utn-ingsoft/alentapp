@@ -24,6 +24,7 @@ Permitir a los administradores eliminar sanciones disciplinarias, manteniendo ac
     - Escenario de éxito: "Si el usuario elimina una sanción existente, el sistema debe marcarla como eliminada y notificar al usuario".
     - Escenario de fallo: "Si el usuario intenta eliminar una sanción inexistente, el sistema debe cancelar la acción y notificar al usuario".
     - Escenario de fallo: "Si ocurre un error de conexión con la base de datos, el sistema debe informar un error interno".
+    - Escenario de fallo: "Si el usuario intenta eliminar una sanción que ya fue eliminada, el sistema debe informar que la sanción ya se encuentra eliminada".
 
 ## 2. Diseño Técnico 
 
@@ -36,14 +37,23 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 *   `start_date`: Fecha, obligatoria.
 *   `end_date`: Fecha, obligatoria.
 *   `is_total_suspension`: Booleano, obligatorio.
-*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema.
+*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción no fue eliminada.
 *   `member_id`: Identificador del socio sancionado, obligatorio.
 
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
 *   **Endpoint**: `DELETE /api/v1/disciplines/:id`
-*   **Request Body**: No aplica.
+
+*   **Semántica**: Baja lógica de la sanción. Esta operación no elimina el recurso físicamente; el servidor asigna `deleted_at = now()` y la sanción deja de ser considerada en las consultas de sanciones activas.
+
+*   **Request Body**: `{}`. No se requiere información adicional para ejecutar la baja; la fecha de eliminación se determina del lado del servidor.
+
+*   **Response (Success)**: `204 No Content`
+
+Nota de diseño:
+
+* Se utiliza `DELETE` por decisión de diseño. Aunque la operación realiza una baja lógica mediante el seteo de `deleted_at`, se mantiene la semántica REST de que el recurso deja de estar disponible para el cliente por defecto.
 
 
 ### 2.3. Esquema de Persistencia
@@ -74,14 +84,17 @@ model Discipline {
 **Caso de Uso**: `DeleteDisciplineUseCase`.
 
 1. Recibir el `id` de la sanción a eliminar.
-2. Buscar la sanción por `id`.
-3. Notificar el error en caso de que no exista una sanción con ese id.
-4. Marcar la sanción como eliminada, asignando la fecha actual a `deleted_at`.
-5. Retornar respuesta de éxito vacía.
+2. Validar que el `id` tenga un formato válido.
+3. Buscar la sanción por `id`.
+4. Notificar el error en caso de que no exista una sanción con ese id.
+5. Si la sanción ya tiene `deleted_at` distinto de `null`, retornar error.
+6. Marcar la sanción como eliminada, asignando la fecha actual a `deleted_at`.
+7. Retornar respuesta de éxito vacía.
 
 ## 4. Casos de Borde y Errores
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
 | ----------------------------| --------------------------------------------- | ------------------------- |
+| Eliminación exitosa | Respuesta vacía | 204 No Content |
 | Sanción inexistente     | "La sanción no existe"       | 404 Not Found              |
 | ID con formato inválido | "Formato de ID inválido" | 400 Bad Request |
 | Sanción ya eliminada | "La sanción ya fue eliminada" | 409 Conflict |
@@ -94,11 +107,11 @@ model Discipline {
 3. Implementar la eliminación lógica en `PostgresDisciplineRepository`.
 4. Crear la ruta `DELETE /api/v1/disciplines/:id` en `DisciplineController`.
 5. Conectar la funcionalidad en el frontend agregando confirmación previa a la eliminación.
+6. Ejecutar pruebas unitarias del caso de uso y pruebas de integración del endpoint `DELETE`.
 
 ## 6. Observaciones Adicionales
 
 * Antes de eliminar, el frontend debería mostrar una confirmación al usuario para evitar borrados accidentales.
 * Esta operación realiza un borrado lógico: la sanción no se elimina físicamente de la base de datos, sino que se marca con `deleted_at`.
-* `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema. Cuando se asigna, se guarda como `DateTime` en formato ISO 8601 datetime.
-* Las operaciones sobre sanciones deben verse reflejadas en el estado disciplinario del socio.
-* El estado del socio debe recalcularse en función de las sanciones activas.
+* `deleted_at`: fecha de eliminación lógica, opcional. Si es `null`, la sanción no fue eliminada.
+* Las sanciones eliminadas lógicamente no deben considerarse al consultar si un socio está suspendido.
