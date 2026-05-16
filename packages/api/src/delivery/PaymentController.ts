@@ -7,6 +7,7 @@ export class PaymentController {
         private readonly createPaymentUseCase: any, // TODO: Tipar con CreatePaymentUseCase
         private readonly getPaymentsUseCase: any,   // TODO: Tipar con GetPaymentsUseCase
         private readonly updatePaymentUseCase: any, // TODO: Tipar con UpdatePaymentUseCase
+        private readonly cancelPaymentUseCase: any, // TODO: Tipar con CancelPaymentUseCase
     ) {}
 
     async getAll(_request: FastifyRequest, reply: FastifyReply) {
@@ -55,6 +56,25 @@ export class PaymentController {
                 return reply.status(400).send({ error: error.message });
             }
             return reply.status(500).send({ error: "Error interno, reintente más tarde" });
+        }
+    }
+
+    async delete(
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const { id } = request.params;
+            await this.cancelPaymentUseCase.execute(id);
+            return reply.status(204).send(); // 204 No Content según TDD-0015
+        } catch (error: any) {
+            if (error.message.includes('No se puede anular un pago cobrado')) {
+                return reply.status(409).send({ error: error.message });
+            }
+            if (error.message.includes('El pago no existe')) {
+                return reply.status(404).send({ error: error.message });
+            }
+            return reply.status(500).send({ error: error.message });
         }
     }
 }
