@@ -110,3 +110,18 @@ export interface PaymentResponse {
     paymentDate: string | null;
     memberId: string;
 }
+
+export interface GetLoansQuery {
+  status?: 'Loaned' | 'Returned' | 'Damaged';
+  search?: string;
+}
+
+export interface LoanWithMemberDTO extends LoanDTO {
+  member: {
+    name: string;
+  };
+}
+
+export interface UpdateLoanStatusRequest {
+  status: 'Returned' | 'Damaged';
+}

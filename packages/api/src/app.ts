@@ -19,6 +19,9 @@ import { DisciplineController } from './delivery/DisciplineController.js';
 import { PostgresLoanRepository } from './infrastructure/PostgresLoanRepository.js';
 import { LoanValidator } from './domain/services/LoanValidator.js';
 import { CreateLoanUseCase } from './application/CreateLoanUseCase.js';
+import { GetLoansUseCase } from './application/GetLoansUseCase.js';
+import { DeleteLoanUseCase } from './application/DeleteLoanUseCase.js';
+import { UpdateLoanStatusUseCase } from './application/UpdateLoanStatusUseCase.js';
 import { LoanController } from './delivery/LoanController.js';
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
@@ -95,6 +98,9 @@ export function buildApp() {
         memberRepo,
         loanValidator,
     );
+    const getLoansUseCase = new GetLoansUseCase(loanRepo);
+    const deleteLoanUseCase = new DeleteLoanUseCase(loanRepo);
+    const updateLoanStatusUseCase = new UpdateLoanStatusUseCase(loanRepo);
 
     const paymentRepo = new PostgresPaymentRepository();
     const paymentValidator = new PaymentValidator();
@@ -119,7 +125,12 @@ export function buildApp() {
         deleteDisciplineUseCase,
     );
 
-    const loanController = new LoanController(createLoanUseCase);
+    const loanController = new LoanController(
+        createLoanUseCase,
+        getLoansUseCase,
+        deleteLoanUseCase,
+        updateLoanStatusUseCase,
+    );
 
     const paymentController = new PaymentController(createPaymentUseCase);
 
@@ -163,12 +174,22 @@ export function buildApp() {
         '/api/v1/members/:memberId/discipline-status',
         disciplineController.getMemberStatus.bind(disciplineController),
     );
-
     server.post(
         '/api/v1/equipment-loan',
         loanController.create.bind(loanController),
     );
-
+    server.get(
+        '/api/v1/equipment-loan',
+        loanController.getAll.bind(loanController),
+    );
+    server.delete(
+        '/api/v1/equipment-loan/:id',
+        loanController.delete.bind(loanController),
+    );
+    server.patch(
+        '/api/v1/equipment-loan/:id/status',
+        loanController.updateStatus.bind(loanController),
+    );
     server.post(
         '/api/v1/payments',
         paymentController.create.bind(paymentController),
