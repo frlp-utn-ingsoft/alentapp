@@ -9,7 +9,7 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw, LuSearch } from "react-icons/lu";
+import { LuPlus, LuRefreshCw, LuCheck } from "react-icons/lu";
 import { useEffect, useMemo, useState } from "react";
 import { membersService } from "../services/members";
 import { paymentsService } from "../services/payments";
@@ -197,7 +197,7 @@ export function PaymentsView() {
                               colorPalette={isSelected ? "blue" : undefined}
                               onClick={() => setFormData((current) => ({ ...current, memberId: member.id }))}
                             >
-                              <LuSearch /> {isSelected ? "Seleccionado" : "Elegir"}
+                              {isSelected && <LuCheck />} {isSelected ? "Seleccionado" : "Elegir"}
                             </Button>
                           </Table.Cell>
                         </Table.Row>
