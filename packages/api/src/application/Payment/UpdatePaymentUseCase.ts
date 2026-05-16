@@ -20,7 +20,8 @@ export class UpdatePaymentUseCase {
 
         const existingPayment = await this.paymentRepo.findById(paymentId);
         this.paymentValidator.validatePaymentExists(existingPayment);
-
+        this.paymentValidator.validatePaymentCanBeUpdated(existingPayment);
+        
         const requestedStatus = data.status;
 
         this.paymentValidator.validateStatus(requestedStatus);

@@ -54,7 +54,7 @@ export class PaymentValidator {
 
     validateDueDate(dueDate: string): void {
         if (!this.isValidDateOnly(dueDate)) {
-            throw new Error('La fecha de vencimiento es inválida.');
+            throw new Error('La fecha de vencimiento es inválida');
         }
     }
 
@@ -76,7 +76,12 @@ export class PaymentValidator {
             );
         }
     }
+
     validateUpdatePayload(data: UpdatePaymentRequest): void {
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            throw new Error('El body debe ser un objeto JSON válido');
+        }
+
         const forbiddenFields = [
             'member_id',
             'month',
@@ -84,31 +89,53 @@ export class PaymentValidator {
             'due_date',
             'amount',
         ];
+
         for (const field of forbiddenFields) {
             if (field in data) {
                 throw new Error(`No se puede actualizar el campo ${field}`);
             }
         }
+
         if (!data.status && data.payment_date === undefined) {
             throw new Error('Debe informar al menos un campo para actualizar');
         }
     }
-      validateStatus(status: unknown): asserts status is PaymentStatus {
-    if (!status || typeof status !== 'string') {
-      throw new Error('El estado es obligatorio');
+
+    validateStatus(status: unknown): asserts status is PaymentStatus {
+        if (!status || typeof status !== 'string') {
+            throw new Error('El estado es obligatorio');
+        }
+
+        if (!this.allowedStatuses.includes(status as PaymentStatus)) {
+            throw new Error('Estado inválido');
+        }
     }
 
-    if (!this.allowedStatuses.includes(status as PaymentStatus)) {
-      throw new Error('Estado inválido');
-    }
-  }
+    validatePaymentDate(paymentDate?: string | null): void {
+        if (!paymentDate) {
+            return;
+        }
 
-    async validatePaymentExists(payment_id: string): Promise<void> {
-        const payment = await this.paymentRepo.findById(payment_id);
+        if (!this.isValidDateOnly(paymentDate)) {
+            throw new Error('La fecha de pago es inválida');
+        }
+    }
+
+    validatePaymentExists(payment: PaymentDTO | null): asserts payment is PaymentDTO {
         if (!payment) {
             throw new Error('Pago no encontrado');
         }
     }
+
+    validatePaymentCanBeUpdated(payment: PaymentDTO): void {
+    if (payment.status === 'Pagado') {
+        throw new Error('No se puede actualizar un pago ya pagado');
+    }
+
+    if (payment.status === 'Cancelado') {
+        throw new Error('No se puede actualizar un pago cancelado');
+    }
+}
 
     private isValidDateOnly(dateStr: string): boolean {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
