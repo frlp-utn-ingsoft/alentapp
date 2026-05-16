@@ -38,6 +38,13 @@ export function HomeView() {
           icon={LuShieldAlert}
         />
 
+        <SectionCard
+          title="Pagos"
+          description="Administra los pagos asociados a los socios del club."
+          to="/payments"
+          icon={LuShieldAlert}
+        />
+
         {/* Future sections can be added here following the same pattern */}
         <Box 
           p="6" 
