@@ -299,6 +299,7 @@ export function PaymentsView() {
                                                                 payment,
                                                             )
                                                         }
+                                                        disabled={payment.status === 'Pagado' || payment.status === 'Cancelado'}
                                                     >
                                                         {' '}
                                                         <LuPencil />
