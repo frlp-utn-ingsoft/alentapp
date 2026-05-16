@@ -7,6 +7,7 @@ type Props = {
     searchRef: React.RefObject<HTMLDivElement | null>;
     onSearch: (value: string) => void;
     onSelect: (member: MemberDTO) => void;
+    updateMode?: boolean;
 };
 
 export function MemberSearchInput({
@@ -15,6 +16,7 @@ export function MemberSearchInput({
     searchRef,
     onSearch,
     onSelect,
+    updateMode,
 }: Props) {
     return (
         <Box position="relative" w="100%" ref={searchRef}>
@@ -22,10 +24,11 @@ export function MemberSearchInput({
                 placeholder="Buscar por nombre o DNI"
                 value={value}
                 onChange={(e) => onSearch(e.target.value)}
-                required
+                required={!updateMode}
+                disabled={updateMode}
             />
 
-            {results.length > 0 && (
+            {!updateMode && results.length > 0 && (
                 <Box
                     position="absolute"
                     top="100%"

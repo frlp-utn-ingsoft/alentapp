@@ -77,19 +77,19 @@ export function PaymentFormDialog({
 
                 <DialogBody>
                     <Stack gap="4">
-                        <Field label="Socio" required>
+                        <Field label="Socio" required={!isUpdateMode}>
                             <MemberSearchInput
                                 value={memberSearch}
                                 results={memberResults}
                                 searchRef={memberSearchRef}
                                 onSearch={onSearchMember}
                                 onSelect={onSelectMember}
-                                disabled={isUpdateMode}
+                                updateMode={isUpdateMode}
                             />
                         </Field>
 
                         <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-                            <Field label="Mes" required>
+                            <Field label="Mes" required={!isUpdateMode}>
                                 <Input
                                     type="text"
                                     inputMode="numeric"
@@ -97,12 +97,12 @@ export function PaymentFormDialog({
                                     onChange={(e) =>
                                         onUpdateMonth(e.target.value)
                                     }
-                                    required
+                                    required={!isUpdateMode}
                                     disabled={isUpdateMode}
                                 />
                             </Field>
 
-                            <Field label="Año" required>
+                            <Field label="Año" required={!isUpdateMode}>
                                 <Input
                                     type="text"
                                     inputMode="numeric"
@@ -110,14 +110,14 @@ export function PaymentFormDialog({
                                     onChange={(e) =>
                                         onUpdateYear(e.target.value)
                                     }
-                                    required
-                                    diabled={isUpdateMode}
+                                    required={!isUpdateMode}
+                                    disabled={isUpdateMode}
                                 />
                             </Field>
                         </SimpleGrid>
 
                         <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-                            <Field label="Monto" required>
+                            <Field label="Monto" required={!isUpdateMode}>
                                 <Box position="relative">
                                     <Text
                                         position="absolute"
@@ -143,12 +143,12 @@ export function PaymentFormDialog({
                                             )
                                         }
                                         disabled={isUpdateMode}
-                                        required
+                                        required={!isUpdateMode}
                                     />
                                 </Box>
                             </Field>
 
-                            <Field label="Fecha de Vencimiento" required>
+                            <Field label="Fecha de Vencimiento" required={!isUpdateMode}>
                                 <Input
                                     type="date"
                                     value={formData.due_date}
@@ -158,13 +158,14 @@ export function PaymentFormDialog({
                                             e.target.value,
                                         )
                                     }
-                                    required
+                                    required={!isUpdateMode}
+                                    disabled={isUpdateMode}
                                 />
                             </Field>
                         </SimpleGrid>
                         {isUpdateMode && (
                             <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-                                <Field label="Estado" required>
+                                <Field label="Estado" required={!isUpdateMode}>
                                     <NativeSelect.Root>
                                         <NativeSelect.Field
                                             value={formData.status ?? ''}
