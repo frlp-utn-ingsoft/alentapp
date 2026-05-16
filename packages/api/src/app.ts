@@ -2,8 +2,7 @@ import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
-import { MemberValidator } from './domain/services/MemberValidator.js';
-import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
+import { MemberValidator } from './domain/services/MemberValidator.js';import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
 import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
@@ -13,7 +12,7 @@ import { PrismaLockerRepository } from './infrastructure/PrismaLockerRepository.
 import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
 import { LockerController } from './delivery/LockerController.js';
 import { GetLockersUseCase } from './application/GetLockersUseCase.js';
-
+import { UpdateLockerUseCase } from './application/UpdateLockerUseCase.js';
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -57,11 +56,16 @@ export function buildApp() {
     const lockerRepo = new PrismaLockerRepository();
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo);
     const getLockersUseCase = new GetLockersUseCase(lockerRepo);
-    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase);
+    const updateLockerUseCase = new UpdateLockerUseCase(lockerRepo);
+    const lockerController = new LockerController(
+        createLockerUseCase,
+        getLockersUseCase,
+        updateLockerUseCase,
+    );
 
     server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
-
+    server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));    
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
     });
