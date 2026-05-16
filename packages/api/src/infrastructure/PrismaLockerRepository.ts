@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
-import { LockerRepository } from '../domain/LockerRepository.js';
+import { LockerRepository } from '../generated/domain/LockerRepository.js';
 import { LockerDTO, CreateLockerRequest, LockerStatus } from '@alentapp/shared';
 
 if (!process.env.DATABASE_URL) {
@@ -79,5 +79,11 @@ export class PrismaLockerRepository implements LockerRepository {
             orderBy: { number: 'asc' },
         });
         return lockers.map(this.mapToDTO.bind(this));
+    }
+    async findByMemberId(memberId: string): Promise<LockerDTO | null> {
+        const locker = await prisma.locker.findFirst({
+            where: { member_id: memberId },
+        });
+        return locker ? this.mapToDTO(locker) : null;
     }
 }
