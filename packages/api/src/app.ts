@@ -28,7 +28,9 @@ import { PaymentController } from './delivery/PaymentController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
 import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
+import { DeleteSportUseCase } from './application/DeleteSportUseCase.js';
 import { SportValidator } from './domain/services/SportValidator.js';
+import { DeleteSportValidator } from './domain/services/DeleteSportValidator.js';
 import { SportController } from './delivery/SportController.js';
 
 export function buildApp() {
@@ -116,12 +118,15 @@ export function buildApp() {
     // --- Sports ---
     const sportRepo = new PostgresSportRepository();
     const sportValidator = new SportValidator(sportRepo);
+    const deleteSportValidator = new DeleteSportValidator(sportRepo);
     const createSportUseCase = new CreateSportUseCase(sportRepo);
     const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
-    const sportController = new SportController(createSportUseCase, updateSportUseCase);
+    const deleteSportUseCase = new DeleteSportUseCase(sportRepo, deleteSportValidator);
+    const sportController = new SportController(createSportUseCase, updateSportUseCase, deleteSportUseCase);
 
     server.post('/api/v1/deportes', sportController.create.bind(sportController));
     server.put('/api/v1/deportes/:id', sportController.update.bind(sportController));
+    server.delete('/api/v1/deportes/:id', sportController.delete.bind(sportController));
     
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
