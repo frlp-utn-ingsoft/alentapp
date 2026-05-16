@@ -17,7 +17,7 @@ Permitir a los administrativos corregir o modificar la información de un locker
 ### User Persona
 
 - Nombre: Alberto (Tesorero/Administrativo).
-- Necesidad: Modificar datos de los lockers rápidamente desde la tabla del panel de administración. Por ejemplo, actualizar a un socio que alquilo el locker y asignandole a ese locker el id del socio, o cambiar el estado del locker a Mantenimiento.
+- Necesidad: Modificar datos de los lockers rápidamente desde la tabla del panel de administración. Por ejemplo, actualizar a un socio que alquilo el locker y asignandole a ese locker el id del socio, o cambiar el estado del locker a `Manteinance`.
 
 ### Criterios de Aceptación
 
