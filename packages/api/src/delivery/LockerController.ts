@@ -1,10 +1,12 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { CreateLockerRequest } from '@alentapp/shared';
 import { CreateLockerUseCase } from '../application/Locker/NewLockerUseCase.js';
+import { GetLockersUseCase } from '../application/Locker/GetLockersUseCase.js';
 
 export class LockerController {
     constructor(
         private readonly createLockerUseCase: CreateLockerUseCase,
+        private readonly getLockersUseCase: GetLockersUseCase,
     ) {}
 
     async create(
@@ -27,6 +29,17 @@ export class LockerController {
                 return reply.status(409).send({ error: error.message });
             }
 
+            return reply
+                .status(500)
+                .send({ error: 'Error interno, reintente más tarde' });
+        }
+    }
+
+    async getAll(_request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const lockers = await this.getLockersUseCase.execute();
+            return reply.status(200).send({ data: lockers });
+        } catch {
             return reply
                 .status(500)
                 .send({ error: 'Error interno, reintente más tarde' });
