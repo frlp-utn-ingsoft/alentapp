@@ -15,7 +15,10 @@ import { GetSportsUseCase } from './application/GetSportsUseCase.js';
 import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
 import { DeleteSportUseCase } from './application/DeleteSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
-
+import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
+import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
+import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCertificateUseCase.js';
+import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -28,14 +31,12 @@ export function buildApp() {
             : undefined,
         },
     });
-
     server.register(cors, {
         origin: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     });
-
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
     
@@ -43,56 +44,56 @@ export function buildApp() {
     const getMembersUseCase = new GetMembersUseCase(memberRepo);
     const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
     const deleteMemberUseCase = new DeleteMemberUseCase(memberRepo);
-
     const memberController = new MemberController(
         createMemberUseCase, 
         getMembersUseCase,
         updateMemberUseCase,
         deleteMemberUseCase
     );
-
     const sportRepo = new InMemorySportRepository();
     const enrollmentRepo = new InMemoryEnrollmentRepository();
     const sportValidator = new SportValidator(sportRepo);
-
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
     const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
     const deleteSportUseCase = new DeleteSportUseCase(sportRepo, enrollmentRepo);
-
     const sportController = new SportController(
         createSportUseCase,
         getSportsUseCase,
         updateSportUseCase,
         deleteSportUseCase
     );
-
+    const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
+    const medicalCertificateValidator = new MedicalCertificateValidator();
+    const createMedicalCertificateUseCase = new CreateMedicalCertificateUseCase(
+      medicalCertificateRepo,
+      memberRepo,
+      medicalCertificateValidator
+    );
+    const medicalCertificateController = new MedicalCertificateController(
+      createMedicalCertificateUseCase
+    );
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
-
     server.get('/api/v1/deportes', sportController.getAll.bind(sportController));
     server.post('/api/v1/deportes', sportController.create.bind(sportController));
     server.put('/api/v1/deportes/:id', sportController.update.bind(sportController));
     server.delete('/api/v1/deportes/:id', sportController.delete.bind(sportController));
-
+    server.post('/api/v1/certificados-medicos', medicalCertificateController.create.bind(medicalCertificateController));
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
     });
-
     return server;
 }
-
 // Solo iniciar el servidor si el script se ejecuta directamente (no cuando es importado por vitest)
 if (process.argv[1] && process.argv[1].endsWith('app.ts')) {
     const server = buildApp();
     const port = parseInt(process.env.PORT || '3000', 10);
-
     server.listen({ port, host: '0.0.0.0' }, () =>
         server.log.info(`API server running on http://localhost:${port}`)
     );
-
     ['SIGINT', 'SIGTERM'].forEach((signal) => {
         process.on(signal, async () => {
             await server.close();
