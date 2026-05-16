@@ -83,11 +83,11 @@ Campo **inmutable** (no editable post-creación):
 
 | Escenario                               | Resultado Esperado                                      | Código HTTP       |
 |-----------------------------------------|---------------------------------------------------------------|-------------------|
-| `id` no corresponde a ningún deporte    | Mensaje: "Deporte no encontrado"                              | 404 Not Found     |
-| Se intenta modificar `name`             | Mensaje: "El nombre del deporte no puede modificarse"         | 400 Bad Request   |
-| `maxCapacity` es 0 o negativo          | Mensaje: "La capacidad máxima debe ser mayor a cero"          | 400 Bad Request   |
-| `additionalPrice` es negativo           | Mensaje: "El precio adicional debe ser mayor o igual a cero" | 400 Bad Request   |
-| Body vacío (sin campos a actualizar)    | Mensaje: "Se requiere al menos un campo para actualizar"      | 400 Bad Request   |
+| `id` no corresponde a ningún deporte    | { "error": "Deporte no encontrado" }                              | 404 Not Found     |
+| Se intenta modificar `name`             | { "error": "El nombre del deporte no puede modificarse" }         | 400 Bad Request   |
+| `maxCapacity` es 0 o negativo          | { "error": "La capacidad máxima debe ser mayor a cero" }          | 400 Bad Request   |
+| `additionalPrice` es negativo           | { "error": "El precio adicional debe ser mayor o igual a cero" } | 400 Bad Request   |
+| Body vacío (sin campos a actualizar)    | { "error": "Se requiere al menos un campo para actualizar" }      | 400 Bad Request   |
 | Actualización exitosa                   | Retorna el deporte con los datos actualizados                 | 200 OK            |
 
 ## Plan de Implementación

@@ -54,10 +54,11 @@ Sin cambios en el schema. La operación es un borrado físico (`DELETE`) del reg
 
 | Escenario                                  | Resultado Esperado                                                      | Código HTTP       |
 |--------------------------------------------|-------------------------------------------------------------------------|-------------------|
-| `id` no corresponde a ningún deporte       | Error con mensaje "Deporte no encontrado"                               | 404 Not Found     |
-| Deporte con inscripciones activas          | Error con mensaje "No se puede eliminar: existen inscripciones activas" | 409 Conflict      |
-| `id` con formato inválido (no UUID)        | Error de validación de parámetro                                        | 400 Bad Request   |
-| Eliminación exitosa                        | Mensaje de confirmación y registro removido de la base de datos         | 204 No Content    |
+| `id` no corresponde a ningún deporte       | { "error": "Deporte no encontrado" }                                    | 404 Not Found     |
+| Deporte con inscripciones activas          | { "error": "No se puede eliminar: existen inscripciones activas" }      | 409 Conflict      |
+| `id` con formato inválido (no UUID)        | { "error": "Identificador de deporte inválido" }                        | 400 Bad Request   |
+| Eliminación exitosa                        | Respuesta vacía                                                         | 204 No Content    |
+
 
 ## Plan de Implementación
 1. Implementar `SportDomainService` en Domain con la validación de Enrollments activos.

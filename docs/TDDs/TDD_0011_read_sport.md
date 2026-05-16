@@ -36,7 +36,7 @@ Sin cambios en el schema. Operaciones de sólo lectura sobre el modelo `Sport`.
 - **Query Params opcionales**:
 ```ts
 {
-  requires_medical_certificate?: boolean;
+  requiresMedicalCertificate?: boolean;
 }
 ```
 - **Response Body (200 OK)**:
@@ -85,9 +85,9 @@ Array<{
 | Escenario                                     | Resultado Esperado                                     | Código HTTP       |
 |-----------------------------------------------|--------------------------------------------------------|-------------------|
 | No hay deportes registrados (listado vacío)   | Retorna un array vacío `[]`                            | 200 OK            |
-| `id` no corresponde a ningún deporte          | Error con mensaje "Deporte no encontrado"              | 404 Not Found     |
-| `id` con formato inválido (no UUID)           | Error de validación de parámetro                       | 400 Bad Request   |
-| Filtro `requiresMedicalCertificate=true`    | Retorna sólo los deportes con ese atributo en `true`   | 200 OK            |
+| `id` no corresponde a ningún deporte          | { "error": "Deporte no encontrado" }                   | 404 Not Found     |
+| `id` con formato inválido (no UUID)           | { "error": "Identificador de deporte inválido" }       | 400 Bad Request   |
+| Filtro `requiresMedicalCertificate=true`      | Retorna sólo los deportes con ese atributo en `true`   | 200 OK            |
 | Listado con múltiples deportes                | Retorna el array completo con todos los deportes       | 200 OK            |
 
 ## Plan de Implementación
