@@ -20,6 +20,7 @@ import { GetLockersUseCase } from './application/GetLockersUseCase.js';
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { CreatePaymentUseCase } from './application/NewPaymentUseCase.js'; 
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
+import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
@@ -46,10 +47,12 @@ export function buildApp() {
     // --- Members ---
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
+    
     const createMemberUseCase = new CreateMemberUseCase(memberRepo, memberValidator);
     const getMembersUseCase = new GetMembersUseCase(memberRepo);
     const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
     const deleteMemberUseCase = new DeleteMemberUseCase(memberRepo);
+    
     const memberController = new MemberController(
         createMemberUseCase,
         getMembersUseCase,
@@ -68,16 +71,18 @@ export function buildApp() {
     // Le pasamos el memberRepo que ya instanciamos arriba para no crear dos!
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, memberRepo);
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo);
 
     const paymentController = new PaymentController(
         createPaymentUseCase,
-        getPaymentsUseCase
+        getPaymentsUseCase,
+        updatePaymentUseCase
     );
 
     // Fijate que acá usamos "server", igual que con socios
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
-
+    server.put('/api/v1/payments/:id', paymentController.update.bind(paymentController));
 
     // Ruta de prueba
     // --- Lockers ---
