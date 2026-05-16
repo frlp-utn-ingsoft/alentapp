@@ -1,7 +1,20 @@
 import { PaymentRepository } from '../PaymentRepository.js';
+import {
+    PaymentDTO,
+    PaymentStatus,
+    UpdatePaymentRequest,
+} from '@alentapp/shared';
 
 export class PaymentValidator {
-    constructor(private readonly paymentRepo: PaymentRepository) {}
+    constructor(
+        private readonly paymentRepo: PaymentRepository,
+        private readonly allowedStatuses: PaymentStatus[] = [
+            'Pendiente',
+            'Pagado',
+            'Vencido',
+            'Cancelado',
+        ],
+    ) {}
 
     validateFields(data: {
         member_id?: string;
@@ -61,6 +74,39 @@ export class PaymentValidator {
             throw new Error(
                 'Ya existe un pago para este miembro en el mes y año especificados',
             );
+        }
+    }
+    validateUpdatePayload(data: UpdatePaymentRequest): void {
+        const forbiddenFields = [
+            'member_id',
+            'month',
+            'year',
+            'due_date',
+            'amount',
+        ];
+        for (const field of forbiddenFields) {
+            if (field in data) {
+                throw new Error(`No se puede actualizar el campo ${field}`);
+            }
+        }
+        if (!data.status && data.payment_date === undefined) {
+            throw new Error('Debe informar al menos un campo para actualizar');
+        }
+    }
+      validateStatus(status: unknown): asserts status is PaymentStatus {
+    if (!status || typeof status !== 'string') {
+      throw new Error('El estado es obligatorio');
+    }
+
+    if (!this.allowedStatuses.includes(status as PaymentStatus)) {
+      throw new Error('Estado inválido');
+    }
+  }
+
+    async validatePaymentExists(payment_id: string): Promise<void> {
+        const payment = await this.paymentRepo.findById(payment_id);
+        if (!payment) {
+            throw new Error('Pago no encontrado');
         }
     }
 
