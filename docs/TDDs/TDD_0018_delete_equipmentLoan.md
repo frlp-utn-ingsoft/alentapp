@@ -22,8 +22,8 @@ Permitir la anulación o baja lógica de un registro de préstamo para mantener 
 ### Criterios de Aceptación
 
 - Si se intenta eliminar un prestamo que no existe en el sistema o que ya fue eliminado logicamente, el sistema debe devolver un error indicando que el recurso no fue encontrado
-- Al ejecutar la eliminacion el sistema no debe borrar fisicamente el registo de la base de datos, sino que debe registrar la fecha y hora de la operacion en el campo `deleted_at`.
-- Una vez que un préstamo ha sido dado de baja (posee un valor en `deleted_at`), el sistema debe ocultarlo de los listados generales y bloquear cualquier intento de actualización
+- Al ejecutar la eliminacion el sistema no debe borrar fisicamente el registo de la base de datos, sino que debe registrar la fecha y hora de la operacion en el campo `deletedAt`.
+- Una vez que un préstamo ha sido dado de baja (posee un valor en `deletedAt`), el sistema debe ocultarlo de los listados generales y bloquear cualquier intento de actualización
 - Al finalizar, el sistema debe mostrar un mensaje de exito confirmando la baja logica.
 
 ## Diseño Técnico (RFC)
@@ -33,13 +33,23 @@ Permitir la anulación o baja lógica de un registro de préstamo para mantener 
 - **Endpoint**: `DELETE /api/v1/equipment-loans/:id`
 - **Request Body**:`none`
 
+- **Response 200 OK**:
+
+```tsx
+{
+"data": {
+        "id": "123"
+    }
+}
+```
+
 ### Componentes de Arquitectura Hexagonal
 
 - **Domain**:
     - La estructura de la entidad `EquipmentLoan` y el Value Object `EquipmentLoanStatus` son idénticos a los definidos en el documento base de creación.
-    - Comportamiento: La entidad `EquipmentLoan` es responsable de gestionar su propia baja. Posee un comportamiento interno que asienta la fecha actual en `deleted_at` y valida que no se pueda eliminar si ya estaba eliminado.
+    - Comportamiento: La entidad `EquipmentLoan` es responsable de gestionar su propia baja. Posee un comportamiento interno que asienta la fecha actual en `deletedAt` y valida que no se pueda eliminar si ya estaba eliminado.
 - **Application**:
-    - Caso de Uso: `DeleteEquipmentLoanUseCase` (Busca el prestamo validando su existencia, delega a la entidad el cambio del campo `deleted_at` de `null` a la fecha de eliminacion y persiste la entidad modificada utilizando `IEquipmentLoanRepository`)
+    - Caso de Uso: `DeleteEquipmentLoanUseCase` (Busca el prestamo validando su existencia, delega a la entidad el cambio del campo `deletedAt` de `null` a la fecha de eliminacion y persiste la entidad modificada utilizando `IEquipmentLoanRepository`)
     - Puertos de Salida: `IEquipmentLoanRepository` (Interface de dominio, de la cual necesitamos el metodo `findById()` y `update()` para registrar la fecha y hora de la eliminacion)
 - **Infrastructure**:
     - Adaptadores de entrada: `EquipmentLoanController` utilizando su ruta `DELETE /api/v1/equipment-loans/:id` y `EquipmentLoanRouter`
@@ -49,11 +59,11 @@ Permitir la anulación o baja lógica de un registro de préstamo para mantener 
 ## Casos de Borde y Errores
 
 | **Escenario** | **Resultado Esperado** | **Código HTTP** |
-| --- | --- | --- |
-| **Préstamo inexistente (ID no existe)** | Mensaje: "El préstamo que intenta eliminar no se encuentra registrado." | 404 Not Found |
-| **Préstamo ya eliminado previamente** | Mensaje: "El préstamo que intenta eliminar no se encuentra registrado." | 404 Not Found |
-| **Formato de ID inválido** | Mensaje: "El formato del ID provisto en la URL no es válido." | 400 Bad Request |
-| **Error de conexión a DB** | Mensaje: "Error interno del servidor al procesar la baja, reintente más tarde." | 500 Internal Server Error |
+| :--- | :--- | :--- |
+| **Préstamo inexistente (ID no existe)** | `{ "error": "El préstamo que intenta eliminar no se encuentra registrado." }` | 404 Not Found |
+| **Préstamo ya eliminado previamente** | `{ "error": "El préstamo que intenta eliminar no se encuentra registrado." }` | 404 Not Found |
+| **Formato de ID inválido** | `{ "error": "El formato del ID provisto en la URL no es válido." }` | 400 Bad Request |
+| **Error de conexión a DB** | `{ "error": "Error interno del servidor al procesar la baja, reintente más tarde." }` | 500 Internal Server Error |
 
 ## Plan de Implementación
 
@@ -62,8 +72,8 @@ Permitir la anulación o baja lógica de un registro de préstamo para mantener 
 ## Fase 1: Núcleo de Dominio (Domain)
 1. **Comportamiento en la Entidad `EquipmentLoan`**:
    - Implementar método `delete()`: 
-     - Validar que `deleted_at` sea actualmente `null`. Si ya tiene una fecha, lanzar una excepción de negocio.
-     - Asignar la fecha y hora actual al campo `deleted_at`.
+     - Validar que `deletedAt` sea actualmente `null`. Si ya tiene una fecha, lanzar una excepción de negocio.
+     - Asignar la fecha y hora actual al campo `deletedAt`.
 2. **Puertos (Interfaces)**: Verificar que `IEquipmentLoanRepository` disponga de:
    - `findById()`: Para recuperar el préstamo antes de marcarlo.
    - `update()`: Para persistir el cambio de estado en la base de datos.
@@ -82,6 +92,6 @@ Permitir la anulación o baja lógica de un registro de préstamo para mantener 
 
 ## Fase 3: Infraestructura y Persistencia (Infrastructure)
 4. **Actualizar el `DB persistence adapter`**:
-   - **Filtrado Crítico**: Modificar las consultas de lectura (`findAll` y `findById`) para incluir la cláusula que excluya registros donde `deleted_at` no sea nulo.
+   - **Filtrado Crítico**: Modificar las consultas de lectura (`findAll` y `findById`) para incluir la cláusula que excluya registros donde `deletedAt` no sea nulo.
 5. **Adaptadores de Entrada**:
    - Agregar en `EquipmentLoanController` el método vinculado a `DELETE /api/v1/equipment-loans/:id`.
