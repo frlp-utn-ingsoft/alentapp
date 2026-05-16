@@ -31,4 +31,14 @@ export const paymentsService = {
         if (!response.ok) throw new Error(json.error || 'Error al actualizar pago');
             return json.data;
     },
+
+    async delete(id: string): Promise<void> {
+        const response = await fetch(`${API_URL}/payments/${id}`, {
+        method: 'DELETE',
+    });
+        if (!response.ok) {
+            const json = await response.json();
+            throw new Error(json.error || 'Error al anular pago');
+        }
+    }
 };

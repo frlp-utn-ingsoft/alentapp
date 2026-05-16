@@ -1,10 +1,10 @@
 import { 
   Table, Button, Heading, HStack, IconButton, Stack, Text, Box, Flex, Spinner, Center, Input
 } from "@chakra-ui/react";
-import { LuPlus, LuPencil, LuRefreshCw } from "react-icons/lu"; // Volvió LuPencil
+import { LuPlus, LuPencil, LuTrash2, LuRefreshCw } from "react-icons/lu";
 import { useEffect, useState, useMemo } from "react";
 import { paymentsService } from "../services/payments";
-import { membersService } from "../services/members"; 
+import { membersService } from "../services/members"; // Necesitamos a los socios para el formulario
 import type { PaymentDTO, CreatePaymentRequest, UpdatePaymentRequest, PaymentStatus, MemberDTO } from "@alentapp/shared";
 import { 
   DialogRoot, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogActionTrigger, DialogCloseTrigger
@@ -14,7 +14,6 @@ import {
   SelectRoot, SelectTrigger, SelectValueText, SelectContent, SelectItem, createListCollection 
 } from "../components/ui/select";
 
-// Volvieron los estados
 const statusCategories = createListCollection({
   items: [
     { label: "Pendiente", value: "Pending" },
@@ -31,7 +30,7 @@ export function PaymentsView() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null); // Volvió el ID de edición
+  const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<CreatePaymentRequest & { status?: PaymentStatus }>({
     member_id: "",
@@ -74,7 +73,6 @@ export function PaymentsView() {
     setIsDialogOpen(true);
   };
 
-  // Volvió la función para abrir el modal en modo edición
   const openEditModal = (payment: PaymentDTO) => {
     setEditingPaymentId(payment.id);
     setFormData({
@@ -93,14 +91,12 @@ export function PaymentsView() {
     setIsSubmitting(true);
     try {
       if (editingPaymentId) {
-        // Lógica de Update
         await paymentsService.update(editingPaymentId, {
           amount: Number(formData.amount),
           due_date: formData.due_date,
           status: formData.status
         } as UpdatePaymentRequest);
       } else {
-        // Lógica de Create
         await paymentsService.create({
           ...formData,
           amount: Number(formData.amount),
@@ -114,6 +110,17 @@ export function PaymentsView() {
       alert(err.message || "Error al guardar el pago");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm(`¿Estás seguro de que deseas anular/eliminar este pago?`)) {
+      try {
+        await paymentsService.delete(id);
+        fetchData();
+      } catch (err: any) {
+        alert(err.message || "Error al eliminar el pago");
+      }
     }
   };
 
@@ -146,6 +153,7 @@ export function PaymentsView() {
           </HStack>
         </Flex>
 
+          {/* Modal Form */}
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
@@ -215,7 +223,6 @@ export function PaymentsView() {
                   </HStack>
                 )}
                 
-                {/* Volvió el selector de estado para cuando editamos */}
                 {editingPaymentId && formData.status && (
                   <Field label="Estado del Pago" required>
                     <SelectRoot 
@@ -293,9 +300,8 @@ export function PaymentsView() {
                     </Table.Cell>
                     <Table.Cell textAlign="end">
                       <HStack gap="2" justify="flex-end">
-                        <IconButton variant="ghost" size="sm" onClick={() => openEditModal(payment)}>
-                          <LuPencil />
-                        </IconButton>
+                        <IconButton variant="ghost" size="sm" onClick={() => openEditModal(payment)}><LuPencil /></IconButton>
+                        <IconButton variant="ghost" size="sm" colorPalette="red" onClick={() => handleDelete(payment.id)}><LuTrash2 /></IconButton>
                       </HStack>
                     </Table.Cell>
                   </Table.Row>

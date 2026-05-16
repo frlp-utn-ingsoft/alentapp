@@ -84,3 +84,29 @@ export interface UpdateLockerRequest {
   status?: LockerStatus;
   member_id?: string | null;
 }
+
+// ==========================================
+// EquipmentLoan
+// ==========================================
+export type LoanStatus = 'Loaned' | 'Returned' | 'Damaged';
+
+export interface EquipmentLoanDTO {
+  id: string;
+  itemName: string;
+  status: LoanStatus;
+  loanDate: string; // ISO 8601
+  dueDate: string;  // ISO 8601
+  memberId: string;
+}
+
+export interface CreateEquipmentLoanRequest {
+  itemName: string;
+  dueDate: string;  // ISO 8601. Debe ser posterior a NOW().
+  memberId: string; // UUID del socio. Debe existir y ser Pleno o Honorario.
+}
+
+export interface UpdateEquipmentLoanRequest {
+  itemName?: string;
+  status?: 'Returned' | 'Damaged';
+  dueDate?: string; // ISO 8601. Debe seguir siendo > loanDate original.
+}
