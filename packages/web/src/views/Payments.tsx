@@ -20,6 +20,7 @@ import { useMemberSearch } from '../hooks/useMemberSearch';
 import { PaymentFormDialog } from '../components/PaymentFormDialog';
 
 import { formatDate } from '../utils/paymentDates';
+import { formatCurrency } from '../utils/currency';
 
 export function PaymentsView() {
     const { payments, isLoading, error, fetchPayments } = usePayments();
@@ -80,6 +81,7 @@ export function PaymentsView() {
                 };
         }
     };
+    const paymentList = Array.isArray(payments) ? payments : [];
 
     return (
         <DialogRoot
@@ -161,7 +163,7 @@ export function PaymentsView() {
                                 <Text color="fg.muted">Cargando pagos...</Text>
                             </Stack>
                         </Center>
-                    ) : payments.length === 0 ? (
+                    ) : paymentList.length === 0 ? (
                         <Center h="300px">
                             <Stack align="center" gap="4">
                                 <Text color="fg.muted">
@@ -208,7 +210,7 @@ export function PaymentsView() {
                             </Table.Header>
 
                             <Table.Body>
-                                {payments.map((payment) => {
+                                {paymentList.map((payment) => {
                                     const statusStyles = getStatusStyles(
                                         payment.status,
                                     );
@@ -236,7 +238,7 @@ export function PaymentsView() {
                                                 fontWeight="semibold"
                                                 color="fg.emphasized"
                                             >
-                                                ${payment.amount}
+                                                ${formatCurrency(payment.amount)}
                                             </Table.Cell>
 
                                             <Table.Cell color="fg.muted">
