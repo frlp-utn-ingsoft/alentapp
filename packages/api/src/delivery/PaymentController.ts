@@ -2,11 +2,12 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreatePaymentRequest } from '@alentapp/shared';
 import { CreatePaymentUseCase } from '../application/Payment/NewPaymentUseCase.js';
 import { GetPaymentsUseCase } from '../application/Payment/GetPaymentsUseCase.js';
-
+import { DeletePaymentUseCase } from '../application/Payment/DeletePaymentUseCase.js';
 export class PaymentController {
     constructor(
         private readonly createPaymentUseCase: CreatePaymentUseCase,
         private readonly getPaymentsUseCase: GetPaymentsUseCase,
+        private readonly deletePaymentUseCase: DeletePaymentUseCase,
     ) {}
     async create(
         request: FastifyRequest<{ Body: CreatePaymentRequest }>,
@@ -14,7 +15,9 @@ export class PaymentController {
     ) {
         try {
             request.log.info('Alguien pegó al endpoint de crear pago');
-            const payment = await this.createPaymentUseCase.execute(request.body);
+            const payment = await this.createPaymentUseCase.execute(
+                request.body,
+            );
             return reply.status(201).send({ data: payment });
         } catch (error: any) {
             if (
@@ -48,6 +51,49 @@ export class PaymentController {
             return reply.status(200).send({ data: payments });
         } catch (error: any) {
             console.error('Error obteniendo pagos:', error);
+            return reply
+                .status(500)
+                .send({ error: 'Error interno, reintente más tarde' });
+        }
+    }
+    async cancel(
+        request: FastifyRequest<{
+            Params: { id: string };
+        }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const { id } = request.params;
+
+            request.log.info({ id }, 'Cancelando pago');
+
+            const payment = await this.deletePaymentUseCase.execute(id);
+
+            return reply.status(200).send({ data: payment });
+        } catch (error: any) {
+            const message =
+                error instanceof Error ? error.message : 'Error desconocido';
+
+            if (message === 'Pago no encontrado') {
+                return reply.status(404).send({ error: message });
+            }
+
+            if (
+                message === 'El pago ya se encuentra cancelado' ||
+                message === 'No se puede cancelar un pago ya pagado'
+            ) {
+                return reply.status(409).send({ error: message });
+            }
+
+            request.log.error(
+                {
+                    message: error?.message,
+                    stack: error?.stack,
+                    error,
+                },
+                'Error al cancelar pago',
+            );
+
             return reply
                 .status(500)
                 .send({ error: 'Error interno, reintente más tarde' });
