@@ -60,15 +60,15 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 1. **Puerto**: `IDisciplineRepository` (Método `softDelete(id)`).
 2. **Caso de Uso**: `DeleteDisciplineUseCase` (Valida la existencia previa mediante `findById` y marca la sanción como eliminada lógicamente mediante `deletedAt`.).
 3. **Adaptador de Salida**: `PostgresDisciplineRepository` (Actualización lógica de la entidad marcando `deletedAt`).
-4. **Adaptador de Entrada**: `DisciplineController` (Extrae el `id` de la request y devuelve status 200).
+4. **Adaptador de Entrada**: `DisciplineController` (Extrae el `id` de la request y devuelve status 200 OK).
 
 ## Casos de Borde y Errores
 
-| Escenario            | Resultado Esperado                             | Código HTTP               |
-| -------------------- | -----------------------------------------------| --------------------------|
-| Sanción ya eliminada | Mensaje: "La sanción ya fue eliminada"         | 409 Conflict              |
-| Sanción inexistente  | Mensaje: "La sanción no existe"                | 404 Not Found             |
-| Error de conexión DB | Mensaje: "Error interno, reintente más tarde"  | 500 Internal Server Error |
+| Escenario             | Resultado Esperado                                | Código HTTP               |
+| --------------------  | -----------------------------------------------   | --------------------------|
+| Sanción ya eliminada  | { "error": "La sanción ya fue eliminada" }        | 409 Conflict              |
+| Sanción inexistente   | { "error": "La sanción no existe" }               | 404 Not Found             |
+| Error de conexión DB  | { "error": "Error interno, reintente más tarde" } | 500 Internal Server Error |
 
 ## Plan de Implementación
 

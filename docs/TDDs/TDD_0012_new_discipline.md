@@ -85,12 +85,12 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 ## Casos de Borde y Errores
 
-| Escenario               | Resultado Esperado                                           | Código HTTP               |
-| ----------------------  | ------------------------------------------------------------ | ------------------------- |
-| endDate ≤ startDate     | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request           |
-| Socio inexistente       | Mensaje: "El socio indicado no existe"                       | 404 Not Found             |
-| Datos incompletos       | Mensaje: "Faltan campos requeridos o poseen formato inválido"| 400 Bad Request           |
-| Error de conexión a DB  | Mensaje: "Error interno, reintente más tarde"                | 500 Internal Server Error |
+| Escenario               | Resultado Esperado                                                | Código HTTP               |
+| ----------------------  | ------------------------------------------------------------      | ------------------------- |
+| endDate ≤ startDate     | { "error": "La fecha de fin debe ser posterior a la de inicio" }  | 400 Bad Request           |
+| Socio inexistente       | { "error": "El socio indicado no existe" }                        | 404 Not Found             |
+| Datos incompletos       | { "error": "Faltan campos requeridos o poseen formato inválido" } | 400 Bad Request           |
+| Error de conexión a DB  | { "error": "Error interno, reintente más tarde" }                 | 500 Internal Server Error |
 
 ## Plan de Implementación
 

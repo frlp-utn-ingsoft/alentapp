@@ -86,13 +86,13 @@ Nota: Las sanciones con deletedAt != null (desactivadas) pueden ser consultadas 
 
 ## Casos de Borde y Errores
 
-| Escenario                                | Resultado Esperado                            | Código HTTP               |
-| -----------------------------------------| ----------------------------------------------| --------------------------|
-| Listado sin sanciones cargadas           | Array vacío `[]`                              | 200 OK                    |
-| Consulta exitosa de listado              | Array con todas las sanciones                 | 200 OK                    |
-| Consulta exitosa por `id`                | Objeto con los datos de la sancion            | 200 OK                    |
-| Sanción inexistente al consultar por `id`| Mensaje: "La sanción no existe"               | 404 Not Found             |
-| Error de conexión a DB                   | Mensaje: "Error interno, reintente más tarde" | 500 Internal Server Error |
+| Escenario                                | Resultado Esperado                                | Código HTTP               |
+| -----------------------------------------| ----------------------------------------------    | --------------------------|
+| Listado sin sanciones cargadas           | { "data": [] }                                    | 200 OK                    |
+| Consulta exitosa de listado              | { "data": [...] }                                 | 200 OK                    |
+| Consulta exitosa por `id`                | { "data": {...} }                                 | 200 OK                    |
+| Sanción inexistente al consultar por `id`| { "error": "La sanción no existe" }               | 404 Not Found             |
+| Error de conexión a DB                   | { "error": "Error interno, reintente más tarde" } | 500 Internal Server Error |
 
 ## Plan de Implementación
 1. Crear el modelo de dominio `Discipline` y el puerto `IDisciplineRepository` con los métodos `findAll` y `findById`.

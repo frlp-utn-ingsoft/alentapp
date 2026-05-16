@@ -87,14 +87,14 @@ Los campos omitidos conservarán su valor actual. El endpoint utilizará `PUT` p
 
 ## Casos de Borde y Errores
 
-| Escenario                   | Resultado Esperado                                           | Código HTTP               |
-| -----------------------     | ------------------------------------------------------------ | ------------------------- |
-| Sanción inexistente         | Mensaje: "La sanción no existe"                              | 404 Not Found             |
-| Body sin campos a actualizar| Mensaje: "Debe enviar al menos un campo a actualizar"        | 400 Bad Request           |
-| endDate ≤ startDate         | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request           |
-| Datos inválidos             | Mensaje: "Formato de datos inválido"                         | 400 Bad Request           |
-| Error de conexión a DB      | Mensaje: "Error interno, reintente más tarde"                | 500 Internal Server Error |
-| deletedAt no null           | Mensaje: "No se puede editar una sanción desactivada"        | 400 Bad Request           |
+| Escenario                   | Resultado Esperado                                               | Código HTTP               |
+| -----------------------     | ------------------------------------------------------------     | ------------------------- |
+| Sanción inexistente         | { "error": "La sanción no existe" }                              | 404 Not Found             |
+| Body sin campos a actualizar| { "error": "Debe enviar al menos un campo a actualizar" }        | 400 Bad Request           |
+| endDate ≤ startDate         | { "error": "La fecha de fin debe ser posterior a la de inicio" } | 400 Bad Request           |
+| Datos inválidos             | { "error": "Formato de datos inválido" }                         | 400 Bad Request           |
+| Error de conexión a DB      | { "error": "Error interno, reintente más tarde" }                | 500 Internal Server Error |
+| deletedAt no null           | { "error": "No se puede editar una sanción desactivada" }        | 400 Bad Request           |
 
 ## Plan de Implementación
 
