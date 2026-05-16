@@ -22,7 +22,7 @@ Permitir que un administrativo registre un nuevo Locker físico del club en el s
 ### Criterios de Aceptación
 
 - El sistema debe validar que el número de Locker (`number`) sea único.
-- El status inicial de un nuevo Locker debe ser `Available` por defecto.
+- El status inicial de un nuevo Locker debe ser `Disponible` por defecto.
 - El campo `member_id` debe quedar en `null` al crear un Locker (aún no asignado).
 - Al crear con éxito, el sistema debe retornar los datos del Locker creado con status `201 Created`.
 
@@ -35,7 +35,7 @@ Se definirá la entidad `Locker` con las siguientes propiedades y restricciones:
 - `id`: Identificador único universal (UUID), generado automáticamente.
 - `number`: Entero, único e indexado (`UNIQUE`). Representa el número físico del Locker.
 - `location`: Cadena de texto que describe la ubicación dentro del club (ej: "Vestuario A - Fila 1").
-- `status`: Enumeración (`Available`, `Occupied`, `Maintenance`). Valor por defecto: `Available`.
+- `status`: Enumeración (`Disponible`, `Ocupado`, `Mantenimiento`). Valor por defecto: `Disponible`.
 - `member_id`: UUID foráneo nullable que referencia a `Member`. `null` indica que el Locker está libre.
 
 ### Contrato de API (@alentapp/shared)
@@ -57,7 +57,7 @@ Se definirá la entidad `Locker` con las siguientes propiedades y restricciones:
     id: string;
     number: number;
     location: string;
-    status: 'Available' | 'Occupied' | 'Maintenance';
+    status: 'Disponible' | 'Ocupado' | 'Mantenimiento';
     member_id: string | null;
 }
 ```
@@ -84,7 +84,7 @@ Se definirá la entidad `Locker` con las siguientes propiedades y restricciones:
     - `create(data)`
 2. Implementar o ampliar la validación de negocio para asegurar que el número de Locker sea válido, que la ubicación sea obligatoria y que no exista otro Locker con el mismo número.
 3. Implementar el caso de uso `NewLockerUseCase` aplicando validaciones y delegando la persistencia.
-4. Implementar los métodos correspondientes en `PostgresLockerRepository`, respetando la unicidad del número y valores por defecto (`status: Available`, `member_id: null`).
+4. Implementar los métodos correspondientes en `PostgresLockerRepository`, respetando la unicidad del número y valores por defecto (`status: Disponible`, `member_id: null`).
 5. Crear la ruta `POST /api/v1/lockers` en `LockerController`.
 6. Mapear los errores del caso de uso a los códigos HTTP correspondientes (`400`, `409` y `500`).
 7. Consumir el endpoint desde el frontend para permitir el alta y reflejar el nuevo Locker creado.
