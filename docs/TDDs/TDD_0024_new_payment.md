@@ -104,12 +104,12 @@ Definiremos los tipos en el paquete compartido para asegurar sincronización:
 
 | Escenario                      | Resultado Esperado                                     | Código HTTP               |
 | ----------------------------- | ------------------------------------------------------ | ------------------------- |
-| `amount` es cero o negativo    | Mensaje: "El monto debe ser mayor a cero"              | 400 Bad Request           |
-| `amount` no es un número       | Mensaje: "El monto debe ser un valor numérico"         | 400 Bad Request           |
-| `paymentDate` ausente o inválida | Mensaje: "La fecha de pago es inválida o está ausente" | 400 Bad Request           |
-| `memberId` no existe        | Mensaje: "El socio indicado no existe"                 | 404 Not Found             |
-| Datos requeridos faltantes    | Mensaje: "Datos inválidos"                             | 400 Bad Request           |
-| Error de conexión a DB        | Mensaje: "Error interno, reintente más tarde"        | 500 Internal Server Error |
+| `amount` es cero o negativo    | `{ "error": "El monto debe ser mayor a cero" }`              | 400 Bad Request           |
+| `amount` no es un número       | `{ "error": "El monto debe ser un valor numérico" }`         | 400 Bad Request           |
+| `paymentDate` ausente o inválida | `{ "error": "La fecha de pago es inválida o está ausente" }` | 400 Bad Request           |
+| `memberId` no existe        | `{ "error": "El socio indicado no existe" }`                 | 404 Not Found             |
+| Datos requeridos faltantes    | `{ "error": "Datos inválidos" }`                             | 400 Bad Request           |
+| Error de conexión a DB        | `{ "error": "Error interno, reintente más tarde" }`        | 500 Internal Server Error |
 
 ## Plan de Implementación
 

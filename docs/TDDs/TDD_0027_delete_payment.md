@@ -24,9 +24,9 @@ Permitir que un administrativo cancele un pago registrado **sin borrar físicame
 - El sistema debe validar que el pago exista antes de intentar la operación.
 - El sistema **no debe eliminar físicamente** el registro bajo ninguna circunstancia.
 - La baja lógica debe establecer **`status` igual a `"Canceled"`** y **`deletedAt`** con fecha/hora actual (no `null` tras aplicar).
-- La baja lógica está permitida únicamente si el registro **`deletedAt` es `null` y no estaba ya cancelado** mediante este flujo. Si ya está dado de baja (`deletedAt != null`), la operación se rechaza.
+- La baja lógica está permitida únicamente si el registro **`deletedAt` es `null`**. Si ya está dado de baja (`deletedAt != null`), la operación se rechaza.
 - Para esta implementación **simple**, la baja lógica desde `DELETE` se permite **solo** cuando el estado de negocio actual es **`Pending`**. Si el pago está en **`Paid`**, se debe rechazar (no hay anulación posterior en esta versión).
-- **Ajuste respecto de la redacción inicial (TDD-0024):** al documentar la baja lógica se había dado por sentado que el `amount` quedaba fijo tras el alta. En la práctica el monto de la cuota se ingresa por teclado; **se permite modificar `amount` siempre que el pago siga en `Pending` y `deletedAt == null`** (caso de uso de actualización acorde a otros TDDs). Una vez aplicada la cancelación (`deletedAt` seteado y `status === "Canceled"`), el pago no puede modificarse ni reactivarse mediante los casos de uso de actualización/consultas operativas según otros TDDs.
+- **Ajuste respecto de la redacción inicial (TDD-0024):** **se permite modificar `amount` siempre que el pago siga en `Pending` y `deletedAt == null`**. Una vez aplicada la cancelación (`deletedAt` seteado y `status === "Canceled"`), el pago no puede modificarse ni reactivarse.
 - Los listados habituales **excluyen** pagos con `deletedAt != null`, salvo un futuro modo explícito de historial (fuera del alcance mínimo de este texto).
 - Al finalizar con éxito, el sistema debe devolver `{ "data": ... }` con el payment actualizado, incluyendo `status`, `deletedAt`, `updatedAt` y los demás campos de respuesta habitual.
 
@@ -88,12 +88,12 @@ La operación se expresa con `DELETE`, pero contractualmente describe **solo** c
 
 | Escenario                                   | Resultado Esperado                                                | Código HTTP               |
 | ------------------------------------------- | ----------------------------------------------------------------- | ------------------------- |
-| `id` del pago no existe                     | Mensaje: "El pago indicado no existe"                             | 404 Not Found             |
-| Baja ya aplicada (`deletedAt != null`)      | Mensaje: "El pago ya se encuentra cancelado"                      | 409 Conflict              |
-| `status` actual es `Canceled` sin coherencia de datos | Mensaje: "El pago ya se encuentra cancelado"               | 409 Conflict              |
-| `status` es `Paid` (anulación no permitida)| Mensaje: "No se puede cancelar un pago ya confirmado como pagado" | 422 Unprocessable Entity  |
-| `id` con formato inválido (no UUID)         | Mensaje: "El identificador proporcionado no es válido"           | 400 Bad Request           |
-| Error de conexión a DB                      | Mensaje: "Error interno, reintente más tarde"                     | 500 Internal Server Error |
+| `id` del pago no existe                     | `{ "error": "El pago indicado no existe" }`                             | 404 Not Found             |
+| Baja ya aplicada (`deletedAt != null`)      | `{ "error": "El pago ya se encuentra cancelado" }`                      | 409 Conflict              |
+| `status` actual es `Canceled` sin coherencia de datos | `{ "error": "El pago ya se encuentra cancelado" }`               | 409 Conflict              |
+| `status` es `Paid` (anulación no permitida)| `{ "error": "No se puede cancelar un pago ya confirmado como pagado" }` | 422 Unprocessable Entity  |
+| `id` con formato inválido (no UUID)         | `{ "error": "El identificador proporcionado no es válido" }`           | 400 Bad Request           |
+| Error de conexión a DB                      | `{ "error": "Error interno, reintente más tarde" }`                     | 500 Internal Server Error |
 
 ## Plan de Implementación
 
