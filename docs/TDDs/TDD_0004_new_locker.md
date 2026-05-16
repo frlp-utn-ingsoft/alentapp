@@ -69,7 +69,7 @@ Eliminar el registro manual de los lockers del club en planillas de papel, permi
   - Caso de Uso
     - `CreateLockerUseCase`
   - Puertos
-    - `LockerRepository`
+    - `ILockerRepository`
       - `create(locker)`
       - `findByNumber(number)`
   - DTOs (Van en el Shared ya que los usan tanto en back como el front)
@@ -78,7 +78,8 @@ Eliminar el registro manual de los lockers del club en planillas de papel, permi
 - Infraestructura
   - Adaptadores de Entrada
     - `LockerController`
-    - Rutas registradas en `app.ts` para `POST /api/v1/lockers` (sin `LockerRouter` separado si se mantiene el patron actual del proyecto).
+    - `LockerRouter`
+      - Registra el endpoint `POST /api/v1/lockers`.
   - Adaptadores de Salida
     - `PostgresLockerRepository`
   - Mappers
@@ -102,6 +103,7 @@ Eliminar el registro manual de los lockers del club en planillas de papel, permi
 ## Plan de Implementación
 
 1. Definir esquema de persistencia y correr migración.
-2. Crear tipos en `@alentapp/shared` y puerto `LockerRepository` en el Dominio.
+2. Crear tipos en `@alentapp/shared` y puerto `ILockerRepository` en el Dominio.
 3. Implementar el repositorio y el caso de uso `CreateLocker`.
-4. Crear formulario en React y conectar con el endpoint del backend.
+4. Crear el endpoint `POST /api/v1/lockers` en el `LockerController`, registrarlo en `LockerRouter` y montar el router en `app.ts` si aún no está montado.
+5. Crear formulario en React y conectar con el endpoint del backend.

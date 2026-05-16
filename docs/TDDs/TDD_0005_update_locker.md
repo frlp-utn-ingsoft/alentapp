@@ -74,11 +74,11 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
   - Caso de Uso
     - `UpdateLockerUseCase`
   - Puertos
-    - `LockerRepository`
+    - `ILockerRepository`
       - `findById(id)`
       - `findByNumber(number)`
       - `update(id, data)`
-    - `MemberRepository`
+    - `IMemberRepository`
       - `findById(memberId)` para validar que el socio exista cuando se asigna un locker.
   - DTOs (Van en el Shared ya que los usan tanto en back como el front)
     - `UpdateLockerRequest`
@@ -86,7 +86,8 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
 - Infraestructura
   - Adaptadores de Entrada
     - `LockerController`
-    - Rutas registradas en `app.ts` para `PUT /api/v1/lockers/:id` (sin `LockerRouter` separado si se mantiene el patron actual del proyecto).
+    - `LockerRouter`
+      - Registra el endpoint `PUT /api/v1/lockers/:id`.
   - Adaptadores de Salida
     - `PostgresLockerRepository`
   - Mappers
@@ -118,7 +119,7 @@ Se utilizará el paquete compartido para definir el cuerpo de la petición. Todo
 ## Plan de Implementación
 
 1. Actualizar las interfaces en el paquete `@alentapp/shared` agregando `UpdateLockerRequest`.
-2. Ampliar el `LockerRepository` con el método `update`.
+2. Ampliar el `ILockerRepository` con el método `update`.
 3. Implementar la lógica en `UpdateLockerUseCase` utilizando el `LockerValidator` centralizado.
-4. Crear la ruta `PUT /api/v1/lockers/:id` en el controlador y enlazarla a la aplicación.
+4. Crear la ruta `PUT /api/v1/lockers/:id` en el `LockerController`, registrarla en `LockerRouter` y montar el router en `app.ts` si aún no está montado.
 5. Consumir el endpoint desde el frontend y reutilizar el modal de creación para permitir la edición.

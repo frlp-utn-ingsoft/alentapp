@@ -57,7 +57,7 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
   - Caso de Uso
     - `DeleteLockerUseCase`
   - Puertos
-    - `LockerRepository`
+    - `ILockerRepository`
       - `findById(id)`
       - `delete(id)`
   - DTOs (Van en el Shared ya que los usan tanto en back como el front)
@@ -66,7 +66,8 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 - Infraestructura
   - Adaptadores de Entrada
     - `LockerController`
-    - Rutas registradas en `app.ts` para `DELETE /api/v1/lockers/:id` (sin `LockerRouter` separado si se mantiene el patron actual del proyecto).
+    - `LockerRouter`
+      - Registra el endpoint `DELETE /api/v1/lockers/:id`.
   - Adaptadores de Salida
     - `PostgresLockerRepository`
   - Mappers
@@ -89,8 +90,8 @@ Al tratarse de una operación destructiva que solo requiere conocer el identific
 
 ## Plan de Implementación
 
-1. Ampliar el `LockerRepository` y `PostgresLockerRepository` con el método `delete`.
+1. Ampliar el `ILockerRepository` y `PostgresLockerRepository` con el método `delete`.
 2. Crear la lógica de negocio en `DeleteLockerUseCase`.
-3. Crear el endpoint `DELETE /api/v1/lockers/:id` en el `LockerController` y registrarlo en `app.ts`.
+3. Crear el endpoint `DELETE /api/v1/lockers/:id` en el `LockerController`, registrarlo en `LockerRouter` y montar el router en `app.ts` si aún no está montado.
 4. Añadir el método `delete` al servicio Frontend (`lockers.ts`).
 5. Enlazar el botón de eliminación en `LockersView.tsx` agregando la confirmación del navegador (`window.confirm`) antes de hacer la llamada.

@@ -73,7 +73,7 @@ type LockerResponse = {
     - `GetLockersUseCase`
     - `GetLockerByIdUseCase`
   - Puertos
-    - `LockerRepository`
+    - `ILockerRepository`
       - `findAll()`
       - `findById(id)`
   - DTOs (Van en el Shared ya que los usan tanto en back como el front)
@@ -82,7 +82,8 @@ type LockerResponse = {
 - Infraestructura
   - Adaptadores de Entrada
     - `LockerController`
-    - Rutas registradas en `app.ts` para `GET /api/v1/lockers` y `GET /api/v1/lockers/:id` (sin `LockerRouter` separado si se mantiene el patron actual del proyecto).
+    - `LockerRouter`
+      - Registra los endpoints `GET /api/v1/lockers` y `GET /api/v1/lockers/:id`.
   - Adaptadores de Salida
     - `PostgresLockerRepository`
   - Mappers
@@ -106,8 +107,8 @@ type LockerResponse = {
 
 ## Plan de Implementación
 
-1. Ampliar el `LockerRepository` y `PostgresLockerRepository` con los métodos `findAll` y `findById`.
+1. Ampliar el `ILockerRepository` y `PostgresLockerRepository` con los métodos `findAll` y `findById`.
 2. Crear la lógica de los casos de uso `GetLockersUseCase` y `GetLockerByIdUseCase`.
-3. Crear los endpoints `GET /api/v1/lockers` y `GET /api/v1/lockers/:id` en el `LockerController` y registrarlos en `app.ts`.
+3. Crear los endpoints `GET /api/v1/lockers` y `GET /api/v1/lockers/:id` en el `LockerController` y registrarlos en `LockerRouter`.
 4. Añadir los métodos `getAll` y `getById` al servicio Frontend (`lockers.ts`).
 5. Conectar la tabla principal en `LockersView.tsx` para que consuma `getAll` al montarse y al refrescar después de cada operación de ABM.
