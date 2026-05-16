@@ -8,7 +8,7 @@ titulo: Actualización de Deportes Existentes
 
 # TDD-0013: Actualización de Deportes Existentes
 
-## 1. Contexto de Negocio (PRD)
+## 1. Contexto de Negocio
 
 ### 1.1 Objetivo
 
@@ -16,8 +16,8 @@ Permitir que un administrativo actualice los datos editables de un deporte exist
 
 ### 1.2 User Persona
 
-- **Rol:** Administrador.
-- **Necesidad:** Actualizar la configuración de un deporte cuando cambian sus condiciones, sin alterar el nombre del deporte.
+* **Rol**: Administrador.
+* **Necesidad**: Actualizar la configuración de un deporte cuando cambian sus condiciones, sin alterar el nombre del deporte.
 
 ### 1.3 Criterios de Aceptación
 
@@ -29,26 +29,26 @@ Permitir que un administrativo actualice los datos editables de un deporte exist
     - Escenario de fallo: "Si el usuario intenta asignar un precio adicional negativo, el sistema debe bloquear la acción y notificar que el precio adicional no puede ser negativo".
     - Escenario de fallo: "Si el usuario intenta modificar un deporte inexistente, el sistema debe responder indicando el error y cancelar la operación".
 
-## 2. Diseño Técnico (RFC)
+## 2. Diseño Técnico
 
 ### 2.1 Modelo de Dominio 
 
 La entidad de dominio `Sport` mantiene los mismos campos definidos para el alta. En esta funcionalidad no se permite modificar `name`. El campo `deleted_at` tampoco se modifica desde este endpoint, ya que su cambio corresponde al caso de uso de baja lógica.
 
-- `id`: Identificador único universal (UUID).
-- `name`: Cadena de texto obligatoria e inmutable.
-- `description`: Cadena de texto obligatoria y editable.
-- `max_capacity`: Número entero obligatorio y editable. Debe ser mayor a cero.
-- `additional_price`: Número decimal obligatorio. No puede ser negativo.
-- `requires_medical_certificate`: Booleano obligatorio.
-- `deleted_at`: Fecha de baja lógica, opcional. Si es `null`, el deporte se considera activo dentro del catálogo.
+* `id`: Identificador único universal (UUID).
+* `name`: Cadena de texto obligatoria e inmutable.
+* `description`: Cadena de texto obligatoria y editable.
+* `max_capacity`: Número entero obligatorio y editable. Debe ser mayor a cero.
+* `additional_price`: Número decimal obligatorio. No puede ser negativo.
+* `requires_medical_certificate`: Booleano obligatorio.
+* `deleted_at`: Fecha de baja lógica, opcional. Si es `null`, el deporte se considera activo dentro del catálogo.
 
 ### 2.2 Contrato de API (@alentapp/shared)
 
-Se utilizará el paquete compartido `@alentapp/shared` para definir una actualización parcial. Aunque el endpoint utiliza `PUT`, solo se modificarán los campos enviados en el request. 
+Se utilizará el paquete compartido `@alentapp/shared` para definir una actualización parcial.
 
-- **Endpoint:** `PUT /api/v1/sports/:id`
-- **Request Body (UpdateSportRequest):**
+* **Endpoint**: `PATCH /api/v1/sports/:id`
+* **Request Body (UpdateSportRequest)**:
 
 ```ts
 {
@@ -57,6 +57,25 @@ Se utilizará el paquete compartido `@alentapp/shared` para definir una actualiz
     additional_price?: number;
     requires_medical_certificate?: boolean;
 }
+```
+
+* **Response (Success)**: `200 OK`
+* **Response Body**: `SportResponseDTO`
+
+```ts
+type SportResponseDTO = {
+  id: string;
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+  deleted_at: string | null; // ISO DateTime
+};
+
+type ErrorResponse = {
+  message: string;
+};
 ```
 
 ### 2.3 Esquema de Persistencia
@@ -79,9 +98,9 @@ model Sport {
 
 ### 3.1 Componentes de Arquitectura Hexagonal
 
-1. **Puerto (Domain):** `SportRepository`, con métodos como `findById(id)` y `update(id, data)`.
-2. **Adaptador de Entrada (Delivery):** `SportController`, encargado de recibir el `id` de la URL y el body de la petición, delegando al caso de uso.
-3. **Adaptador de Salida (Infrastructure):** `PostgresSportRepository`, implementa los métodos `findById` y `update`.
+1. **Puerto (Domain)**: `SportRepository`, con métodos como `findById(id)` y `update(id, data)`.
+2. **Adaptador de Entrada (Delivery)**: `SportController`, encargado de recibir el `id` de la URL y el body de la petición, delegando al caso de uso.
+3. **Adaptador de Salida (Infrastructure)**: `PostgresSportRepository`, implementa los métodos `findById` y `update`.
 
 ### 3.2 Lógica del Caso de Uso
 
@@ -102,7 +121,7 @@ model Sport {
 ## 4. Casos de Borde y Errores
 
 | Escenario | Resultado Esperado | Código HTTP |
-| --------- | ------------------ | ----------- |
+| :--- | :--- | :--- |
 | Deporte inexistente | "El deporte no existe" | 404 Not Found |
 | Intento de modificar `name` | "El nombre del deporte no puede modificarse después de la creación" | 400 Bad Request |
 | Intento de modificar `deleted_at` desde este endpoint | "La baja del deporte solo puede modificarse mediante la operación correspondiente" | 400 Bad Request |
@@ -118,12 +137,13 @@ model Sport {
 2. Ampliar el puerto `SportRepository` con los métodos necesarios para consultar y actualizar deportes.
 3. Implementar el caso de uso `UpdateSportUseCase`, validando existencia del deporte, inmutabilidad de `name`, restricción de modificación de `deleted_at`, `max_capacity` y `additional_price`.
 4. Implementar la actualización en `PostgresSportRepository`.
-5. Crear la ruta `PUT /api/v1/sports/:id` en `SportController`.
+5. Implementar el endpoint `PATCH /api/v1/sports/:id` en `SportController`.
 6. Conectar el formulario de edición con el endpoint del backend.
 7. Agregar tests para los escenarios principales de éxito y error. 
 
 ## 6. Observaciones Adicionales
 
 * No se permite modificar el `name` desde este endpoint, ya que identifica funcionalmente al deporte dentro del catálogo.
-* El campo `deleted_at` no se modifica desde este endpoint general de actualización. Su modificación corresponde al caso de uso de baja lógica.
+* La actualización debe ser parcial: solo los campos enviados en el body deben modificarse.
+* El campo `deleted_at` no puede modificarse manualmente por API desde este endpoint; es un efecto de la operación de baja lógica.
 * Se decidió permitir la modificación de todos los campos de `Sport` excepto `name`, ya que `name` funciona como identificador funcional del deporte y debe mantenerse estable después de la creación. Los demás campos representan condiciones administrativas de la actividad y pueden requerir correcciones o actualizaciones sin alterar la identidad del deporte.  
