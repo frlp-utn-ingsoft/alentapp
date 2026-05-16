@@ -84,3 +84,23 @@ export interface UpdateLockerRequest {
   status?: LockerStatus;
   member_id?: string | null;
 }
+
+// ==========================================
+// Sport
+// ==========================================
+export interface SportDTO {
+  id: string;
+  name: string;
+  description: string;
+  maxCapacity: number;
+  additionalPrice: number;
+  requiresMedicalCertificate: boolean;
+}
+
+export interface CreateSportRequest {
+  name: string;
+  description: string;
+  maxCapacity: number;
+  additionalPrice: number;
+  requiresMedicalCertificate: boolean;
+}
