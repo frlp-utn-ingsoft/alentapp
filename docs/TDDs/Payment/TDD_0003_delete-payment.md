@@ -34,7 +34,7 @@ Anular una obligación financiera existente sin eliminar físicamente el registr
 
 ### Contrato de API (@alentapp/shared)
 
-* **Endpoint**: `PATCH /api/v1/payments/:id/cancel`
+* **Endpoint**: `DELETE /api/v1/payments/:id`
 * **Request Body**: `None`
 * **Response**: `200 OK`
 
