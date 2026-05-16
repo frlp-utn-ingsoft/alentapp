@@ -64,29 +64,42 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 
 ### Componentes de Arquitectura Hexagonal
 
-- **Domain**: Entidad `Sport`. Value Object `MaxCapacity` que encapsula la validación de capacidad > 0. Regla de negocio: `name` es inmutable (se valida al construir la entidad, no se expone setter).
-- **Application**: Caso de Uso `CreateSportUseCase`. Puerto de salida `ISportRepository` con método `create(sport: Sport): Promise<Sport>` y `findByName(name: string): Promise<Sport | null>`.
-- **Infrastructure**: Controlador Fastify `SportController` (ruta POST). Implementación del repositorio `PrismaSportRepository`.
+- **Domain**:
+  - Entidad `Sport`.
+  - Value Object `MaxCapacity` (en Shared) que encapsula la validación de capacidad > 0.
+  - Regla de negocio: `name` es inmutable (se valida al construir la entidad, no se expone setter).
+- **Application**:
+  - Caso de Uso `CreateSportUseCase`.
+  - Puerto de salida `ISportRepository` con métodos `create(sport: Sport): Promise<Sport>` y `findByName(name: string): Promise<Sport | null>`.
+  - DTOs en Shared: `CreateSportRequest` y `SportResponse`.
+- **Infrastructure**:
+  - `SportController`: recibe el request HTTP y lo delega al caso de uso.
+  - `SportRouter`: registra la ruta `POST /api/v1/sports` y la conecta al controlador.
+  - `PrismaSportRepository`: implementación del puerto `ISportRepository`.
+  - `SportPersistenceMapper`: convierte entre la entidad de dominio `Sport` y el modelo de Prisma (`toPersistence`, `toDomain`).
+  - `SportDTOMapper`: convierte la entidad de dominio a `SportResponse` (`toDTO`).
 
 ## Casos de Borde y Errores
 
 | Escenario                        | Resultado Esperado                                      | Código HTTP       |
 |------------------------------------------|---------------------------------------------------------|-------------------|
 | `name` ya registrado                     | Mensaje: "El deporte ya existe"                         | 409 Conflict      |
-| `max_capacity` es 0 o negativo           | Mensaje: "La capacidad maxima debe ser mayor a cero"    | 400 Bad Request   |
-| `max_capacity` no es entero              | Mensaje: "La capacidad maxima debe ser un numero entero"| 400 Bad Request   |
+| `max_capacity` es 0 o negativo           | Mensaje: "La capacidad máxima debe ser mayor a cero"    | 400 Bad Request   |
+| `max_capacity` no es entero              | Mensaje: "La capacidad máxima debe ser un numero entero"| 400 Bad Request   |
 | `additional_price` no puede ser negativo | Mensaje: "El precio adicional no puede ser negativo" | 400 Bad Request   |
 | `name` ausente en el body                | Mensaje: "El nombre del deporte es obligatorio"         | 400 Bad Request   |
 | Body vacío                               | Error de validación: campos requeridos faltantes        | 400 Bad Request   |
 
 ## Plan de Implementación
-1. Definir tipos `CreateSportDto` y `SportResponseDto` en `@alentapp/shared`.
-2. Implementar el Value Object `MaxCapacity` en el Domain con su validación.
+1. Definir tipos `CreateSportRequest` y `SportResponse` en Shared (`@alentapp/shared`).
+2. Implementar el Value Object `MaxCapacity` en Shared con su validación.
 3. Implementar la entidad `Sport` en el Domain.
 4. Definir el puerto `ISportRepository` en Application.
 5. Implementar `CreateSportUseCase` en Application (validar unicidad de nombre, construir entidad, persistir).
-6. Implementar `PrismaSportRepository` en Infrastructure.
-7. Implementar el controlador Fastify para la ruta `POST /api/v1/sports`.
-8. Registrar la ruta en el servidor Fastify.
-9. Escribir tests unitarios para el caso de uso y el Value Object.
-10. Escribir tests de integración para el endpoint.
+6. Implementar `SportPersistenceMapper` con los métodos `toPersistence` y `toDomain`.
+7. Implementar `SportDTOMapper` con el método `toDTO`.
+8. Implementar `PrismaSportRepository` en Infrastructure.
+9. Implementar `SportController` en Infrastructure.
+10. Implementar `SportRouter` y registrarlo en la aplicación.
+11. Escribir tests unitarios para el caso de uso y el Value Object.
+12. Escribir tests de integración para el endpoint.

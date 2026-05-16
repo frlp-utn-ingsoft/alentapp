@@ -67,9 +67,18 @@ Array<{
 
 ### Componentes de Arquitectura Hexagonal
 
-- **Domain**: Entidad `Sport` (ya definida). Sin lógica de negocio adicional para consultas.
-- **Application**: Casos de uso `GetAllSportsUseCase` y `GetSportByIdUseCase`. Puerto de salida `ISportRepository` con métodos `findAll(filters?: SportFilters): Promise<Sport[]>` y `findById(id: string): Promise<Sport | null>`.
-- **Infrastructure**: Controlador Fastify `SportController` (rutas GET). Implementación en `PrismaSportRepository`.
+- **Domain**:
+  - Entidad `Sport` (ya definida). Sin lógica de negocio adicional para consultas.
+- **Application**:
+  - Casos de uso `GetAllSportsUseCase` y `GetSportByIdUseCase`.
+  - Puerto de salida `ISportRepository` con métodos `findAll(filters?: SportFilters): Promise<Sport[]>` y `findById(id: string): Promise<Sport | null>`.
+  - DTOs en Shared: `SportResponse` y `SportFilters`.
+- **Infrastructure**:
+  - `SportController`: recibe los requests HTTP y los delega a los casos de uso correspondientes.
+  - `SportRouter`: registra las rutas `GET /api/v1/sports` y `GET /api/v1/sports/:id` y las conecta al controlador.
+  - `PrismaSportRepository`: implementación del puerto `ISportRepository`.
+  - `SportPersistenceMapper`: convierte entre la entidad de dominio `Sport` y el modelo de Prisma (`toPersistence`, `toDomain`).
+  - `SportDTOMapper`: convierte la entidad de dominio a `SportResponse` (`toDTO`).
 
 ## Casos de Borde y Errores
 
@@ -82,10 +91,13 @@ Array<{
 | Listado con múltiples deportes                | Retorna el array completo con todos los deportes       | 200 OK            |
 
 ## Plan de Implementación
-1. Definir tipo `SportResponseDto` y `SportFilters` en `@alentapp/shared` (si no existen aún).
+1. Definir tipos `SportResponse` y `SportFilters` en Shared (`@alentapp/shared`).
 2. Añadir métodos `findAll` y `findById` al puerto `ISportRepository` en Application.
 3. Implementar `GetAllSportsUseCase` y `GetSportByIdUseCase` en Application.
-4. Implementar los métodos de lectura en `PrismaSportRepository` en Infrastructure.
-5. Implementar las rutas `GET /api/v1/sports` y `GET /api/v1/sports/:id` en el controlador Fastify.
-6. Escribir tests unitarios para ambos casos de uso.
-7. Escribir tests de integración para ambos endpoints.
+4. Implementar `SportPersistenceMapper` con los métodos `toPersistence` y `toDomain`.
+5. Implementar `SportDTOMapper` con el método `toDTO`.
+6. Implementar los métodos de lectura en `PrismaSportRepository` en Infrastructure.
+7. Implementar `SportController` en Infrastructure.
+8. Implementar `SportRouter` y registrarlo en la aplicación.
+9. Escribir tests unitarios para ambos casos de uso.
+10. Escribir tests de integración para ambos endpoints.
