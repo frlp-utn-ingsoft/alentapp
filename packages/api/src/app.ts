@@ -121,7 +121,8 @@ export function buildApp() {
     //Medical Certificate Endpoints
     server.post('/api/v1/medicalcertificate',medicalCertificateController.create.bind(medicalCertificateController));
     server.delete('/api/v1/medicalcertificate/:id', medicalCertificateController.delete.bind(medicalCertificateController));
-    
+    server.put('/api/v1/medicalcertificate/:id', medicalCertificateController.update.bind(medicalCertificateController));
+
     //Payments Endpoints
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));

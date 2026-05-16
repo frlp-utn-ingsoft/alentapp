@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { MedicalCertificateRepository } from '../domain/MedicalCertificateRepository.js';
-import {CreateMedicalCertificateRequest, MedicalCertificateDTO,} from '@alentapp/shared';
+import {CreateMedicalCertificateRequest, MedicalCertificateDTO, UpdateMedicalCertificateRequest} from '@alentapp/shared';
 
 type DBMedicalCertificate = {
   id: string;
@@ -28,6 +28,28 @@ export class PostgresMedicalCertificateRepository
 
     return certificate ? this.mapToDTO(certificate) : null;
   }
+
+  async update(
+    id: string,
+    data: UpdateMedicalCertificateRequest,
+  ): Promise<MedicalCertificateDTO> {
+  const certificate = await this.getPrisma().medicalCertificate.update({
+    where: { id },
+    data: {
+      ...(data.issue_date !== undefined && {
+        issue_date: new Date(data.issue_date),
+      }),
+      ...(data.expiry_date !== undefined && {
+        expiry_date: new Date(data.expiry_date),
+      }),
+      ...(data.doctor_license !== undefined && {
+        doctor_license: data.doctor_license,
+      }),
+    },
+  });
+
+  return this.mapToDTO(certificate);
+}
 
   async delete(id: string): Promise<void> {
     //hard delete
