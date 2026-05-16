@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { LuPlus, LuPencil, LuTrash2, LuRefreshCw } from 'react-icons/lu';
 import { useEffect, useState, ChangeEvent } from 'react';
-import { paymentService } from '../services/payments';
+import { paymentsService } from '../services/payments';
 import type { PaymentDTO, CreatePaymentRequest } from '@alentapp/shared';
 import {
     DialogRoot,
@@ -77,7 +77,7 @@ export function PaymentsView() {
         setIsLoading(true);
         setError(null);
         try {
-            const data = await paymentService.getAll();
+            const data = await paymentsService.getAll();
             setPayments(data);
         } catch (err: any) {
             setError(err.message || 'Error al cargar los pagos');
@@ -102,7 +102,7 @@ export function PaymentsView() {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await paymentService.create(formData as CreatePaymentRequest);
+            await paymentsService.create(formData as CreatePaymentRequest);
             setIsDialogOpen(false);
             fetchPayments(); // Refresh the list
         } catch (err: any) {
