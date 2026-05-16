@@ -7,6 +7,10 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './infrastructure/delivery/MemberController.js';
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
+import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
+import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
+import { PaymentController } from './infrastructure/delivery/PaymentController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -47,6 +51,14 @@ export function buildApp() {
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
+    const paymentRepo = new PostgresPaymentRepository();
+    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, memberRepo);
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
+    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase);
+
+    server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
+    server.post('/api/v1/payments', paymentController.create.bind(paymentController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
