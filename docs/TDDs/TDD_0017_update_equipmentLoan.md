@@ -24,7 +24,7 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 - El sistema debe permitir cambiar el estado de `Prestado` a `Devuelto` o `Dañado` para finalizar el préstamo
 - Si un prestamo ya se encuentra finalizado (`Devuelto` o `Dañado`), el sistema debe permitir alternar entre estos para corregir errores de carga manual
 - El sistema no debe permitir que un prestamo con estado `Devuelto` o `Dañado` vuelva al estado inicial `Prestado` para prevenir inconsistencias en los datos de la entidad. Si un socio quiere el material nuevamente se debe generar un nuevo prestamo.
-- Una vez que el préstamo pasa a un estado final (`Devuelto` o `Dañado`), el sistema debe bloquear la edición de los campos `item_name` y `due_date`. Solo se permitirá modificar el campo `status` para correcciones.
+- Una vez que el préstamo pasa a un estado final (`Devuelto` o `Dañado`), el sistema debe bloquear la edición de los campos `itemName` y `dueDate`. Solo se permitirá modificar el campo `status` para correcciones.
 - Al finalizar, el sistema debe mostrar un mensaje de exito y retornar los datos actualizados
 
 ## Diseño Técnico (RFC)
@@ -36,9 +36,24 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 
 ```tsx
 {
-    item_name?: string;
-    due_date?: string;
+    itemName?: string;
+    dueDate?: string;
     status?: 'Prestado' | 'Devuelto' | 'Dañado';
+}
+```
+
+- **Response 200 OK**:
+
+```tsx
+{
+"data": {
+        "id": "123",
+        "itemName": "Pelota de Fútbol N5 (Actualizado)",
+        "dueDate": "2026-05-25T18:00:00Z",
+        "memberId": "mem-123",
+        "status": "Devuelto",
+        "loanDate": "2026-05-16T15:30:00Z"
+    } 
 }
 ```
 
@@ -46,7 +61,7 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 
 - **Domain**:
     - La estructura de la entidad `EquipmentLoan` y el Value Object `EquipmentLoanStatus` son idénticos a los definidos en el documento base de creación
-    - Reglas de Negocio(Transicion de estados): Solo permitir cambiar el estado de `Prestado` a `Devuelto` o `Dañado`y transicionar entre estos ultimos dos. Bloquear el retorno a `Prestado` y congelar la edición de los campos `item_name` y `due_date` si el préstamo ya está finalizado(`Devuelto` o `Dañado`)."
+    - Reglas de Negocio(Transicion de estados): Solo permitir cambiar el estado de `Prestado` a `Devuelto` o `Dañado`y transicionar entre estos ultimos dos. Bloquear el retorno a `Prestado` y congelar la edición de los campos `itemName` y `dueDate` si el préstamo ya está finalizado(`Devuelto` o `Dañado`)."
 - **Application**:
     - Caso de Uso: `UpdateEquipmentLoanUseCase` (Busca el prestamo existente, llama a `EquipmentLoan` para que aplique sus reglas de transicion de estados, bloquea los campos correspondientes si es necesario y persiste la entidad modificada utilizando `IEquipmentLoanRepository`)
     - Puertos de Salida: `IEquipmentLoanRepository` (Interface de dominio, de la cual necesitamos el metodo `findById()` y `update()`)
@@ -59,13 +74,13 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
 ## Casos de Borde y Errores
 
 | **Escenario** | **Resultado Esperado** | **Código HTTP** |
-| --- | --- | --- |
-| **Préstamo inexistente o eliminado** | Mensaje: "El préstamo que intenta actualizar no existe en el sistema." | 404 Not Found |
-| **Regresión de estado prohibida** | Mensaje: "No se puede cambiar el estado a '`Prestado`' si el préstamo ya fue finalizado." | 409 Conflict |
-| **Edición de histórico bloqueada** | Mensaje: "No se pueden modificar datos (item_name, due_date) de un préstamo ya cerrado." | 409 Conflict |
-| **Nueva fecha en el pasado** | Mensaje: "La nueva fecha de devolución debe ser posterior a la fecha actual." | 400 Bad Request |
-| **Formato de ID inválido** | Mensaje: "El parámetro ID de la URL no tiene un formato válido." | 400 Bad Request |
-| **Error de conexión a DB** | Mensaje: "Error interno del servidor, reintente más tarde." | 500 Internal Server Error |
+| :--- | :--- | :--- |
+| **Préstamo inexistente o eliminado** | `{ "error": "El préstamo que intenta actualizar no existe en el sistema." }` | 404 Not Found |
+| **Regresión de estado prohibida** | `{ "error": "No se puede cambiar el estado a 'Prestado' si el préstamo ya fue finalizado." }` | 409 Conflict |
+| **Edición de histórico bloqueada** | `{ "error": "No se pueden modificar datos (itemName, dueDate) de un préstamo ya cerrado." }` | 409 Conflict |
+| **Nueva fecha en el pasado** | `{ "error": "La nueva fecha de devolución debe ser posterior a la fecha actual." }` | 400 Bad Request |
+| **Formato de ID inválido** | `{ "error": "El parámetro ID de la URL no tiene un formato válido." }` | 400 Bad Request |
+| **Error de conexión a DB** | `{ "error": "Error interno del servidor, reintente más tarde." }` | 500 Internal Server Error |
 
 ## Plan de Implementación
 
@@ -101,4 +116,4 @@ Permitir la actualizacion de los detalles del prestamo de equipamiento para que 
    - Implementar en el `DB persistence adapter` la lógica para buscar por ID y realizar el `UPDATE` real en la base de datos.
    - Asegurar que el `EquipmentLoanPersistenceMapper` procese correctamente los cambios de estado y fechas.
 6. **Adaptadores de Entrada**:
-   - Implementar en `EquipmentLoanController` el método vinculado a `PUT /api/v1/equipment-loans/:id`.
+   - Implementar en `EquipmentLoanController` el método vinculado a `PATCH /api/v1/equipment-loans/:id`.
