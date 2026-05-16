@@ -28,6 +28,10 @@ import { MedicalCertificateValidator } from './domain/services/MedicalCertificat
 import { PaymentController } from './delivery/PaymentController.js';
 import { DeletePaymentUseCase } from './application/Payment/DeletePaymentUseCase.js';
 import { UpdatePaymentUseCase } from './application/Payment/UpdatePaymentUseCase.js';
+import { PostgresLockerRepository } from './infrastructure/PostgresLockerRepository.js';
+import { LockerValidator } from './domain/services/LockerValidator.js';
+import { CreateLockerUseCase } from './application/Locker/NewLockerUseCase.js';
+import { LockerController } from './delivery/LockerController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -112,6 +116,12 @@ export function buildApp() {
     const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
     const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase, updatePaymentUseCase , deletePaymentUseCase);
 
+    // locker
+    const lockerRepo = new PostgresLockerRepository();
+    const lockerValidator = new LockerValidator(lockerRepo);
+    const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
+    const lockerController = new LockerController(createLockerUseCase);
+
     //Endpoints
 
     //Member Endpoints
@@ -136,6 +146,9 @@ export function buildApp() {
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
     server.delete('/api/v1/payments/:id', paymentController.cancel.bind(paymentController)); 
     server.patch('/api/v1/payments/:id', paymentController.update.bind(paymentController));
+
+    //Lockers Endpoints
+    server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
 
 
     server.get('/', async (req, rep) => {
