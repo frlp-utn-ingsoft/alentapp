@@ -5,11 +5,15 @@ import { membersService } from '../services/members';
 export function useMemberSearch(onSelectMember: (member: MemberDTO) => void) {
     const [memberSearch, setMemberSearch] = useState('');
     const [memberResults, setMemberResults] = useState<MemberDTO[]>([]);
-    const [selectedMember, setSelectedMember] = useState<MemberDTO | null>(null);
+    const [selectedMember, setSelectedMember] = useState<MemberDTO | null>(
+        null,
+    );
     const [isSearchingMembers, setIsSearchingMembers] = useState(false);
 
     const memberSearchRef = useRef<HTMLDivElement | null>(null);
-
+    const setMemberSearchValue = (value: string) => {
+        setMemberSearch(value);
+    };
     const searchMembers = async (query: string) => {
         setMemberSearch(query);
         setSelectedMember(null);
@@ -71,5 +75,6 @@ export function useMemberSearch(onSelectMember: (member: MemberDTO) => void) {
         searchMembers,
         handleSelectMember,
         resetMemberSearch,
+        setMemberSearchValue,
     };
 }

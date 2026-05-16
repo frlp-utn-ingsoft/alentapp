@@ -26,6 +26,7 @@ import { UpdateMedicalCertificateUseCase } from './application/MedicalCertificat
 import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
 
 import { PaymentController } from './delivery/PaymentController.js';
+import { DeletePaymentUseCase } from './application/Payment/DeletePaymentUseCase.js';
 import { UpdatePaymentUseCase } from './application/Payment/UpdatePaymentUseCase.js';
 
 export function buildApp() {
@@ -43,7 +44,7 @@ export function buildApp() {
 
     server.register(cors, {
         origin: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     });
@@ -107,8 +108,9 @@ export function buildApp() {
     const paymentValidator = new PaymentValidator(paymentRepo);
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, paymentValidator, memberRepo);
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
+    const deletePaymentUseCase = new DeletePaymentUseCase(paymentRepo, paymentValidator);
     const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
-    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase, updatePaymentUseCase);
+    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase, updatePaymentUseCase , deletePaymentUseCase);
 
     //Endpoints
 
@@ -132,6 +134,7 @@ export function buildApp() {
     //Payments Endpoints
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
+    server.delete('/api/v1/payments/:id', paymentController.cancel.bind(paymentController)); 
     server.patch('/api/v1/payments/:id', paymentController.update.bind(paymentController));
 
 

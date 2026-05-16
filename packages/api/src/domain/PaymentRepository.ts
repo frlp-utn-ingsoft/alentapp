@@ -10,5 +10,6 @@ export interface PaymentRepository {
     findByMemberId(member_id: string): Promise<PaymentDTO[]>;
     findAll(): Promise<PaymentDTO[]>;
     findByMemberMonthYear(member_id: string, month: number, year: number): Promise<PaymentDTO | null>;
+    cancel(id: string): Promise<PaymentDTO>;
     update(id: string, status: PaymentStatus, payment_date?: string | null): Promise<PaymentDTO>;
 }
