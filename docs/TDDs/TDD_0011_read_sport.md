@@ -45,9 +45,9 @@ Array<{
   id: string;
   name: string;
   description: string | null;
-  max_capacity: number;
-  additional_price: number | null;
-  requires_medical_certificate: boolean;
+  maxCapacity: number;
+  additionalPrice: number | null;
+  requiresMedicalCertificate: boolean;
 }>
 ```
 
@@ -59,9 +59,9 @@ Array<{
   id: string;
   name: string;
   description: string | null;
-  max_capacity: number;
-  additional_price: number | null;
-  requires_medical_certificate: boolean;
+  maxCapacity: number;
+  additionalPrice: number | null;
+  requiresMedicalCertificate: boolean;
 }
 ```
 
@@ -87,7 +87,7 @@ Array<{
 | No hay deportes registrados (listado vacío)   | Retorna un array vacío `[]`                            | 200 OK            |
 | `id` no corresponde a ningún deporte          | Error con mensaje "Deporte no encontrado"              | 404 Not Found     |
 | `id` con formato inválido (no UUID)           | Error de validación de parámetro                       | 400 Bad Request   |
-| Filtro `requires_medical_certificate=true`    | Retorna sólo los deportes con ese atributo en `true`   | 200 OK            |
+| Filtro `requiresMedicalCertificate=true`    | Retorna sólo los deportes con ese atributo en `true`   | 200 OK            |
 | Listado con múltiples deportes                | Retorna el array completo con todos los deportes       | 200 OK            |
 
 ## Plan de Implementación

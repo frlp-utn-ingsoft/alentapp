@@ -45,9 +45,9 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 {
   name: string;                            // Único
   description?: string;
-  max_capacity: number;                    // Entero > 0
-  additional_price?: number;               // >= 0 si se especifica
-  requires_medical_certificate?: boolean;  // default false
+  maxCapacity: number;                    // Entero > 0
+  additionalPrice?: number;               // >= 0 si se especifica
+  requiresMedicalCertificate?: boolean;  // default false
 }
 ```
 - **Response Body** (201 Created):
@@ -56,9 +56,9 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
   id: string;
   name: string;
   description: string | null;
-  max_capacity: number;
-  additional_price: number | null;
-  requires_medical_certificate: boolean;
+  maxCapacity: number;
+  additionalPrice: number | null;
+  requiresMedicalCertificate: boolean;
 }
 ```
 
@@ -84,9 +84,9 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 | Escenario                        | Resultado Esperado                                      | Código HTTP       |
 |------------------------------------------|---------------------------------------------------------|-------------------|
 | `name` ya registrado                     | Mensaje: "El deporte ya existe"                         | 409 Conflict      |
-| `max_capacity` es 0 o negativo           | Mensaje: "La capacidad máxima debe ser mayor a cero"    | 400 Bad Request   |
-| `max_capacity` no es entero              | Mensaje: "La capacidad máxima debe ser un numero entero"| 400 Bad Request   |
-| `additional_price` no puede ser negativo | Mensaje: "El precio adicional no puede ser negativo" | 400 Bad Request   |
+| `maxCapacity` es 0 o negativo           | Mensaje: "La capacidad máxima debe ser mayor a cero"    | 400 Bad Request   |
+| `maxCapacity` no es entero              | Mensaje: "La capacidad máxima debe ser un numero entero"| 400 Bad Request   |
+| `additionalPrice` no puede ser negativo | Mensaje: "El precio adicional no puede ser negativo" | 400 Bad Request   |
 | `name` ausente en el body                | Mensaje: "El nombre del deporte es obligatorio"         | 400 Bad Request   |
 | Body vacío                               | Error de validación: campos requeridos faltantes        | 400 Bad Request   |
 

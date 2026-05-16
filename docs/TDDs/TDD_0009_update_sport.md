@@ -32,9 +32,9 @@ Sin cambios en el schema. La operación es un `UPDATE` parcial sobre el registro
 
 Campos editables:
 - `description`: String, opcional.
-- `max_capacity`: Int, debe ser > 0.
-- `additional_price`: Float, opcional.
-- `requires_medical_certificate`: Boolean.
+- `maxCapacity`: Int, debe ser > 0.
+- `additionalPrice`: Float, opcional.
+- `requiresMedicalCertificate`: Boolean.
 
 Campo **inmutable** (no editable post-creación):
 - `name`: String.
@@ -46,9 +46,9 @@ Campo **inmutable** (no editable post-creación):
 ```ts
 {
   description?: string;
-  max_capacity?: number;       // Entero > 0 si se especifica
-  additional_price?: number;   // >= 0 si se especifica
-  requires_medical_certificate?: boolean;
+  maxCapacity?: number;       // Entero > 0 si se especifica
+  additionalPrice?: number;   // >= 0 si se especifica
+  requiresMedicalCertificate?: boolean;
 }
 ```
 - **Response Body** (200 OK):
@@ -57,9 +57,9 @@ Campo **inmutable** (no editable post-creación):
   id: string;
   name: string;
   description: string | null;
-  max_capacity: number;
-  additional_price: number | null;
-  requires_medical_certificate: boolean;
+  maxCapacity: number;
+  additionalPrice: number | null;
+  requiresMedicalCertificate: boolean;
 }
 ```
 
@@ -85,8 +85,8 @@ Campo **inmutable** (no editable post-creación):
 |-----------------------------------------|---------------------------------------------------------------|-------------------|
 | `id` no corresponde a ningún deporte    | Mensaje: "Deporte no encontrado"                              | 404 Not Found     |
 | Se intenta modificar `name`             | Mensaje: "El nombre del deporte no puede modificarse"         | 400 Bad Request   |
-| `max_capacity` es 0 o negativo          | Mensaje: "La capacidad máxima debe ser mayor a cero"          | 400 Bad Request   |
-| `additional_price` es negativo           | Mensaje: "El precio adicional debe ser mayor o igual a cero" | 400 Bad Request   |
+| `maxCapacity` es 0 o negativo          | Mensaje: "La capacidad máxima debe ser mayor a cero"          | 400 Bad Request   |
+| `additionalPrice` es negativo           | Mensaje: "El precio adicional debe ser mayor o igual a cero" | 400 Bad Request   |
 | Body vacío (sin campos a actualizar)    | Mensaje: "Se requiere al menos un campo para actualizar"      | 400 Bad Request   |
 | Actualización exitosa                   | Retorna el deporte con los datos actualizados                 | 200 OK            |
 
