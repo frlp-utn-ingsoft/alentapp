@@ -22,6 +22,7 @@ import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepos
 import { CreatePaymentUseCase } from './application/NewPaymentUseCase.js'; 
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
+import { CancelPaymentUseCase } from './application/DeletePaymentUseCase.js'; 
 import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
@@ -73,17 +74,19 @@ export function buildApp() {
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, memberRepo);
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
     const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo);
+    const cancelPaymentUseCase = new CancelPaymentUseCase(paymentRepo);
 
     const paymentController = new PaymentController(
         createPaymentUseCase,
         getPaymentsUseCase,
-        updatePaymentUseCase
+        updatePaymentUseCase,
+        cancelPaymentUseCase
     );
 
-    // Fijate que acá usamos "server", igual que con socios
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
     server.put('/api/v1/payments/:id', paymentController.update.bind(paymentController));
+    server.delete('/api/v1/payments/:id', paymentController.delete.bind(paymentController));
 
     // Ruta de prueba
     // --- Lockers ---
@@ -99,7 +102,9 @@ export function buildApp() {
 
     server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
-    server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));    
+    server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));  
+
+    
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
     });
