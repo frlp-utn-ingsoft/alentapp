@@ -1,3 +1,4 @@
+import { PaymentDTO } from '../../../../shared/index.js';
 import { PaymentRepository } from '../PaymentRepository.js';
 
 export class PaymentValidator {
@@ -44,7 +45,15 @@ export class PaymentValidator {
             throw new Error('La fecha de vencimiento es inválida.');
         }
     }
+    validatePaymentCanBeCanceled(payment: PaymentDTO): void {
+        if (payment.status === 'Cancelado') {
+            throw new Error('El pago ya se encuentra cancelado');
+        }
 
+        if (payment.status === 'Pagado') {
+            throw new Error('No se puede cancelar un pago ya pagado');
+        }
+    }
     async validateUniquePayment(
         member_id: string,
         month: number,
@@ -61,6 +70,13 @@ export class PaymentValidator {
             throw new Error(
                 'Ya existe un pago para este miembro en el mes y año especificados',
             );
+        }
+    }
+    validatePaymentExists(
+        payment: PaymentDTO | null,
+    ): asserts payment is PaymentDTO {
+        if (!payment) {
+            throw new Error('Pago no encontrado');
         }
     }
 
