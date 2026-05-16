@@ -7,7 +7,7 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
-import { InMemorySportRepository } from './infrastructure/InMemorySportRepository.js';
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { InMemoryEnrollmentRepository } from './infrastructure/InMemoryEnrollmentRepository.js';
 import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
@@ -50,7 +50,8 @@ export function buildApp() {
         updateMemberUseCase,
         deleteMemberUseCase
     );
-    const sportRepo = new InMemorySportRepository();
+
+    const sportRepo = new PostgresSportRepository();
     const enrollmentRepo = new InMemoryEnrollmentRepository();
     const sportValidator = new SportValidator(sportRepo);
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);

@@ -38,6 +38,19 @@ model Member {
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
 }
 
+
+model Sport {
+    id                           String   @id @default(uuid())
+    name                         String   @unique
+    description                  String
+    max_capacity                 Int
+    additional_price             Decimal  @db.Decimal(10, 2)
+    requires_medical_certificate Boolean  @default(false)
+    created_at                   DateTime @default(now())
+
+    @@map("sports")
+}
+
 model MedicalCertificate {
   id             String    @id @default(uuid())
   issueDate      DateTime  @default(now())
@@ -50,4 +63,5 @@ model MedicalCertificate {
   member         Member    @relation(fields: [memberId], references: [id])
 
   @@map("medical_certificates")
+
 }
