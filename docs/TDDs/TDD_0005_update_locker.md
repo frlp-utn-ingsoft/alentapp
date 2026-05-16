@@ -1,6 +1,6 @@
 ---
 id: 0005
-estado: Pendiente
+estado: Implementado
 autor: Juan Ignacio Wilt
 fecha: 2026-05-01
 titulo: Modificación de Locker
