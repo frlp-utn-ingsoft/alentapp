@@ -31,7 +31,7 @@ export const paymentsService = {
 
   async update(id:string, data: UpdatePaymentRequest): Promise<PaymentDTO> {
     const response= await fetch(`${API_URL}/payments/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'},
       body: JSON.stringify(data),
