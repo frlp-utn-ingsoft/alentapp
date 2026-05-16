@@ -8,7 +8,7 @@ titulo: Registro de Nuevos Deportes
 
 # TDD-0012: Registro de Nuevos Deportes
 
-## 1. Contexto de Negocio (PRD)
+## 1. Contexto de Negocio
 
 ### 1.1 Objetivo
 
@@ -16,8 +16,8 @@ Permitir que un administrativo registre nuevos deportes en el catálogo del club
 
 ### 1.2 User Persona
 
-- **Rol:** Administrador.
-- **Necesidad:** Cargar nuevos deportes ofrecidos por el club de manera simple y consistente, evitando duplicados y asegurando que cada deporte tenga una capacidad válida. 
+* **Rol**: Administrador.
+* **Necesidad**: Cargar nuevos deportes ofrecidos por el club de manera simple y consistente, evitando duplicados y asegurando que cada deporte tenga una capacidad válida. 
 
 ### 1.3 Criterios de Aceptación
 
@@ -28,26 +28,30 @@ Permitir que un administrativo registre nuevos deportes en el catálogo del club
     - Escenario de fallo: "Si el usuario ingresa un precio adicional negativo, el sistema debe bloquear la acción y notificar que el precio adicional no puede ser negativo".
     - Escenario de fallo: "Si el usuario no completa campos obligatorios, el sistema debe bloquear la acción y notificar que todos los campos requeridos deben estar presentes".
 
-## 2. Diseño Técnico (RFC)
+## 2. Diseño Técnico
 
 ### 2.1 Modelo de Dominio 
 
 Se definirá la entidad `Sport` con las siguientes propiedades y restricciones:
 
-- `id`: Identificador único universal (UUID).
-- `name`: Cadena de texto obligatoria e inmutable luego de la creación. No debe repetirse entre deportes activos. 
-- `description`: Cadena de texto obligatoria.
-- `max_capacity`: Número entero obligatorio. Debe ser mayor a cero.
-- `additional_price`: Número decimal obligatorio. No puede ser negativo.
-- `requires_medical_certificate`: Booleano obligatorio. Indica si para inscribirse al deporte se requiere certificado médico vigente.
-- `deleted_at`: Fecha de baja lógica, opcional. Si es `null`, el deporte se considera activo dentro del catálogo.
+* `id`: Identificador único universal (UUID).
+* `name`: Cadena de texto obligatoria e inmutable luego de la creación. No debe repetirse entre deportes activos. 
+* `description`: Cadena de texto obligatoria.
+* `max_capacity`: Número entero obligatorio. Debe ser mayor a cero.
+* `additional_price`: Número decimal obligatorio. No puede ser negativo.
+* `requires_medical_certificate`: Booleano obligatorio. Indica si para inscribirse al deporte se requiere certificado médico vigente.
+* `deleted_at`: Fecha de baja lógica (opcional). Si es `null`, el deporte se considera activo dentro del catálogo.
+
+Definición operativa:
+
+* Deporte **activo**: `deleted_at = null`.
 
 ### 2.2 Contrato de API (@alentapp/shared)
 
 Se utilizará el paquete compartido `@alentapp/shared` para definir el cuerpo de la petición y mantener sincronizado el contrato entre frontend y backend.
 
-- **Endpoint:** `POST /api/v1/sports`
-- **Request Body (CreateSportRequest):**
+* **Endpoint:** `POST /api/v1/sports`
+* **Request Body (CreateSportRequest):**
 
 ```ts
 {
@@ -57,6 +61,25 @@ Se utilizará el paquete compartido `@alentapp/shared` para definir el cuerpo de
     additional_price: number;
     requires_medical_certificate: boolean;
 }
+```
+
+* **Response (Success)**: `201 Created`
+* **Response Body**: `SportResponseDTO`
+
+```ts
+type SportResponseDTO = {
+  id: string;
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+  deleted_at: string | null; // ISO DateTime
+};
+
+type ErrorResponse = {
+  message: string;
+};
 ```
 
 ### 2.3 Esquema de Persistencia
@@ -77,9 +100,9 @@ model Sport {
 
 ### 3.1 Componentes de Arquitectura Hexagonal
 
-1. **Puerto (Domain):** `SportRepository` con métodos `create(data)` y `findActiveByName(name)`.
-2. **Adaptador de Entrada (Delivery):** `SportController`, encargado de recibir la petición HTTP y llamar al caso de uso correspondiente.
-3. **Adaptador de Salida (Infrastructure):** `PostgresSportRepository`, implementa los métodos `create` y `findActiveByName` usando Prisma.
+1. **Puerto (Domain)**: `SportRepository` con métodos `create(data)` y `findActiveByName(name)`.
+2. **Adaptador de Entrada (Delivery)**: `SportController`, encargado de recibir la petición HTTP y llamar al caso de uso correspondiente.
+3. **Adaptador de Salida (Infrastructure)**: `PostgresSportRepository`, implementa los métodos `create` y `findActiveByName` usando Prisma.
 
 ### 3.2 Lógica del Caso de Uso
 
@@ -98,7 +121,7 @@ model Sport {
 ## 4. Casos de Borde y Errores
 
 | Escenario | Resultado Esperado | Código HTTP |
-| --------- | ------------------ | ----------- |
+| :--- | :--- | :--- |
 | Campos obligatorios faltantes | Mensaje: "Todos los campos obligatorios deben estar presentes" | 400 Bad Request |
 | `max_capacity` menor o igual a cero | Mensaje: "El cupo máximo debe ser mayor a cero" | 400 Bad Request |
 | `additional_price` negativo | Mensaje: "El precio adicional no puede ser negativo" | 400 Bad Request |
