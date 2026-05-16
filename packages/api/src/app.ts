@@ -8,6 +8,16 @@ import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 
+// 💳 IMPORTS DE PAGOS (Agregados para conectar tu nuevo módulo)
+// packages/api/src/app.ts
+
+// ... (dejá los imports de Fastify, cors y miembros como estaban)
+
+// 💳 IMPORTS DE PAGOS CORREGIDOS (Alineados exactamente con tu árbol de archivos de la izquierda)
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js'; 
+import { NewPaymentUseCase } from './application/NewPaymentUseCase.js'; // 👈 Sin la palabra "payments" porque está suelto en application
+import { PaymentController } from './delivery/PaymentController.js';
+
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -28,6 +38,7 @@ export function buildApp() {
         credentials: true,
     });
 
+    // --- INSTANCIACIÓN DE MIEMBROS ---
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
     
@@ -43,10 +54,19 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
+    // --- 💳 INSTANCIACIÓN DE PAGOS (Acoplamos los componentes) ---
+    const paymentRepo = new PostgresPaymentRepository();
+    const newPaymentUseCase = new NewPaymentUseCase(paymentRepo);
+    const paymentController = new PaymentController(newPaymentUseCase);
+
+    // --- ENDPOINTS DE MIEMBROS ---
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
+    // --- 💳 ENDPOINT DE PAGOS (Registrado oficialmente) ---
+    server.post('/api/v1/payments', paymentController.create.bind(paymentController)); // 👈 Clave para matar el 404
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
@@ -55,7 +75,6 @@ export function buildApp() {
     return server;
 }
 
-// Solo iniciar el servidor si el script se ejecuta directamente (no cuando es importado por vitest)
 if (process.argv[1] && process.argv[1].endsWith('app.ts')) {
     const server = buildApp();
     const port = parseInt(process.env.PORT || '3000', 10);

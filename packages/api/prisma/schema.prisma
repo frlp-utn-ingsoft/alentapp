@@ -1,7 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// This is your Prisma schema file
 
 generator client {
     provider = "prisma-client-js"
@@ -25,7 +22,7 @@ enum MemberStatus {
 }
 
 model Member {
-    id         String         @id @default(uuid())
+    id         String         @id @default(uuid()) @db.Uuid // 👈 Le agregamos @db.Uuid
     dni        String         @unique
     name       String
     email      String         @unique
@@ -33,6 +30,25 @@ model Member {
     category   MemberCategory
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
+    
+    // 👈 AGREGAR ESTA LÍNEA: Relación inversa para que Prisma compile feliz
+    payments   Payment[]
 
-    @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+    @@map("members")
+}
+
+model Payment {
+  id           String    @id @default(uuid()) @db.Uuid
+  amount       Float
+  month        Int
+  year         Int
+  status       String    // Valores: "Pending", "Paid", "Canceled"
+  due_date     DateTime  @db.Date
+  payment_date DateTime? @db.Timestamp
+  member_id    String    @db.Uuid
+  
+  // Relación con el modelo Member 
+  member       Member    @relation(fields: [member_id], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }
