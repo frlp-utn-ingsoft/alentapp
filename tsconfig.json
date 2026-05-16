@@ -7,9 +7,12 @@
         "strict": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
+        "types": ["vitest"],
         "paths": {
             "@alentapp/shared": [
-                "../shared/index.ts"
+                "./packages/shared/index.ts"
             ]
         }
     }

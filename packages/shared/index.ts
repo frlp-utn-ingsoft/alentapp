@@ -59,3 +59,8 @@ export interface UpdateSportRequest {
   additional_price?: number;
   requires_medical_certificate?: boolean;
 }
+
+// ==========================
+// = Payments
+// ==========================
+export * from './payment';
