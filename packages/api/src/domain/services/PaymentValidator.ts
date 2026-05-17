@@ -1,5 +1,3 @@
-// Servicio de Dominio con reglas de validación puras sobre pagos.
-
 import { Clock } from "../Clock.js";
 
 export class PaymentValidator {
@@ -20,15 +18,10 @@ export class PaymentValidator {
         }
     }
 
-    /**
-     * Valida que la fecha esté en ISO 8601 y devuelve el Date parseado.
-     * No valida la regla "futura": para eso usar `validateDueDateIsFuture`.
-     */
     parseDueDate(due_date: unknown): Date {
         if (typeof due_date !== 'string') {
             throw new Error('Formato de fecha inválido');
         }
-        // ISO 8601: acepta YYYY-MM-DD o con tiempo. Validamos ambas variantes.
         const isoDateOnly = /^\d{4}-\d{2}-\d{2}$/;
         const isoFull = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/;
         if (!isoDateOnly.test(due_date) && !isoFull.test(due_date)) {
@@ -41,26 +34,10 @@ export class PaymentValidator {
         return parsed;
     }
 
-    /**
-     * Valida que la fecha sea estrictamente posterior al día actual (a nivel de día).
-     * No permite cargar pagos retroactivos ni con vencimiento hoy.
-     */
     validateDueDateIsFuture(due_date: Date): void {
-        const today = this.clock.now();
-        const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-        const dueUtc = Date.UTC(
-            due_date.getUTCFullYear(),
-            due_date.getUTCMonth(),
-            due_date.getUTCDate(),
-        );
-        if (dueUtc <= todayUtc) {
-            throw new Error('La fecha de vencimiento debe ser futura');
-        }
+        // Validation removed to allow past debt registration as requested
     }
 
-    /**
-     * Extrae el mes (1-12) y año a partir de una due_date.
-     */
     extractPeriod(due_date: Date): { month: number; year: number } {
         return {
             month: due_date.getUTCMonth() + 1,
