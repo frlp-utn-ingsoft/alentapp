@@ -23,7 +23,7 @@ Permitir a los administrativos eliminar permanentemente un Locker del sistema. L
 
 - El sistema debe presentar una confirmación explícita antes de proceder con el borrado.
 - El sistema debe validar que el Locker exista antes de intentar eliminarlo.
-- El sistema **no debe permitir** eliminar un Locker cuyo status sea `Occupied` (tiene un socio asignado).
+- El sistema **no debe permitir** eliminar un Locker cuyo status sea `Ocupado` (tiene un socio asignado).
 - Si el borrado es exitoso la tabla de base de datos debe actualizarse.
 
 ## Diseño Técnico (RFC)
@@ -48,8 +48,8 @@ Al tratarse de una operación destructiva que solo requiere el identificador, no
 | Escenario                        | Resultado Esperado                                              | Código HTTP               |
 | -------------------------------- | --------------------------------------------------------------- | ------------------------- |
 | Locker inexistente            | Mensaje: "El Locker no existe"                               | 404 Not Found             |
-| Locker con estado `Occupied` (ocupado)  | Mensaje: "No se puede eliminar un Locker con un socio asignado" | 409 Conflict           |
-| Locker con estado `Maintenance`(en mantenimiento) o  `Available`(disponible)     | Eliminación permitida (no está asignado a ningún socio)         | 204 No Content            |                                           | 204 No Content            |
+| Locker con estado `Ocupado`  | Mensaje: "No se puede eliminar un Locker con un socio asignado" | 409 Conflict           |
+| Locker con estado `Mantenimiento` o `Disponible`     | Eliminación permitida (no está asignado a ningún socio)         | 204 No Content            |
 | Error de conexión a DB           | Mensaje: "Error interno, reintente más tarde"                   | 500 Internal Server Error |
 
 ## Plan de Implementación
@@ -57,7 +57,7 @@ Al tratarse de una operación destructiva que solo requiere el identificador, no
 1. Ampliar el puerto `LockerRepository` y `PostgresLockerRepository` con los métodos necesarios:
 	- `findById(id)`
 	- `delete(id)`
-2. Implementar o ampliar la validación de negocio para asegurar que el Locker exista y que no esté en estado `Occupied`.
+2. Implementar o ampliar la validación de negocio para asegurar que el Locker exista y que no esté en estado `Ocupado`.
 3. Implementar la lógica en `DeleteLockerUseCase` delegando la eliminación solo si las validaciones son correctas.
 4. Crear el endpoint `DELETE /api/v1/lockers/:id` en `LockerController` y mapear errores de negocio a los códigos HTTP correspondientes (`404` y `409`).
 5. Añadir el método `delete` al servicio Frontend de Lockers.

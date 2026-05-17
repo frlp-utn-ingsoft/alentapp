@@ -31,6 +31,12 @@ enum PaymentStatus {
   Cancelado
 }
 
+enum LockerStatus {
+  Disponible
+  Ocupado
+  Mantenimiento
+}
+
 model Member {
   id         String         @id @default(uuid())
   dni        String         @unique
@@ -42,6 +48,7 @@ model Member {
   created_at DateTime       @default(now())
 
   payments            Payment[]
+  lockers             Locker[]
   medicalCertificates MedicalCertificate[]
 
   @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
@@ -63,6 +70,18 @@ model Payment {
 
   @@unique([member_id, month, year])
   @@map("payments")
+}
+
+model Locker {
+  id        String       @id @default(uuid())
+  number    Int          @unique
+  location  String
+  status    LockerStatus @default(Disponible)
+  member_id String?
+
+  member Member? @relation(fields: [member_id], references: [id])
+
+  @@map("lockers")
 }
 
 model Sport {

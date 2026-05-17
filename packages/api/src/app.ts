@@ -26,7 +26,14 @@ import { UpdateMedicalCertificateUseCase } from './application/MedicalCertificat
 import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
 
 import { PaymentController } from './delivery/PaymentController.js';
+import { DeletePaymentUseCase } from './application/Payment/DeletePaymentUseCase.js';
 import { UpdatePaymentUseCase } from './application/Payment/UpdatePaymentUseCase.js';
+import { PostgresLockerRepository } from './infrastructure/PostgresLockerRepository.js';
+import { LockerValidator } from './domain/services/LockerValidator.js';
+import { CreateLockerUseCase } from './application/Locker/NewLockerUseCase.js';
+import { GetLockersUseCase } from './application/Locker/GetLockersUseCase.js';
+import { UpdateLockerUseCase } from './application/Locker/UpdateLockerUseCase.js';
+import { LockerController } from './delivery/LockerController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -43,7 +50,7 @@ export function buildApp() {
 
     server.register(cors, {
         origin: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     });
@@ -107,8 +114,17 @@ export function buildApp() {
     const paymentValidator = new PaymentValidator(paymentRepo);
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, paymentValidator, memberRepo);
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
+    const deletePaymentUseCase = new DeletePaymentUseCase(paymentRepo, paymentValidator);
     const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
-    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase, updatePaymentUseCase);
+    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase, updatePaymentUseCase , deletePaymentUseCase);
+
+    // locker
+    const lockerRepo = new PostgresLockerRepository();
+    const lockerValidator = new LockerValidator(lockerRepo);
+    const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
+    const getLockersUseCase = new GetLockersUseCase(lockerRepo);
+    const updateLockerUseCase = new UpdateLockerUseCase(lockerRepo, lockerValidator, memberRepo);
+    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase, updateLockerUseCase);
 
     //Endpoints
 
@@ -132,7 +148,13 @@ export function buildApp() {
     //Payments Endpoints
     server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
+    server.delete('/api/v1/payments/:id', paymentController.cancel.bind(paymentController)); 
     server.patch('/api/v1/payments/:id', paymentController.update.bind(paymentController));
+
+    //Lockers Endpoints
+    server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
+    server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
+    server.patch('/api/v1/lockers/:id', lockerController.update.bind(lockerController));
 
 
     server.get('/', async (req, rep) => {

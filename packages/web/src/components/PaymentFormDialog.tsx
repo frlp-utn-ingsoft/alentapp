@@ -1,5 +1,13 @@
-import { Box, Button, Input, SimpleGrid, Stack, Text } from '@chakra-ui/react';
-import type { CreatePaymentRequest } from '@alentapp/shared';
+import {
+    Box,
+    Button,
+    Input,
+    SimpleGrid,
+    Stack,
+    Text,
+    NativeSelect,
+} from '@chakra-ui/react';
+import type { CreatePaymentRequest, PaymentStatus } from '@alentapp/shared';
 import {
     DialogActionTrigger,
     DialogBody,
@@ -13,8 +21,16 @@ import { Field } from './ui/field';
 import { MemberSearchInput } from './MemberSearchInput';
 import type { MemberDTO } from '@alentapp/shared';
 
+type PaymentFormMode = 'create' | 'update';
+
+type PaymentFormData = CreatePaymentRequest & {
+    status?: PaymentStatus;
+    payment_date?: string | null;
+};
+
 type Props = {
-    formData: CreatePaymentRequest;
+    mode?: PaymentFormMode;
+    formData: PaymentFormData;
     isSubmitting: boolean;
 
     memberSearch: string;
@@ -22,10 +38,10 @@ type Props = {
     memberSearchRef: React.RefObject<HTMLDivElement | null>;
 
     onSubmit: (event: React.FormEvent) => void;
-    onUpdateField: <K extends keyof CreatePaymentRequest>(
-        field: K,
-        value: CreatePaymentRequest[K],
-    ) => void;
+   onUpdateField: <K extends keyof PaymentFormData>(
+    field: K,
+    value: PaymentFormData[K],
+) => void;
     onUpdateMonth: (value: string) => void;
     onUpdateYear: (value: string) => void;
     onSearchMember: (value: string) => void;
@@ -33,6 +49,7 @@ type Props = {
 };
 
 export function PaymentFormDialog({
+    mode = 'create',
     formData,
     isSubmitting,
     memberSearch,
@@ -45,27 +62,34 @@ export function PaymentFormDialog({
     onSearchMember,
     onSelectMember,
 }: Props) {
+    const isUpdateMode = mode === 'update';
+
     return (
         <DialogContent>
             <form onSubmit={onSubmit}>
                 <DialogHeader>
-                    <DialogTitle>Agregar Nuevo Pago</DialogTitle>
+                    <DialogTitle>
+                        {isUpdateMode
+                            ? 'Actualizar Pago'
+                            : 'Agregar Nuevo Pago'}
+                    </DialogTitle>
                 </DialogHeader>
 
                 <DialogBody>
                     <Stack gap="4">
-                        <Field label="Socio" required>
+                        <Field label="Socio" required={!isUpdateMode}>
                             <MemberSearchInput
                                 value={memberSearch}
                                 results={memberResults}
                                 searchRef={memberSearchRef}
                                 onSearch={onSearchMember}
                                 onSelect={onSelectMember}
+                                updateMode={isUpdateMode}
                             />
                         </Field>
 
                         <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-                            <Field label="Mes" required>
+                            <Field label="Mes" required={!isUpdateMode}>
                                 <Input
                                     type="text"
                                     inputMode="numeric"
@@ -73,11 +97,12 @@ export function PaymentFormDialog({
                                     onChange={(e) =>
                                         onUpdateMonth(e.target.value)
                                     }
-                                    required
+                                    required={!isUpdateMode}
+                                    disabled={isUpdateMode}
                                 />
                             </Field>
 
-                            <Field label="Año" required>
+                            <Field label="Año" required={!isUpdateMode}>
                                 <Input
                                     type="text"
                                     inputMode="numeric"
@@ -85,13 +110,14 @@ export function PaymentFormDialog({
                                     onChange={(e) =>
                                         onUpdateYear(e.target.value)
                                     }
-                                    required
+                                    required={!isUpdateMode}
+                                    disabled={isUpdateMode}
                                 />
                             </Field>
                         </SimpleGrid>
 
                         <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-                            <Field label="Monto" required>
+                            <Field label="Monto" required={!isUpdateMode}>
                                 <Box position="relative">
                                     <Text
                                         position="absolute"
@@ -116,12 +142,13 @@ export function PaymentFormDialog({
                                                 Number(e.target.value),
                                             )
                                         }
-                                        required
+                                        disabled={isUpdateMode}
+                                        required={!isUpdateMode}
                                     />
                                 </Box>
                             </Field>
 
-                            <Field label="Fecha de Vencimiento" required>
+                            <Field label="Fecha de Vencimiento" required={!isUpdateMode}>
                                 <Input
                                     type="date"
                                     value={formData.due_date}
@@ -131,10 +158,59 @@ export function PaymentFormDialog({
                                             e.target.value,
                                         )
                                     }
-                                    required
+                                    required={!isUpdateMode}
+                                    disabled={isUpdateMode}
                                 />
                             </Field>
                         </SimpleGrid>
+                        {isUpdateMode && (
+                            <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
+                                <Field label="Estado" >
+                                    <NativeSelect.Root>
+                                        <NativeSelect.Field
+                                            value={formData.status ?? ''}
+                                            onChange={(e) =>
+                                                onUpdateField(
+                                                    'status',
+                                                    e.target
+                                                        .value as PaymentStatus,
+                                                )
+                                            }
+                                            required
+                                        >
+                                            <option value="" disabled>
+                                                Seleccionar Estado
+                                            </option>
+                                            <option value="Pendiente">
+                                                Pendiente
+                                            </option>
+                                            <option value="Pagado">
+                                                Pagado
+                                            </option>
+                                            <option value="Vencido">
+                                                Vencido
+                                            </option>
+                                    
+                                        </NativeSelect.Field>
+                                        <NativeSelect.Indicator/>
+                                    </NativeSelect.Root>
+                                </Field>
+                                {formData.status === 'Pagado' && (
+                                    <Field label="Fecha de Pago">
+                                        <Input
+                                            type="date"
+                                            value={formData.payment_date ?? ''}
+                                            onChange={(e) =>
+                                                onUpdateField(
+                                                    'payment_date',
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </Field>
+                                )}
+                            </SimpleGrid>
+                        )}
                     </Stack>
                 </DialogBody>
 
@@ -148,7 +224,7 @@ export function PaymentFormDialog({
                         colorPalette="blue"
                         loading={isSubmitting}
                     >
-                        Crear Pago
+                        {isUpdateMode ? 'Actualizar Pago' : 'Crear Pago'}
                     </Button>
                 </DialogFooter>
 

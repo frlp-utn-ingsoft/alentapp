@@ -117,3 +117,28 @@ export interface UpdateMedicalCertificateRequest {
     expiry_date?: Date | string;
     doctor_license?: string;
 }
+
+// ==========================================
+// Locker
+// ==========================================
+export type LockerStatus = 'Disponible' | 'Ocupado' | 'Mantenimiento';
+
+export interface LockerDTO {
+    id: string; // uuid
+    member_id: string | null; // FK uuid nullable
+    number: number;
+    status: LockerStatus;
+    location: string;
+}
+
+export interface CreateLockerRequest {
+    number: number;
+    location: string;
+}
+
+export interface UpdateLockerRequest {
+    number?: number;
+    status?: LockerStatus;
+    location?: string;
+    member_id?: string | null;
+}
