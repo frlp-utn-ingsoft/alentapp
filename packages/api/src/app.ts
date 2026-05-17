@@ -8,7 +8,7 @@ import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
-import { InMemoryEnrollmentRepository } from './infrastructure/InMemoryEnrollmentRepository.js';
+import { PostgresEnrollmentRepository } from './infrastructure/PostgresEnrollmentRepository.js';
 import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
 import { GetSportsUseCase } from './application/GetSportsUseCase.js';
@@ -27,6 +27,10 @@ import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.ts';
 import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.ts';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.ts';
 import { PaymentController } from './delivery/PaymentController.ts';
+import { CreateEnrollmentUseCase } from './application/CreateEnrollmentUseCase.js';
+import { GetEnrollmentsUseCase } from './application/GetEnrollmentsUseCase.js';
+import { DeleteEnrollmentUseCase } from './application/DeleteEnrollmentUseCase.js';
+import { EnrollmentController } from './delivery/EnrollmentController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -61,7 +65,7 @@ export function buildApp() {
     );
 
     const sportRepo = new PostgresSportRepository();
-    const enrollmentRepo = new InMemoryEnrollmentRepository();
+    const enrollmentRepo = new PostgresEnrollmentRepository();
     const sportValidator = new SportValidator(sportRepo);
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
@@ -99,6 +103,15 @@ export function buildApp() {
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
     const paymentController = new PaymentController(createPaymentUseCase, updatePaymentUseCase,getPaymentsUseCase);
 
+    const createEnrollmentUseCase = new CreateEnrollmentUseCase(enrollmentRepo, memberRepo, sportRepo);
+    const getEnrollmentsUseCase = new GetEnrollmentsUseCase(enrollmentRepo);
+    const deleteEnrollmentUseCase = new DeleteEnrollmentUseCase(enrollmentRepo);
+    const enrollmentController = new EnrollmentController(
+        createEnrollmentUseCase,
+        getEnrollmentsUseCase,
+        deleteEnrollmentUseCase
+    );
+
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
@@ -113,7 +126,13 @@ export function buildApp() {
 
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
     server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
+
     server.put('/api/v1/pagos/:id', paymentController.update.bind(paymentController));
+
+    server.get('/api/v1/inscripciones', enrollmentController.getAll.bind(enrollmentController));
+    server.post('/api/v1/inscripciones', enrollmentController.create.bind(enrollmentController));
+    server.delete('/api/v1/inscripciones/:id', enrollmentController.delete.bind(enrollmentController));
+
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
