@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { 
-    Button, Input, Stack, createListCollection 
-} from "@chakra-ui/react";
-import { 
-    SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValueText 
-} from "./ui/select";
+import { useState, useEffect } from 'react';
+import { Button, Input, Stack, createListCollection } from '@chakra-ui/react';
+import {
+    SelectContent,
+    SelectItem,
+    SelectRoot,
+    SelectTrigger,
+    SelectValueText,
+} from './ui/select';
 import {
     DialogRoot,
     DialogContent,
@@ -15,56 +17,106 @@ import {
     DialogActionTrigger,
     DialogCloseTrigger,
 } from './ui/dialog';
-import { Field } from "./ui/field";
+import { Field } from './ui/field';
 import { paymentsService } from '../services/payments';
-import type { MemberDTO } from '@alentapp/shared';
-import { toaster } from "./ui/toaster";
+import type { MemberDTO, PaymentDTO, PaymentStatus } from '@alentapp/shared';
+import { toaster } from './ui/toaster';
 
 interface PaymentCreateDialogProps {
     isOpen: boolean;
     onOpenChange: (details: { open: boolean }) => void;
     members: MemberDTO[];
     onSuccess: () => void;
+    payment?: PaymentDTO | null;
 }
 
-export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }: PaymentCreateDialogProps) => {
+export const PaymentCreateDialog = ({
+    isOpen,
+    onOpenChange,
+    members,
+    onSuccess,
+    payment,
+}: PaymentCreateDialogProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         member_id: '',
         amount: '' as number | '',
         month: (new Date().getMonth() + 1) as number | '',
         year: new Date().getFullYear() as number | '',
-        due_date: new Date().toISOString().split('T')[0]
+        due_date: new Date().toISOString().split('T')[0],
+        status: 'Pending' as PaymentStatus,
     });
 
+    useEffect(() => {
+        if (payment) {
+            setFormData({
+                member_id: payment.member_id,
+                amount: payment.amount,
+                month: payment.month,
+                year: payment.year,
+                due_date: payment.due_date,
+                status: payment.status,
+            });
+        } else {
+            setFormData({
+                member_id: '',
+                amount: '',
+                month: new Date().getMonth() + 1,
+                year: new Date().getFullYear(),
+                due_date: new Date().toISOString().split('T')[0],
+                status: 'Pending',
+            });
+        }
+    }, [payment, isOpen]);
+
     const membersList = createListCollection({
-        items: members.map(m => ({ label: `${m.name} (DNI: ${m.dni})`, value: m.id }))
+        items: members.map((m) => ({
+            label: `${m.name} (DNI: ${m.dni})`,
+            value: m.id,
+        })),
+    });
+
+    const statusList = createListCollection({
+        items: [
+            { label: 'Pendiente', value: 'Pending' },
+            { label: 'Pagado', value: 'Paid' },
+            { label: 'Cancelado', value: 'Canceled' },
+        ],
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await paymentsService.create({
+            const payload = {
                 ...formData,
                 amount: formData.amount === '' ? 0 : Number(formData.amount),
                 month: formData.month === '' ? 0 : Number(formData.month),
-                year: formData.year === '' ? 0 : Number(formData.year)
-            });
-            toaster.create({ title: "Pago registrado", type: "success" });
+                year: formData.year === '' ? 0 : Number(formData.year),
+            };
+
+            if (payment) {
+                await paymentsService.update(payment.id, payload);
+                toaster.create({
+                    title: 'Pago actualizado exitosamente',
+                    type: 'success',
+                });
+            } else {
+                await paymentsService.create(payload);
+                toaster.create({
+                    title: 'Pago registrado exitosamente',
+                    type: 'success',
+                });
+            }
+
             onOpenChange({ open: false });
             onSuccess();
-            
-            // Limpiar formulario
-            setFormData({ 
-                member_id: '', 
-                amount: '', 
-                month: new Date().getMonth() + 1, 
-                year: new Date().getFullYear(), 
-                due_date: new Date().toISOString().split('T')[0] 
-            });
         } catch (error: any) {
-            toaster.create({ title: "Error", description: error.message, type: "error" });
+            toaster.create({
+                title: 'Error',
+                description: error.message,
+                type: 'error',
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -75,22 +127,33 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
             <DialogContent>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Registrar Nuevo Pago</DialogTitle>
+                        <DialogTitle>
+                            {payment ? 'Editar Pago' : 'Registrar Nuevo Pago'}
+                        </DialogTitle>
                     </DialogHeader>
                     <DialogBody>
                         <Stack gap="4">
                             <Field label="Socio" required>
-                                <SelectRoot 
-                                    collection={membersList} 
+                                <SelectRoot
+                                    collection={membersList}
                                     value={[formData.member_id]}
-                                    onValueChange={(e) => setFormData({...formData, member_id: e.value[0]})}
+                                    onValueChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            member_id: e.value[0],
+                                        })
+                                    }
+                                    disabled={Boolean(payment)}
                                 >
                                     <SelectTrigger>
                                         <SelectValueText placeholder="Seleccionar socio" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {membersList.items.map((item) => (
-                                            <SelectItem item={item} key={item.value}>
+                                            <SelectItem
+                                                item={item}
+                                                key={item.value}
+                                            >
                                                 {item.label}
                                             </SelectItem>
                                         ))}
@@ -99,14 +162,15 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
                             </Field>
 
                             <Field label="Monto ($)" required>
-                                <Input 
-                                    type="number" 
-                                    value={formData.amount} 
+                                <Input
+                                    type="number"
+                                    value={formData.amount}
                                     onChange={(e) => {
                                         const val = e.target.value;
                                         setFormData({
                                             ...formData,
-                                            amount: val === '' ? '' : Number(val)
+                                            amount:
+                                                val === '' ? '' : Number(val),
                                         });
                                     }}
                                     required
@@ -115,28 +179,36 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
 
                             <Stack direction="row" gap="4">
                                 <Field label="Mes" required>
-                                    <Input 
-                                        type="number" min={1} max={12}
-                                        value={formData.month} 
+                                    <Input
+                                        type="number"
+                                        min={1}
+                                        max={12}
+                                        value={formData.month}
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             setFormData({
                                                 ...formData,
-                                                month: val === '' ? '' : Number(val)
+                                                month:
+                                                    val === ''
+                                                        ? ''
+                                                        : Number(val),
                                             });
                                         }}
                                         required
                                     />
                                 </Field>
                                 <Field label="Año" required>
-                                    <Input 
-                                        type="number" 
-                                        value={formData.year} 
+                                    <Input
+                                        type="number"
+                                        value={formData.year}
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             setFormData({
                                                 ...formData,
-                                                year: val === '' ? '' : Number(val)
+                                                year:
+                                                    val === ''
+                                                        ? ''
+                                                        : Number(val),
                                             });
                                         }}
                                         required
@@ -145,21 +217,60 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
                             </Stack>
 
                             <Field label="Fecha de Vencimiento" required>
-                                <Input 
-                                    type="date" 
-                                    value={formData.due_date} 
-                                    onChange={(e) => setFormData({...formData, due_date: e.target.value})}
+                                <Input
+                                    type="date"
+                                    value={formData.due_date}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            due_date: e.target.value,
+                                        })
+                                    }
                                     required
                                 />
                             </Field>
+
+                            {payment && (
+                                <Field label="Estado" required>
+                                    <SelectRoot
+                                        collection={statusList}
+                                        value={[formData.status]}
+                                        onValueChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                status: e
+                                                    .value[0] as PaymentStatus,
+                                            })
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValueText placeholder="Seleccionar estado" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {statusList.items.map((item) => (
+                                                <SelectItem
+                                                    item={item}
+                                                    key={item.value}
+                                                >
+                                                    {item.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </SelectRoot>
+                                </Field>
+                            )}
                         </Stack>
                     </DialogBody>
                     <DialogFooter>
                         <DialogActionTrigger asChild>
                             <Button variant="outline">Cancelar</Button>
                         </DialogActionTrigger>
-                        <Button type="submit" colorPalette="blue" loading={isSubmitting}>
-                            Registrar Pago
+                        <Button
+                            type="submit"
+                            colorPalette="blue"
+                            loading={isSubmitting}
+                        >
+                            {payment ? 'Guardar Cambios' : 'Registrar Pago'}
                         </Button>
                     </DialogFooter>
                     <DialogCloseTrigger />
