@@ -56,3 +56,14 @@ model EquipmentLoan {
 
     @@map("equipment_loans")
 }
+
+model Sport {
+    id                           String  @id @default(uuid())
+    name                         String  @unique
+    description                  String
+    max_capacity                 Int
+    additional_price             Decimal @db.Decimal(10, 2)
+    requires_medical_certificate Boolean
+
+    @@map("sports")
+}

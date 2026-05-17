@@ -8,6 +8,11 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+import { CreateSportUseCase } from './application/NewSportUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
+import { SportController } from './delivery/SportController.js';
 
 // --- Equipment Loan ---
 import { PostgresEquipmentLoanRepository } from './infrastructure/PostgresEquipmentLoanRepository.js';
@@ -49,6 +54,12 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator(sportRepo);
+    const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
+    const sportController = new SportController(createSportUseCase, updateSportUseCase);
+
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
@@ -61,6 +72,10 @@ export function buildApp() {
 
     // --- Equipment Loan Route ---
     server.post('/api/v1/equipment-loans', equipmentLoanController.create.bind(equipmentLoanController));
+
+    // --- Sports Route ---
+    server.post('/api/v1/sports', sportController.create.bind(sportController));
+    server.put('/api/v1/sports/:id', sportController.update.bind(sportController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
