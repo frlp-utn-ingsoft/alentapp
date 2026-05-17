@@ -24,26 +24,48 @@ enum MemberStatus {
     Suspendido
 }
 
+enum MedicalCertificateStatus {
+    in_review
+    validated
+    historical
+}
+
+model Member {
+    id         String         @id @default(uuid())
+    dni        String         @unique
+    name       String
+    email      String         @unique
+    birthdate  DateTime?      @db.Date
+    category   MemberCategory
+    status     MemberStatus   @default(Activo)
+    created_at DateTime       @default(now())
+    certificates MedicalCertificate[]
+    payments    Payment[]
+    disciplines Discipline[]
+
+    @@map("members")
+}
+
+model MedicalCertificate {
+    id             String   @id @default(uuid())
+    issue_date     DateTime @db.Date
+    expiry_date    DateTime @db.Date
+    doctor_license String
+    institution    String
+    status         MedicalCertificateStatus @default(in_review)
+    deleted_at     DateTime?
+    member_id      String
+    member         Member   @relation(fields: [member_id], references: [id])
+
+    @@map("medical_certificates")
+}
+
 enum PaymentStatus {
     Pendiente
     Pagado
     Cancelado
 }
 
-model Member {
-    id          String         @id @default(uuid())
-    dni         String         @unique
-    name        String
-    email       String         @unique
-    birthdate   DateTime?      @db.Date
-    category    MemberCategory
-    status      MemberStatus   @default(Activo)
-    created_at  DateTime       @default(now())
-    payments    Payment[]
-    disciplines Discipline[]
-
-    @@map("members")
-}
 
 model Payment {
     id           String        @id @default(uuid())
