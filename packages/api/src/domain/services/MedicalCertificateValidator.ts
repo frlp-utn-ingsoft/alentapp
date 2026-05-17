@@ -20,4 +20,22 @@ export class MedicalCertificateValidator {
       )
     }
   }
+  validateUpdate(data: {
+    expiryDate?: string
+  }, existingIssueDate: Date) {
+    if (data.expiryDate !== undefined) {
+      if (!data.expiryDate) {
+        throw new Error("Formato de fecha inválido")
+      }
+      const expiryDate = new Date(data.expiryDate)
+      if (isNaN(expiryDate.getTime())) {
+        throw new Error("Formato de fecha inválido")
+      }
+      if (expiryDate <= existingIssueDate) {
+        throw new Error(
+          "La fecha de vencimiento debe ser posterior a la de emisión"
+        )
+      }
+    }
+  }
 }
