@@ -16,6 +16,7 @@ import {
 import { LuPlus, LuPencil, LuTrash2, LuRefreshCw } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 import { sportsService } from '../services/sports';
+import { Toaster, toaster } from '../components/ui/toaster';
 import type { CreateSportRequest, SportResponse, UpdateSportRequest } from '@alentapp/shared';
 import {
   DialogRoot,
@@ -29,11 +30,11 @@ import {
 } from '../components/ui/dialog';
 import { Field } from '../components/ui/field';
 
-const emptyForm: CreateSportRequest = {
+const emptyForm = {
   name: '',
   description: '',
   max_capacity: 1,
-  additional_price: 0,
+  additional_price: '',
   requires_medical_certificate: false,
 };
 
@@ -44,7 +45,7 @@ export function SportsView() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingSportId, setEditingSportId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<CreateSportRequest>(emptyForm);
+  const [formData, setFormData] = useState(emptyForm);
 
   const fetchSports = async () => {
     setIsLoading(true);
@@ -71,7 +72,7 @@ export function SportsView() {
       name: sport.name,
       description: sport.description,
       max_capacity: sport.max_capacity,
-      additional_price: sport.additional_price,
+      additional_price: String(sport.additional_price),
       requires_medical_certificate: sport.requires_medical_certificate,
     });
     setIsDialogOpen(true);
@@ -84,27 +85,44 @@ export function SportsView() {
     const payload = {
       description: formData.description,
       max_capacity: Number(formData.max_capacity),
-      additional_price: Number(formData.additional_price),
+      additional_price: Number(formData.additional_price || 0),
       requires_medical_certificate: formData.requires_medical_certificate,
     };
 
     try {
-      if (editingSportId) {
-        await sportsService.update(editingSportId, payload as UpdateSportRequest);
-      } else {
-        await sportsService.create({
-          name: formData.name,
-          ...payload,
-        });
-      }
-      setIsDialogOpen(false);
-      fetchSports();
-    } catch (err: any) {
-      alert(err.message || 'Error al guardar el deporte');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  if (editingSportId) {
+    await sportsService.update(editingSportId, payload as UpdateSportRequest);
+
+    toaster.create({
+      title: 'Deporte actualizado',
+      description: 'El deporte se actualizó correctamente.',
+      type: 'success',
+    });
+  } else {
+    await sportsService.create({
+      name: formData.name,
+      ...payload,
+    });
+
+    toaster.create({
+      title: 'Deporte creado',
+      description: 'El deporte se creó correctamente.',
+      type: 'success',
+    });
+  }
+
+  setIsDialogOpen(false);
+  fetchSports();
+} catch (err: any) {
+  toaster.create({
+    title: 'Error',
+    description: err.message || 'Error al guardar el deporte',
+    type: 'error',
+  });
+} finally {
+  setIsSubmitting(false);
+}
+};
 
   const handleDeleteSport = async (id: string, name: string) => {
     if (window.confirm(`¿Estás seguro de que deseas eliminar el deporte "${name}"? Esta acción no se puede deshacer.`)) {
@@ -123,6 +141,7 @@ export function SportsView() {
 
   return (
     <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
+      <Toaster />
       <Stack gap="8">
         <Flex justify="space-between" align="center">
           <Stack gap="1">
@@ -180,7 +199,7 @@ export function SportsView() {
                     min="0"
                     step="0.01"
                     value={formData.additional_price}
-                    onChange={(e) => setFormData({ ...formData, additional_price: Number(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, additional_price: e.target.value })}
                     required
                   />
                 </Field>

@@ -61,6 +61,26 @@ export interface UpdateSportRequest {
 }
 
 
+// ==========================================
+// Enrollment
+// ==========================================
+export interface EnrollmentDTO {
+  id: string; // UUID
+  member_id: string;
+  sport_id: string;
+  enrollment_date: string; // ISO Date String
+  is_active: boolean;
+  member_name?: string;
+  sport_name?: string;
+}
+
+export interface CreateEnrollmentRequest {
+  member_id: string;
+  sport_id: string;
+  enrollment_date?: string; // ISO Date String, opcional
+}
+
+
 // ==========================
 // = Medical Certificates
 // ==========================
