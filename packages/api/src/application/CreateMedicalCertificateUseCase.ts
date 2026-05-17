@@ -1,25 +1,18 @@
-import { MemberRepository } from '../domain/MemberRepository.js';
 import { MedicalCertificateRepository } from '../domain/MedicalCertificateRepository.js';
+import { MedicalCertificateValidator } from '../domain/services/MedicalCertificateValidator.js';
 import { CreateMedicalCertificateRequest, MedicalCertificateResponseDTO } from '@alentapp/shared';
 
 export class CreateMedicalCertificateUseCase {
     constructor(
         private readonly medicalCertificateRepository: MedicalCertificateRepository,
-        private readonly memberRepository: MemberRepository
+        private readonly medicalCertificateValidator: MedicalCertificateValidator
     ) {}
 
     async execute(data: CreateMedicalCertificateRequest): Promise<MedicalCertificateResponseDTO> {
-        const issueDate = new Date(data.issue_date);
-        const expiryDate = new Date(data.expiry_date);
-
-        if (expiryDate <= issueDate) {
-            throw new Error('La fecha de vencimiento debe ser posterior a la fecha de emisión');
-        }
-
-        const member = await this.memberRepository.findById(data.member_id);
-        if (!member) {
-            throw new Error('El socio indicado no existe');
-        }
+        this.medicalCertificateValidator.validateDateFormat(data.issue_date);
+        this.medicalCertificateValidator.validateDateFormat(data.expiry_date);
+        this.medicalCertificateValidator.validateExpiryAfterIssue(data.issue_date, data.expiry_date);
+        await this.medicalCertificateValidator.validateMemberExists(data.member_id);
 
         return this.medicalCertificateRepository.save({
             member_id: data.member_id,

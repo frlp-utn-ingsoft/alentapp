@@ -4,6 +4,7 @@ import cors from '@fastify/cors';
 import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
 import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
 import { MemberValidator } from './domain/services/MemberValidator.js';
+import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
 import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
 import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
@@ -58,13 +59,14 @@ export function buildApp() {
     const memberRepo = new PostgresMemberRepository();
     const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
     const memberValidator = new MemberValidator(memberRepo);
+    const medicalCertificateValidator = new MedicalCertificateValidator(memberRepo);
 
     const createMemberUseCase = new CreateMemberUseCase(memberRepo, memberValidator);
     const getMembersUseCase = new GetMembersUseCase(memberRepo);
     const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
     const deleteMemberUseCase = new DeleteMemberUseCase(memberRepo);
 
-    const createMedicalCertificateUseCase = new CreateMedicalCertificateUseCase(medicalCertificateRepo, memberRepo);
+    const createMedicalCertificateUseCase = new CreateMedicalCertificateUseCase(medicalCertificateRepo, medicalCertificateValidator);
     const getMedicalCertificatesUseCase = new GetMedicalCertificatesUseCase(medicalCertificateRepo);
 
     const memberController = new MemberController(
