@@ -4,8 +4,8 @@ export class SportValidator {
     // Valida que todos los campos obligatorios para crear un deporte estén presentes.
     validateRequiredFields(data: CreateSportRequest): void {
         if (
-            !data.name ||
-            !data.description ||
+            !data.name?.trim() ||
+            !data.description?.trim() ||
             data.max_capacity === undefined ||
             data.additional_price === undefined ||
             data.requires_medical_certificate === undefined
