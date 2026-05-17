@@ -15,7 +15,7 @@ export class NewPaymentUseCase {
   public async execute(data: any): Promise<Payment> {
     const { memberId, amount, month, year, dueDate } = data;
 
-    // Validamos la estructura del request
+    
     if (!memberId || !amount || !month || !year || !dueDate) {
       throw new Error("Missing required fields");
     }
@@ -38,10 +38,8 @@ export class NewPaymentUseCase {
       throw new Error("DUPLICATE_PERIOD");
     }
 
-    //  Creamos la entidad Payment (Cambiamos el tipo a : any para que no sea tan esticto  con el formato)
     const newPayment: any = {
       id: crypto.randomUUID(),
-      // Seteamos ambos mundos para que no falle ni en la validación ni en la persistencia
       memberId,
       member_id: memberId,
       amount,
