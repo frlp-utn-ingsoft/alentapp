@@ -1,14 +1,17 @@
 import { DisciplineRepository } from '../domain/DisciplineRepository.js';
-import { DisciplineValidator } from '../domain/services/DisciplineValidator.js';
 
 export class DeleteDisciplineUseCase {
     constructor(
         private readonly disciplineRepository: DisciplineRepository,
-        private readonly disciplineValidator: DisciplineValidator,
     ) {}
 
     async execute(id: string): Promise<void> {
-        this.disciplineValidator.validateIdFormat(id);
+        const uuidRegex =
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+        if (!uuidRegex.test(id)) {
+            throw new Error('Formato de ID inválido');
+        }
 
         const existingDiscipline = await this.disciplineRepository.findById(id);
 

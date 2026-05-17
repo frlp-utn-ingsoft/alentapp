@@ -106,10 +106,7 @@ export function buildApp() {
     const disciplineRepo = new PostgresDisciplineRepository();
     const disciplineValidator = new DisciplineValidator(memberRepo);
     const getDisciplinesUseCase = new GetDisciplinesUseCase(disciplineRepo);
-    const deleteDisciplineUseCase = new DeleteDisciplineUseCase(
-        disciplineRepo,
-        disciplineValidator
-    );
+    const deleteDisciplineUseCase = new DeleteDisciplineUseCase(disciplineRepo);
 
     const createDisciplineUseCase = new CreateDisciplineUseCase(
         disciplineRepo,
