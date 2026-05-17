@@ -27,4 +27,11 @@ export class SportValidator {
             throw new Error('El precio adicional no puede ser negativo');
         }
     }
+    
+    // Valida que la descripción no quede vacía cuando se envía para actualizar.
+    validateDescription(description: string): void {
+        if (!description.trim()) {
+            throw new Error('La descripción no puede estar vacía');
+        }
+    }
 }
