@@ -8,10 +8,12 @@ import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
 import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
-import { SportValidator } from './domain/services/SportValidator.js';
+
 
 export function buildApp() {
     const server = Fastify({
@@ -58,9 +60,15 @@ export function buildApp() {
 
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
 
+    const updateSportUseCase = new UpdateSportUseCase(
+        sportRepo,
+        sportValidator,
+    );
+
     const sportController = new SportController(
         createSportUseCase,
         getSportsUseCase,
+        updateSportUseCase,
     );
 
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
@@ -70,6 +78,7 @@ export function buildApp() {
 
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
+    server.patch('/api/v1/sports/:id', sportController.update.bind(sportController));
     
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
