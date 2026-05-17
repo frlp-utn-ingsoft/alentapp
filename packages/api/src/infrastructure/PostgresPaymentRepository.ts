@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { PaymentRepository } from '../domain/PaymentRepository.ts';
-import { PaymentDTO, PaymentStatus } from '@alentapp/shared';
+import { PaymentDTO, PaymentStatus, UpdatePaymentRequest } from '@alentapp/shared';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -58,6 +58,27 @@ export class PostgresPaymentRepository implements PaymentRepository {
         });
 
         return payments.map(p => this.mapToDTO(p as DBPayment));
+    }
+
+    async update(id: string, data: UpdatePaymentRequest & { deleted_at?: Date | null }): Promise<PaymentDTO> {
+        const updateData: any = {};
+
+        if (data.amount !== undefined) updateData.amount = data.amount;
+        if (data.month !== undefined) updateData.month = data.month;
+        if (data.year !== undefined) updateData.year = data.year;
+        if (data.due_date !== undefined) updateData.due_date = new Date(data.due_date);
+        if (data.status !== undefined) updateData.status = data.status;
+        if (data.payment_date !== undefined) {
+            updateData.payment_date = data.payment_date ? new Date(data.payment_date) : null;
+        }
+        if (data.deleted_at !== undefined) updateData.deleted_at = data.deleted_at;
+
+        const payment = await prisma.payment.update({
+            where: { id },
+            data: updateData,
+        });
+
+        return this.mapToDTO(payment);
     }
 
     private mapToDTO(payment: DBPayment): PaymentDTO {

@@ -107,3 +107,13 @@ export interface CreatePaymentRequest {
     year: number;
     due_date: string;
 }
+
+export interface UpdatePaymentRequest {
+  amount?: number;
+  due_date?: string;
+  month?: number;
+  year?: number;
+  payment_date?: string;
+  status?: PaymentStatus;
+  member_id?: string
+}
