@@ -15,7 +15,7 @@ import { LuPlus, LuRefreshCw } from "react-icons/lu";
 import { useEffect, useMemo, useState } from "react";
 import { membersService } from "../services/members";
 import { paymentsService } from "../services/payments";
-import type { CreatePaymentRequest, MemberDTO, PaymentResponse } from "@alentapp/shared";
+import type { CreatePaymentRequest, GetPaymentsQuery, MemberDTO, PaymentResponse, PaymentStatus } from "@alentapp/shared";
 import { Field } from "../components/ui/field";
 import {
   SelectRoot,
@@ -26,6 +26,15 @@ import {
   createListCollection,
 } from "../components/ui/select";
 
+const statusOptions = createListCollection({
+  items: [
+    { label: "Todos", value: "" },
+    { label: "Pendiente", value: "Pending" },
+    { label: "Pagado", value: "Paid" },
+    { label: "Cancelado", value: "Canceled" },
+  ],
+});
+
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
 
@@ -35,6 +44,11 @@ export function PaymentsView() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [memberFilter, setMemberFilter] = useState<string>("");
+  const [monthFilter, setMonthFilter] = useState<string>("");
+  const [yearFilter, setYearFilter] = useState<string>("");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -48,7 +62,10 @@ export function PaymentsView() {
 
   const memberCollection = useMemo(() => {
     return createListCollection({
-      items: members.map((m) => ({ label: `${m.name} - ${m.dni}`, value: m.id })),
+      items: [
+        { label: "Todos", value: "" },
+        ...members.map((m) => ({ label: m.name, value: m.id })),
+      ],
     });
   }, [members]);
 
@@ -56,7 +73,13 @@ export function PaymentsView() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await paymentsService.getAll();
+      const query: GetPaymentsQuery = {};
+      if (statusFilter) query.status = statusFilter as PaymentStatus;
+      if (memberFilter) query.memberId = memberFilter;
+      if (monthFilter) query.month = parseInt(monthFilter);
+      if (yearFilter) query.year = parseInt(yearFilter);
+
+      const data = await paymentsService.getAll(query);
       setPayments(data);
     } catch (err: any) {
       setError(err.message || "Error al cargar los pagos");
@@ -134,8 +157,11 @@ export function PaymentsView() {
 
   useEffect(() => {
     fetchMembers();
-    fetchPayments();
   }, []);
+
+  useEffect(() => {
+    fetchPayments();
+  }, [statusFilter, memberFilter, monthFilter, yearFilter]);
 
   return (
     <Stack gap="8">
@@ -154,6 +180,59 @@ export function PaymentsView() {
             <LuPlus /> Nuevo Pago
           </Button>
         </HStack>
+      </Flex>
+
+      <Flex gap="4" align="center" flexWrap="wrap">
+        <Input
+          placeholder="Mes (1-12)"
+          value={monthFilter}
+          onChange={(e) => setMonthFilter(e.target.value)}
+          maxW="120px"
+          type="number"
+          min="1"
+          max="12"
+          bg="bg.subtle"
+        />
+        <Input
+          placeholder="Año"
+          value={yearFilter}
+          onChange={(e) => setYearFilter(e.target.value)}
+          maxW="130px"
+          type="number"
+          bg="bg.subtle"
+        />
+        <SelectRoot
+          collection={statusOptions}
+          value={[statusFilter]}
+          onValueChange={(e) => setStatusFilter(e.value[0] || "")}
+        >
+          <SelectTrigger bg="bg.subtle" borderWidth="1px" _hover={{ bg: "bg.muted" }} minW="150px">
+            <SelectValueText placeholder="Estado" />
+          </SelectTrigger>
+          <SelectContent>
+            {statusOptions.items.map((opt) => (
+              <SelectItem item={opt} key={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectRoot>
+        <SelectRoot
+          collection={memberCollection}
+          value={[memberFilter]}
+          onValueChange={(e) => setMemberFilter(e.value[0] || "")}
+        >
+          <SelectTrigger bg="bg.subtle" borderWidth="1px" _hover={{ bg: "bg.muted" }} minW="200px">
+            <SelectValueText placeholder="Socio" />
+          </SelectTrigger>
+          <SelectContent>
+            {memberCollection.items.map((opt) => (
+              <SelectItem item={opt} key={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectRoot>
       </Flex>
 
       {error && (
@@ -282,7 +361,9 @@ export function PaymentsView() {
 
                 <Field label="Socio" required>
                   <SelectRoot
-                    collection={memberCollection}
+                    collection={createListCollection({
+                      items: members.map((m) => ({ label: `${m.name} - ${m.dni}`, value: m.id })),
+                    })}
                     value={[formData.memberId]}
                     onValueChange={(e) => setFormData({ ...formData, memberId: e.value[0] })}
                   >
