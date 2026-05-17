@@ -19,7 +19,7 @@ Permitir la anulación de un certificado médico en caso de que haya sido cargad
 
 ### Criterios de Aceptación
 *   El sistema no debe realizar un borrado físico (DELETE) de la fila en la base de datos para mantener la integridad referencial.
-*   Al ejecutar la acción, el campo `estaValidado` debe cambiar a `false` de forma permanente.
+*   Al ejecutar la acción, el campo `isValidated` debe cambiar a `false` de forma permanente.
 *   Una vez anulado, el certificado no podrá ser utilizado por otros módulos (como Inscripciones o Accesos) para habilitar al socio.
 *   El sistema debe solicitar una confirmación antes de proceder con la anulación.
 
@@ -27,9 +27,10 @@ Permitir la anulación de un certificado médico en caso de que haya sido cargad
 
 ### Modelo de Datos
 La operación impacta en la entidad `MedicalCertificate` modificando su estado de vigencia:
-*   `estaValidado`: Cambia de `true` a `false`.
+*   `isValidated`: Cambia de `true` a `false`.
 
 ### Contrato de API (@alentapp/shared)
+**Éxito:** el cuerpo JSON usa `{ "data": ... }`. **Errores:** `{ "error": "<mensaje en español>" }`
 Se utilizará el método DELETE semántico, aunque internamente realice una actualización de estado:
 
 *   **Endpoint**: `DELETE /api/v1/medical-certificates/:id`
@@ -39,10 +40,10 @@ Se utilizará el método DELETE semántico, aunque internamente realice una actu
 Organización de la lógica según el estándar del monorepo:
 
 *   **Domain**:
-    *   Puerto `MedicalCertificateRepository`: Método `LogicalDelete(id)`.
+    *   Puerto `IMedicalCertificateRepository`: Método `LogicalDelete(id)`.
     *   Regla de negocio: Un certificado anulado no puede volver a activarse manualmente; se debe cargar uno nuevo.
 *   **Application**:
-    *   Caso de Uso `DeleteMedicalCertificate`: Valida la existencia del ID y ejecuta la transición de estado a través del repositorio.
+    *   Caso de Uso `DeleteMedicalCertificateUseCase`: Valida la existencia del ID y ejecuta la transición de estado a través del repositorio.
 *   **Infrastructure**:
     *   `MedicalCertificateController`: Adaptador de entrada que gestiona la respuesta exitosa (204 No Content) o errores de ruta.
     *   `PrismaMedicalCertificateRepository`: Implementación que ejecuta `prisma.medicalCertificate.update` seteando el flag `esta_validado: false`.

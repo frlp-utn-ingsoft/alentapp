@@ -19,7 +19,7 @@ Digitalizar la gestión de aptos físicos para garantizar que el club cumpla con
 
 ### Criterios de Aceptación
 *   El sistema debe validar que la fecha de vencimiento sea estrictamente posterior a la fecha de emisión.
-*   El sistema debe validar que el socio (`miembroId`) exista antes de procesar el registro.
+*   El sistema debe validar que el socio (`memberId`) exista antes de procesar el registro.
 *   Solo puede haber un certificado activo por socio. Al crear uno nuevo, el sistema debe invalidar automáticamente (marcar como histórico) los registros anteriores de ese socio
 *   Al finalizar, el sistema debe mostrar un mensaje de éxito y el certificado debe quedar en estado validado por defecto
 
@@ -29,24 +29,25 @@ Digitalizar la gestión de aptos físicos para garantizar que el club cumpla con
 Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propiedades y restricciones.
 
 *   `id`: Identificador único universal (UUID, PK).
-*   `fechaEmision`: DateTime (Fecha de emisión).
-*   `fechaVencimiento`: DateTime (Fecha de vencimiento).
-*   `medicoMatricula`: String (Número de matrícula del profesional).
-*   `institucion`: String (Nombre de la entidad emisora).
-*   `estaValidado`: Boolean (Estado de vigencia actual).
-*   `miembroId`: UUID (FK hacia la entidad Member).
+*   `issueDate`: DateTime (Fecha de emisión).
+*   `expiryDate`: DateTime (Fecha de vencimiento).
+*   `doctorLicence`: String (Número de matrícula del profesional).
+*   `reason`: String (Nombre de la entidad emisora).
+*   `isValidated`: Boolean (Estado de vigencia actual).
+*   `memberId`: UUID (FK hacia la entidad Member).
 
 ### Contrato de API (@alentapp/shared)
 [Definición de endpoints y tipos compartidos.]
+*   **Éxito:** el cuerpo JSON usa  `{"data: ... "}`. **Errores:**  `{ "error": "<mensaje en español>"}`.
 *   **Endpoint**: `POST /api/v1/medical-certificates`
 *   **Request Body**: (CreateMedicalCertificateRequest)
 ```ts
 {
-    fechaEmision: string;      // ISO Date String
-    fechaVencimiento: string;  // ISO Date String
-    medicoMatricula: string;
-    institucion: string;
-    miembroId: string;          // UUID del socio
+    issueDate: string;      // ISO Date String
+    expiryDate: string;  // ISO Date String
+    doctorLicence: string;
+    reason: string;
+    memberId: string;          // UUID del socio
 }
 ```
 
@@ -54,16 +55,16 @@ Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propie
 [Cómo se distribuye la lógica en las capas.]
 *   **Domain**: 
 	* Entidad MedicalCertificate con validaciones de integridad.
-	* Puerto MedicalCertificateRepository: interfaz con métodos Save e InvalidatePreviousCertificates
+	* Puerto IMedicalCertificateRepository: interfaz con métodos Save e InvalidatePreviousCertificates
 *   **Application**:
-	* Caso de Uso CreateMedicalCertificate: Orquesta la búsqueda de certificados activos previos para su invalidación antes de persistir el nuevo registro.
+	* Caso de Uso CreateMedicalCertificateUseCase: Orquesta la búsqueda de certificados activos previos para su invalidación antes de persistir el nuevo registro.
 *   **Infrastructure**:
 	* MedicalCertificateController: Adaptador de entrada que recibe y valida el DTO mediante fastify.
 
 ## Casos de Borde y Errores
 | Escenario                              | Resultado Esperado                                           | Código HTTP              |
 | ---------------------------------------| -------------------------------------------------------------| -------------------------|
-| fechaVencimiento <= fechaEmision       | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request          |
+| expiryDate <= issueDate                | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request          |
 | Socio inexistente                      | Mensaje: "Socio no encontrado"                               | 404 Not found            |
 | Datos Obligatorios nulos               | Mensaje: "Datos inválidos"                                   | 400 Bad Request          |
 | Error de conexión a DB                 | Mensaje: "Error interno, reintente más tarde"                | 500 Internal Server Error|
