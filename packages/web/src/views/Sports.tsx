@@ -49,10 +49,7 @@ export function SportsView() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   const [editingSportId, setEditingSportId] = useState<string | null>(null);
-  const [editFormData, setEditFormData] = useState<UpdateSportRequest>({
-    description: "",
-    max_capacity: 1,
-  });
+  const [editFormData, setEditFormData] = useState<SportDTO | null>(null);
 
   // Delete dialog
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -80,10 +77,7 @@ export function SportsView() {
 
   const openEditModal = (sport: SportDTO) => {
     setEditingSportId(sport.id);
-    setEditFormData({
-      description: sport.description || "",
-      max_capacity: sport.max_capacity,
-    });
+    setEditFormData(sport);
     setIsEditDialogOpen(true);
   };
 
@@ -109,15 +103,19 @@ export function SportsView() {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editFormData) return;
     setIsEditSubmitting(true);
     try {
-      await sportsService.update(editingSportId!, editFormData);
-      setIsEditDialogOpen(false);
-      fetchSports();
+        await sportsService.update(editingSportId!, {
+            description: editFormData.description,
+            max_capacity: editFormData.max_capacity,
+        });
+        setIsEditDialogOpen(false);
+        fetchSports();
     } catch (err: any) {
-      alert(err.message || "Error al actualizar el deporte");
+        alert(err.message || "Error al actualizar el deporte");
     } finally {
-      setIsEditSubmitting(false);
+        setIsEditSubmitting(false);
     }
   };
 
@@ -220,23 +218,37 @@ export function SportsView() {
               <DialogTitle>Editar Deporte</DialogTitle>
             </DialogHeader>
             <DialogBody>
-              <Stack gap="4">
+               <Stack gap="4">
+                <Field label="Nombre">
+                  <Text fontSize="sm" color="fg.muted" py="2" borderBottomWidth="1px" borderColor="border.muted" w="100%">
+                    {editFormData?.name}
+                  </Text>
+                </Field>
                 <Field label="Descripción">
                   <Input 
                     placeholder="Descripción opcional" 
-                    value={editFormData.description || ""}
-                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                    value={editFormData?.description || ""}
+                    onChange={(e) => setEditFormData(editFormData ? { ...editFormData, description: e.target.value } : null)}
                   />
                 </Field>
                 <Field label="Capacidad Máxima" required>
                   <Input 
                     type="number"
                     min={1}
-                    placeholder="Ej. 20" 
-                    value={editFormData.max_capacity}
-                    onChange={(e) => setEditFormData({ ...editFormData, max_capacity: Number(e.target.value) })}
+                    value={editFormData?.max_capacity || 1}
+                    onChange={(e) => setEditFormData(editFormData ? { ...editFormData, max_capacity: Number(e.target.value) } : null)}
                     required
                   />
+                </Field>
+                <Field label="Precio Adicional">
+                  <Text fontSize="sm" color="fg.muted" py="2" borderBottomWidth="1px" borderColor="border.muted" w="100%">
+                    ${editFormData?.additional_price}
+                  </Text>
+                </Field>
+                <Field label="Requiere Certificado Médico">
+                  <Text fontSize="sm" color="fg.muted" py="2" borderBottomWidth="1px" borderColor="border.muted" w="100%">
+                    {editFormData?.requires_medical_certificate ? 'Sí' : 'No'}
+                  </Text>
                 </Field>
               </Stack>
             </DialogBody>
