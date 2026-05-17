@@ -1,38 +1,77 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "../src/generated/client"
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
-    provider = "postgresql"
+  provider = "postgresql"
 }
 
+
 enum MemberCategory {
-    Pleno
-    Cadete
-    Honorario
+  Pleno
+  Cadete
+  Honorario
 }
 
 enum MemberStatus {
-    Activo
-    Moroso
-    Suspendido
+  Activo
+  Moroso
+  Suspendido
 }
 
-model Member {
-    id         String         @id @default(uuid())
-    dni        String         @unique
-    name       String
-    email      String         @unique
-    birthdate  DateTime?      @db.Date
-    category   MemberCategory
-    status     MemberStatus   @default(Activo)
-    created_at DateTime       @default(now())
+enum PaymentStatus {
+  Pending
+  Paid
+  Canceled
+  Overdue
+}
 
-    @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+
+model Member {
+  id         String         @id @default(uuid()) @db.Uuid 
+  dni        String         @unique
+  name       String
+  email      String         @unique
+  birthdate  DateTime?      @db.Date
+  category   MemberCategory
+  status     MemberStatus   @default(Activo)
+  created_at DateTime       @default(now())
+  
+  // Relación uno a muchos hacia pagos
+  payments   Payment[]
+
+  @@map("members")
+}
+
+
+model Payment {
+  id        String        @id @default(uuid()) @db.Uuid
+  amount    Float
+  month     Int
+  year      Int
+  dueDate   DateTime      @map("due_date")
+  
+  status    PaymentStatus @default(Pending)
+  
+  memberId  String        @map("member_id") @db.Uuid
+
+  member    Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([memberId, month, year])
+  
+  @@map("payments")
+}
+
+model Sport {
+    id                           String  @id @default(uuid())
+    name                         String  @unique
+    description                  String
+    max_capacity                 Int
+    additional_price             Decimal @db.Decimal(10, 2)
+    requires_medical_certificate Boolean
+
+    @@map("sports")
 }

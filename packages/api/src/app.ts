@@ -4,9 +4,20 @@ import { PostgresMemberRepository } from './infrastructure/PostgresMemberReposit
 import { MemberValidator } from './domain/services/MemberValidator.js';
 import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
 import { GetMembersUseCase } from './application/GetMembersUseCase.js';
-import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
-import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
+import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js'; 
 import { MemberController } from './delivery/MemberController.js';
+import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
+// --- IMPORTS DE PAGOS (PAYMENTS) ---
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js'; 
+import { NewPaymentUseCase } from './application/NewPaymentUseCase.js';
+import { GetPaymentUseCase } from './application/GetPaymentUseCase.js';
+import { PaymentController } from './delivery/PaymentController.js'; 
+
+// --- IMPORTS DE DEPORTES (SPORTS) ---
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+import { CreateSportUseCase } from './application/NewSportUseCase.js';
+import { SportController } from './delivery/SportController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -28,6 +39,7 @@ export function buildApp() {
         credentials: true,
     });
 
+    // --- INSTANCIACIÓN DE MIEMBROS ---
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
     
@@ -43,10 +55,29 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
+    // --- INSTANCIACIÓN DE DEPORTES ---
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator(sportRepo);
+    const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
+    const sportController = new SportController(createSportUseCase);
+
+    // --- INSTANCIACIÓN DE PAGOS ---
+    const paymentRepo = new PostgresPaymentRepository();
+    const newPaymentUseCase = new NewPaymentUseCase(paymentRepo);
+    const getPaymentUseCase = new GetPaymentUseCase(paymentRepo); 
+    const paymentController = new PaymentController(newPaymentUseCase, getPaymentUseCase);
+
+    // --- ENDPOINTS DE MIEMBROS ---
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
+    
+    server.post('/api/v1/sports', sportController.create.bind(sportController));  
+
+    server.post('/api/v1/payments', paymentController.create.bind(paymentController));
+    server.get('/api/v1/payments/member/:memberId', paymentController.getByMember.bind(paymentController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
@@ -55,7 +86,6 @@ export function buildApp() {
     return server;
 }
 
-// Solo iniciar el servidor si el script se ejecuta directamente (no cuando es importado por vitest)
 if (process.argv[1] && process.argv[1].endsWith('app.ts')) {
     const server = buildApp();
     const port = parseInt(process.env.PORT || '3000', 10);

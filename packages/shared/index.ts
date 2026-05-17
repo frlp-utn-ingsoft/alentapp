@@ -3,7 +3,7 @@
 // ==========================================
 export type MemberCategory = 'Pleno' | 'Cadete' | 'Honorario';
 export type MemberStatus = 'Activo' | 'Moroso' | 'Suspendido';
-
+export * from './payment.type.js';
 export interface MemberDTO {
   id: string; // UUID
   dni: string;
@@ -30,4 +30,24 @@ export interface UpdateMemberRequest {
   birthdate?: string; // ISO Date String (YYYY-MM-DD)
   category?: MemberCategory;
   status?: MemberStatus;
+}
+
+// ==========================================
+// Sport
+// ==========================================
+export interface SportDTO {
+  id: string; // UUID
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+}
+
+export interface CreateSportRequest {
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
 }
