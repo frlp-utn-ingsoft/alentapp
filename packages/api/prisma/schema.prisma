@@ -87,7 +87,9 @@ model Locker {
     member_id   String?         @db.Uuid
     member      Member?         @relation(fields: [member_id], references: [id])
 
-    @@map("lockers")   
+    @@map("lockers")
+}
+   
 enum PaymentStatus {
     Pending
     Paid
