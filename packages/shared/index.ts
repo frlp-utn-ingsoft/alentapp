@@ -63,11 +63,12 @@ export interface UpdateSportRequest {
 // ==========================
 // = Payments
 // ==========================
-export * from './payment';
+export * from './payment.ts';
 
 // ==========================
-// = MedicalCertificate
+// = Medical Certificates
 // ==========================
+
 
 //datos que el front envía al back para crear un certificado medico
 export interface CreateMedicalCertificateRequest {

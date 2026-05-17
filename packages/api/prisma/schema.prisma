@@ -24,6 +24,29 @@ enum MemberStatus {
     Suspendido
 }
 
+enum PaymentStatus {
+    Pending
+    Paid
+    Canceled
+}
+
+model Payment {
+    id              String         @id @default(uuid())
+    amount          Float
+    month           Int
+    year            Int
+    status          PaymentStatus  @default(Pending)
+    due_date        DateTime       @db.Date
+    payment_date    DateTime?      @db.Date
+    member_id       String
+    member          Member         @relation(fields: [member_id], references: [id])
+    deleted_at      DateTime?      @db.Timestamp
+    createdAt       DateTime       @default(now())
+    updatedAt       DateTime       @updatedAt
+
+    @@map("payments") // Para que en la DB la tabla se llame 'payments' en minúscula
+}
+
 model Member {
     id         String         @id @default(uuid())
     dni        String         @unique
@@ -34,6 +57,9 @@ model Member {
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
     medicalCertificates MedicalCertificate[] //un miembro ouede tener muchos certificados
+
+    // Relación con Payment
+    payments    Payment[]
 
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
 }

@@ -19,16 +19,21 @@ import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresM
 import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
 import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCertificateUseCase.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.ts';
+import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.ts';
+import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.ts';
+import { PaymentController } from './delivery/PaymentController.ts';
+
 export function buildApp() {
     const server = Fastify({
         logger: {
             level: 'info',
-            transport: process.env.NODE_ENV === 'development' 
-            ? {
-                target: 'pino-pretty',
-                options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
-                } 
-            : undefined,
+            transport: process.env.NODE_ENV === 'development'
+                ? {
+                    target: 'pino-pretty',
+                    options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
+                }
+                : undefined,
         },
     });
     server.register(cors, {
@@ -39,13 +44,13 @@ export function buildApp() {
     });
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
-    
+
     const createMemberUseCase = new CreateMemberUseCase(memberRepo, memberValidator);
     const getMembersUseCase = new GetMembersUseCase(memberRepo);
     const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
     const deleteMemberUseCase = new DeleteMemberUseCase(memberRepo);
     const memberController = new MemberController(
-        createMemberUseCase, 
+        createMemberUseCase,
         getMembersUseCase,
         updateMemberUseCase,
         deleteMemberUseCase
@@ -74,6 +79,12 @@ export function buildApp() {
     const medicalCertificateController = new MedicalCertificateController(
       createMedicalCertificateUseCase
     );
+
+    const paymentRepo = new PostgresPaymentRepository();
+    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, memberRepo);
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
+    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase);
+
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
@@ -83,6 +94,10 @@ export function buildApp() {
     server.put('/api/v1/deportes/:id', sportController.update.bind(sportController));
     server.delete('/api/v1/deportes/:id', sportController.delete.bind(sportController));
     server.post('/api/v1/certificados-medicos', medicalCertificateController.create.bind(medicalCertificateController));
+
+    server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
+    server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
+
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
     });
