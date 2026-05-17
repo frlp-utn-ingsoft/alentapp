@@ -1,15 +1,15 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateEquipmentLoanUseCase } from '../application/CreateEquipmentLoanUseCase.js';
-import { CreateEquipmentLoanRequest } from '@alentapp/shared';
+import { UpdateEquipmentLoanUseCase } from '../application/UpdateEquipmentLoanUseCase.js';
+import { CreateEquipmentLoanRequest, UpdateEquipmentLoanRequest } from '@alentapp/shared';
 
 export class EquipmentLoanController {
     constructor(
         private readonly createEquipmentLoanUseCase: CreateEquipmentLoanUseCase,
+        private readonly updateEquipmentLoanUseCase: UpdateEquipmentLoanUseCase,
     ) {}
 
     async getAll(_request: FastifyRequest, reply: FastifyReply) {
-        // Placeholder para la ruta GET — se completa en rama update/delete si se necesita
-        // Por ahora retorna 200 vacío para que la ruta registrada no falle
         return reply.status(200).send({ data: [] });
     }
 
@@ -27,11 +27,33 @@ export class EquipmentLoanController {
             if (error.message.includes('no existe')) {
                 return reply.status(404).send({ error: error.message });
             }
-            if (
-                error.message.includes('fecha') ||
-                error.message.includes('ítem')
-            ) {
+            if (error.message.includes('fecha') || error.message.includes('ítem')) {
                 return reply.status(400).send({ error: error.message });
+            }
+            return reply.status(500).send({ error: 'Error interno, reintente más tarde.' });
+        }
+    }
+
+    async update(
+        request: FastifyRequest<{ Params: { id: string }; Body: UpdateEquipmentLoanRequest }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const { id } = request.params;
+            const loan = await this.updateEquipmentLoanUseCase.execute(id, request.body);
+            return reply.status(200).send({ data: loan });
+        } catch (error: any) {
+            if (error.message.includes('no existe')) {
+                return reply.status(404).send({ error: error.message });
+            }
+            if (error.message.includes('no puede ser modificado') ||
+                error.message.includes('revertir') ||
+                error.message.includes('vacío') ||
+                error.message.includes('fecha')) {
+                return reply.status(400).send({ error: error.message });
+            }
+            if (error.message.includes("debe ser 'Returned' o 'Damaged'")) {
+                return reply.status(422).send({ error: error.message });
             }
             return reply.status(500).send({ error: 'Error interno, reintente más tarde.' });
         }
