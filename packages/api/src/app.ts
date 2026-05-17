@@ -22,6 +22,7 @@ import { MedicalCertificateController } from './delivery/MedicalCertificateContr
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.ts';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.ts';
+import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.ts';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.ts';
 import { PaymentController } from './delivery/PaymentController.ts';
 
@@ -84,8 +85,9 @@ export function buildApp() {
     const paymentRepo = new PostgresPaymentRepository();
     const paymentValidator = new PaymentValidator(memberRepo);
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, paymentValidator);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
-    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase);
+    const paymentController = new PaymentController(createPaymentUseCase, updatePaymentUseCase,getPaymentsUseCase);
 
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
@@ -99,6 +101,7 @@ export function buildApp() {
 
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
     server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
+    server.put('/api/v1/pagos/:id', paymentController.update.bind(paymentController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })

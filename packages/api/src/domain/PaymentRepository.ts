@@ -1,4 +1,4 @@
-import { PaymentDTO } from '@alentapp/shared';
+import { PaymentDTO, UpdatePaymentRequest } from '@alentapp/shared';
 
 export interface PaymentRepository {
     /**
@@ -18,4 +18,9 @@ export interface PaymentRepository {
      * Obtiene todos los pagos registrados (que no estén eliminados)
      */
     findAll(): Promise<PaymentDTO[]>;
+
+    /**
+     * Actualiza parcialmente un pago existente por su ID
+     */
+    update(id: string, data: UpdatePaymentRequest & { deleted_at?: Date | null }): Promise<PaymentDTO>;
 }
