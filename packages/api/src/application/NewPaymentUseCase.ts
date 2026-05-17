@@ -5,6 +5,8 @@ export interface PaymentRepository {
   memberExists(memberId: string): Promise<boolean>;
   create(payment: Payment): Promise<Payment>; 
   findByMemberAndPeriod(memberId: string, month: number, year: number): Promise<Payment | null>;
+  
+  getPaymentsByMember(memberId: string): Promise<Payment[]>;
 }
 
 export class NewPaymentUseCase {
@@ -24,13 +26,13 @@ export class NewPaymentUseCase {
       throw new Error("Month must be between 1 and 12");
     }
 
-    // Acá Validamos que el socio existe
+    
     const exists = await this.paymentRepository.memberExists(memberId); 
     if (!exists) {
       throw new Error(`Member with ID ${memberId} does not exist`);
     }
 
-    // 3. Verificar Duplicados
+    
     const duplicate = await this.paymentRepository.findByMemberAndPeriod(memberId, month, year);
     if (duplicate) {
       throw new Error("DUPLICATE_PERIOD");

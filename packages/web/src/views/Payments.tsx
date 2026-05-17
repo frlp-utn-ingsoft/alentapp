@@ -1,5 +1,3 @@
-// packages/web/src/views/Payments.tsx
-
 import { useState } from "react";
 import { 
   Box, 
@@ -10,13 +8,26 @@ import {
   Button, 
   Field, 
   SimpleGrid,
-  Alert
+  Alert,
+  Table,
+  Separator,
+  Badge,
+  HStack
 } from "@chakra-ui/react";
-import { LuCheck, LuX } from "react-icons/lu";
-import { membersService } from "../services/members"; // 👈 Recuperamos tu servicio oficial
+import { LuCheck, LuX, LuReceipt, LuSearch } from "react-icons/lu";
+import { membersService } from "../services/members";
+import { getPaymentsByMember } from "../services/Payment"; 
+import { type Payment } from "@alentapp/shared";
 
 export function PaymentsView() {
-  // ─── ESTADOS DEL FORMULARIO ──────────────────────────────────────────────
+  // ─── ESTADO DEL BUSCADOR INDEPENDIENTE ───────────────────────────────────
+  const [searchDni, setSearchDni] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [history, setHistory] = useState<Payment[]>([]);
+  const [selectedMemberName, setSelectedMemberName] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  // ─── ESTADOS DEL FORMULARIO DE ALTA ──────────────────────────────────────
   const [memberDni, setMemberDni] = useState("");
   const [amount, setAmount] = useState("");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -24,29 +35,66 @@ export function PaymentsView() {
   const [dueDate, setDueDate] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Estados para los carteles de feedback
+  // Estados para los carteles de feedback (Carga de pagos)
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Estado de error específico para la búsqueda por DNI
+  const [searchError, setSearchError] = useState<string | null>(null);
+
+  const handleSearchPayments = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchDni.trim()) return;
+
+    setSearchLoading(true);
+    setSearchError(null);
+    setHasSearched(true);
+
+    try {
+      const socios = await membersService.getAll();
+      const socioEncontrado = socios.find((s: any) => String(s.dni).trim() === searchDni.trim());
+
+      if (!socioEncontrado) {
+        setHistory([]);
+        setSelectedMemberName(null);
+        setSearchError(`No se encontró ningún socio con el DNI: ${searchDni}`);
+        return;
+      }
+
+      
+      setSelectedMemberName(socioEncontrado.name);
+      const pagos = await getPaymentsByMember(socioEncontrado.id);
+      setHistory(pagos);
+    } catch (err: any) {
+      setSearchError(err.message || "Error al conectar con el servidor.");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const refreshHistory = async (memberId: string) => {
+    try {
+      const pagos = await getPaymentsByMember(memberId);
+      setHistory(pagos);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Manejo nativo de carga
     setLoading(true);
     setSuccessMessage(null);
     setErrorMessage(null);
 
     try {
-      // 🔍 PASO 1: Traemos todos los socios usando tu servicio oficial
       const socios = await membersService.getAll();
-
-      // 🔍 PASO 2: Buscamos localmente el socio por el DNI ingresado
       const socioEncontrado = socios.find((s: any) => String(s.dni).trim() === memberDni.trim());
 
       if (!socioEncontrado) {
         throw new Error(`No se encontró ningún miembro con el DNI: ${memberDni}`);
       }
 
-      // 🛠️ MODIFICADO: Agregamos ": any" para que Vite no choche con mayúsculas/minúsculas remanentes
       const paymentData: any = {
         memberId: socioEncontrado.id,
         amount: Number(amount),
@@ -55,32 +103,33 @@ export function PaymentsView() {
         dueDate: dueDate
       };
 
-      // 💳 PASO 3: Mandamos el pago a la ruta real de tu Fastify con /api/v1/
-      const paymentResponse = await fetch("http://localhost:3000/api/v1/payments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(paymentData),
-      });
+      const paymentResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/payments`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(paymentData),
+});
 
       const paymentResult = await paymentResponse.json();
 
-      // Capturamos el error si Fastify devuelve un código de error (Ej: 400 o 409 Duplicado)
       if (!paymentResponse.ok) {
         throw new Error(paymentResult.error || "Error al procesar el pago en el servidor.");
       }
 
-      // ✅ REQUISITO 2: El pago fue creado correctamente
       setSuccessMessage(`¡Pago creado con éxito para el socio ${socioEncontrado.name}!`);
       
-      // Limpiamos los campos del formulario
+      if (searchDni.trim() === memberDni.trim()) {
+        await refreshHistory(socioEncontrado.id);
+      }
+
       setMemberDni("");
-      setAmount("");
-      setDueDate("");
+setAmount("");
+setDueDate("");
+setMonth(new Date().getMonth() + 1); 
+setYear(new Date().getFullYear());
 
     } catch (error: any) {
-      // ❌ REQUISITO 3: Mostrar cartel de error específico del TDD
       setErrorMessage(error.message || "No se pudo conectar con el servidor.");
     } finally {
       setLoading(false);
@@ -92,20 +141,113 @@ export function PaymentsView() {
       
       <VStack gap="2" align="flex-start" mb="8">
         <Heading size="3xl" fontWeight="extrabold" color="blue.600">
-          Registrar Nuevo Pago
+          Gestión de Pagos y Cuotas
         </Heading>
         <Text fontSize="md" color="fg.muted">
-          Ingresá el DNI del socio para identificarlo y asignarle una nueva cuota.
+          Buscá el historial de deudas de un socio o registrá un nuevo comprobante de pago.
         </Text>
       </VStack>
 
-      {/* CARTELES DE FEEDBACK */}
+      {/*SECCIÓN DE BÚSQUEDA EXPLICÍTA POR DNI */}
+      <Box p="5" bg="gray.50" borderRadius="2xl" borderWidth="1px" borderColor="gray.100" mb="8">
+        <form onSubmit={handleSearchPayments}>
+          <VStack align="stretch" gap="3">
+            <Field.Root required>
+              <Field.Label fontWeight="bold" color="gray.700">Consultar Historial por DNI</Field.Label>
+              <HStack width="100%">
+                <Input 
+                  placeholder="Ingresá DNI para buscar pagos..." 
+                  value={searchDni}
+                  onChange={(e) => setSearchDni(e.target.value)}
+                  bg="white"
+                  borderRadius="xl"
+                  size="lg"
+                />
+                <Button 
+                  type="submit" 
+                  colorScheme="blue" 
+                  size="lg" 
+                  borderRadius="xl"
+                  fontWeight="bold"
+                  loading={searchLoading}
+                >
+                  <LuSearch /> Buscar Pago
+                </Button>
+              </HStack>
+            </Field.Root>
+          </VStack>
+        </form>
+
+        {/* Error de búsqueda */}
+        {searchError && (
+          <Text color="red.600" fontSize="sm" mt="3" fontWeight="medium" display="flex" alignItems="center" gap="1">
+            <LuX /> {searchError}
+          </Text>
+        )}
+      </Box>
+
+      {/* ─── TABLA DE RESULTADOS DE BÚSQUEDA ─────────────────────────────────── */}
+      {hasSearched && selectedMemberName && (
+        <Box mb="8" p="4" borderWidth="1px" borderColor="blue.100" bg="blue.50/20" borderRadius="2xl">
+          <VStack align="flex-start" mb="4" gap="1">
+            <Heading size="md" color="gray.700" display="flex" alignItems="center" gap="2">
+              <LuReceipt /> Historial de Cuotas: {selectedMemberName}
+            </Heading>
+          </VStack>
+
+          {history.length === 0 ? (
+            <Text p="4" bg="white" borderRadius="xl" fontSize="sm" color="gray.500" fontStyle="italic" borderWidth="1px" borderColor="gray.100">
+              Este socio no registra ningún pago previo en el sistema.
+            </Text>
+          ) : (
+            <Box borderWidth="1px" borderColor="border.subtle" borderRadius="xl" overflow="hidden" bg="white">
+              <Table.Root variant="line" size="sm">
+                <Table.Header bg="gray.50">
+                  <Table.Row>
+                    <Table.ColumnHeader fontWeight="bold">Período</Table.ColumnHeader>
+                    <Table.ColumnHeader fontWeight="bold">Monto</Table.ColumnHeader>
+                    <Table.ColumnHeader fontWeight="bold">Vencimiento</Table.ColumnHeader>
+                    <Table.ColumnHeader fontWeight="bold" textAlign="right">Estado</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {history.map((p: any) => (
+                    <Table.Row key={p.id}>
+                      <Table.Cell fontWeight="medium">
+                        {String(p.month).padStart(2, "0")}/{p.year}
+                      </Table.Cell>
+                      <Table.Cell>${p.amount}</Table.Cell>
+                      <Table.Cell>
+                        {p.dueDate ? new Date(p.dueDate).toLocaleDateString("es-AR", { timeZone: "UTC" }) : "-"}
+                      </Table.Cell>
+                      <Table.Cell textAlign="right">
+                        <Badge 
+                          colorScheme={p.status === "Paid" ? "green" : "orange"} 
+                          variant="solid"
+                          borderRadius="md"
+                          px="2"
+                        >
+                          {p.status === "Paid" ? "Pagado" : "Pendiente"}
+                        </Badge>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Box>
+          )}
+        </Box>
+      )}
+
+      <Separator mb="8" />
+
+      {/* ─── SECCIÓN 2: FORMULARIO ORIGINAL DE CARGA ─────────────────────────── */}
+      <Heading size="md" mb="4" color="gray.700">Registrar Nuevo Cobro</Heading>
+
       <VStack gap="4" width="100%" mb="6" align="stretch">
         {successMessage && (
           <Alert.Root status="success" borderRadius="xl" p="4">
-            <Alert.Indicator color="green.600">
-              <LuCheck size="20" />
-            </Alert.Indicator>
+            <Alert.Indicator color="green.600"><LuCheck size="20" /></Alert.Indicator>
             <Alert.Content>
               <Alert.Title fontWeight="bold" color="green.800">Operación Exitosa</Alert.Title>
               <Alert.Description color="green.700">{successMessage}</Alert.Description>
@@ -115,9 +257,7 @@ export function PaymentsView() {
 
         {errorMessage && (
           <Alert.Root status="error" borderRadius="xl" p="4">
-            <Alert.Indicator color="red.600">
-              <LuX size="20" />
-            </Alert.Indicator>
+            <Alert.Indicator color="red.600"><LuX size="20" /></Alert.Indicator>
             <Alert.Content>
               <Alert.Title fontWeight="bold" color="red.800">Error en la Operación</Alert.Title>
               <Alert.Description color="red.700">{errorMessage}</Alert.Description>
@@ -126,12 +266,11 @@ export function PaymentsView() {
         )}
       </VStack>
 
-      {/* FORMULARIO */}
       <form onSubmit={handleSubmit}>
         <VStack gap="6" align="stretch">
           
           <Field.Root required>
-            <Field.Label fontWeight="semibold">DNI del Socio</Field.Label>
+            <Field.Label fontWeight="semibold">DNI del Socio para el Pago</Field.Label>
             <Input 
               placeholder="Ej: 37824282" 
               value={memberDni}
@@ -199,7 +338,7 @@ export function PaymentsView() {
             mt="4"
             fontWeight="bold"
           >
-            Buscar Socio y Crear Pago
+            Crear Pago
           </Button>
         </VStack>
       </form>

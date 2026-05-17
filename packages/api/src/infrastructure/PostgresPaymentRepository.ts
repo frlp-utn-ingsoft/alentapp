@@ -22,14 +22,14 @@ export class PostgresPaymentRepository implements PaymentRepository {
     return member !== null;
   }
 
-  // Acá hacemos la busqueda de payments duplicados
+  // Búsqueda de payments duplicados
   public async findByMemberAndPeriod(memberId: string, month: number, year: number): Promise<Payment | null> {
     const payment = await prisma.payment.findFirst({
       where: {
-        member_id: memberId,
+        memberId: memberId,
         month: month,
         year: year
-      }
+      } as any
     });
     
     return payment as any;
@@ -44,14 +44,38 @@ export class PostgresPaymentRepository implements PaymentRepository {
         amount: p.amount,
         month: p.month,
         year: p.year,
-        status: p.status,
-        due_date: p.dueDate || p.due_date,
-        member_id: p.memberId || p.member_id
-         
-        // use su @default(now()) nativo sin chocar con TypeScript.
-      }
+        status: (p.status || 'Pending') as any,
+        dueDate: p.dueDate || p.due_date,
+        memberId: p.memberId || p.member_id
+      } as any,
     });
 
     return createdPayment as any;
   }
-}
+
+  public async getPaymentsByMember(memberId: string): Promise<Payment[]> {
+    const payments = await prisma.payment.findMany({
+      where: {
+        memberId: memberId
+      } as any, 
+      orderBy: {
+        year: 'desc'
+      }
+    });
+
+    return payments.map((p: any) => ({
+      id: p.id,
+      memberId: p.memberId,
+      amount: p.amount,
+      month: p.month,
+      year: p.year,
+      status: p.status,
+      
+      dueDate: p.dueDate || p.due_date,
+      due_date: p.dueDate || p.due_date,
+      
+      createdAt: p.createdAt || p.created_at,
+      created_at: p.createdAt || p.created_at
+    })) as any;
+  }
+} 

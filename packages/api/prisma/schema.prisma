@@ -1,54 +1,63 @@
-// This is your Prisma schema file
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "../src/generated/client"
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
-    provider = "postgresql"
+  provider = "postgresql"
 }
 
+
 enum MemberCategory {
-    Pleno
-    Cadete
-    Honorario
+  Pleno
+  Cadete
+  Honorario
 }
 
 enum MemberStatus {
-    Activo
-    Moroso
-    Suspendido
+  Activo
+  Moroso
+  Suspendido
 }
 
-model Member {
-    id         String         @id @default(uuid()) @db.Uuid // 👈 Le agregamos @db.Uuid
-    dni        String         @unique
-    name       String
-    email      String         @unique
-    birthdate  DateTime?      @db.Date
-    category   MemberCategory
-    status     MemberStatus   @default(Activo)
-    created_at DateTime       @default(now())
-    
-    // 👈 AGREGAR ESTA LÍNEA: Relación inversa para que Prisma compile feliz
-    payments   Payment[]
+enum PaymentStatus {
+  Pending
+  Paid
+  Canceled
+}
 
-    @@map("members")
+
+model Member {
+  id         String         @id @default(uuid()) @db.Uuid 
+  dni        String         @unique
+  name       String
+  email      String         @unique
+  birthdate  DateTime?      @db.Date
+  category   MemberCategory
+  status     MemberStatus   @default(Activo)
+  created_at DateTime       @default(now())
+  
+  // Relación uno a muchos hacia pagos
+  payments   Payment[]
+
+  @@map("members")
 }
 
 model Payment {
-  id           String    @id @default(uuid()) @db.Uuid
-  amount       Float
-  month        Int
-  year         Int
-  status       String    // Valores: "Pending", "Paid", "Canceled"
-  due_date     DateTime  @db.Date
-  payment_date DateTime? @db.Timestamp
-  member_id    String    @db.Uuid
+  id        String        @id @default(uuid()) @db.Uuid
+  amount    Float
+  month     Int
+  year      Int
+  dueDate   DateTime      @map("due_date")
   
-  // Relación con el modelo Member 
-  member       Member    @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  status    PaymentStatus @default(Pending)
+  
+  memberId  String        @map("member_id") @db.Uuid
 
+  member    Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, month, year])
+  
   @@map("payments")
 }

@@ -1,4 +1,3 @@
-// packages/web/src/routes.ts
 
 import { createBrowserRouter } from "react-router";
 
