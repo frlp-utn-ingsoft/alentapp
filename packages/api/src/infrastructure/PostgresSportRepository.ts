@@ -43,14 +43,28 @@ export class PostgresSportRepository implements SportRepository {
 
     // busca duplicados solo entre deportes activos.
     async findActiveByName(name: string): Promise<SportDTO | null> {
-        const sport = await prisma.sport.findFirst({
+        const sports = await prisma.sport.findMany({
             where: {
-                name,
                 deleted_at: null,
             },
         });
 
+        const normalizedName = this.normalizeName(name);
+
+        const sport = sports.find(
+            (sport) => this.normalizeName(sport.name) === normalizedName,
+        );
+
         return sport ? this.mapToDTO(sport) : null;
+    }
+
+    // Normaliza el nombre para comparar sin distinguir mayúsculas, tildes ni espacios externos.
+    private normalizeName(name: string): string {
+        return name
+            .trim()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
     }
 
     // lista deportes activos.
