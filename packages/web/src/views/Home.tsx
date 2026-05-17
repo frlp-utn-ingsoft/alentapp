@@ -1,8 +1,9 @@
 // packages/web/src/views/Home.tsx
 
 import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
-import { LuUsers, LuCreditCard } from "react-icons/lu"; // 👈 Agregamos LuCreditCard aquí
+import { LuUsers } from "react-icons/lu";
 import { SectionCard } from "../components/SectionCard";
+import { LuDumbbell, LuUser, LuCreditCard } from 'react-icons/lu';
 
 export function HomeView() {
   return (
@@ -32,6 +33,13 @@ export function HomeView() {
           description="Administra el padrón de socios, sus categorías, estados de cuenta y datos personales."
           to="/members"
           icon={LuUsers}
+        />
+
+        <SectionCard 
+          title="Deportes"
+          description="Crea deportes, definiendo su capacidad, precio adicional y necesidad de certificado médico."
+          to="/sports"
+          icon={LuDumbbell}
         />
 
         {/* 💳 CARD DE PAGOS (Reemplaza al "Próximamente") */}

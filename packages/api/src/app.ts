@@ -7,12 +7,17 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
-import { GetPaymentUseCase } from './application/GetPaymentUseCase.js'; 
-
-// IMPORTS DE PAGOS
+// --- IMPORTS DE PAGOS (PAYMENTS) ---
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js'; 
-import { NewPaymentUseCase } from './application/NewPaymentUseCase.js'; 
-import { PaymentController } from './delivery/PaymentController.js';
+import { NewPaymentUseCase } from './application/NewPaymentUseCase.js';
+import { GetPaymentUseCase } from './application/GetPaymentUseCase.js';
+import { PaymentController } from './delivery/PaymentController.js'; 
+
+// --- IMPORTS DE DEPORTES (SPORTS) ---
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+import { CreateSportUseCase } from './application/NewSportUseCase.js';
+import { SportController } from './delivery/SportController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -50,6 +55,11 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator(sportRepo);
+    const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
+    const sportController = new SportController(createSportUseCase);
+
     // --- INSTANCIACIÓN DE PAGOS ---
     const paymentRepo = new PostgresPaymentRepository();
     const newPaymentUseCase = new NewPaymentUseCase(paymentRepo);
@@ -61,13 +71,6 @@ export function buildApp() {
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
-    
-    // Busca un único socio por su DNI
-    server.get('/api/v1/socios/dni/:dni', memberController.getByDni.bind(memberController));
-
-    // --- ENDPOINTS DE PAGOS ---
-    server.post('/api/v1/payments', paymentController.create.bind(paymentController));
-    server.get('/api/v1/payments/member/:memberId', paymentController.getByMember.bind(paymentController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
