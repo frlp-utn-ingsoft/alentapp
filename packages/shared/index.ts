@@ -137,6 +137,7 @@ export interface CreateLockerRequest {
 }
 
 export interface UpdateLockerRequest {
+    number?: number;
     status?: LockerStatus;
     location?: string;
     member_id?: string | null;
