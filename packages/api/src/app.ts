@@ -16,7 +16,7 @@ import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
 import { LockerController } from './delivery/LockerController.js';
 import { GetLockersUseCase } from './application/GetLockersUseCase.js';
 import { UpdateLockerUseCase } from './application/UpdateLockerUseCase.js';
-
+import { DeleteLockerUseCase } from './application/DeleteLockerUseCase.js';
 // Payments
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { CreatePaymentUseCase } from './application/NewPaymentUseCase.js'; 
@@ -24,6 +24,14 @@ import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
 import { CancelPaymentUseCase } from './application/DeletePaymentUseCase.js'; 
 import { PaymentController } from './delivery/PaymentController.js';
+// Sports
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
+import { DeleteSportUseCase } from './application/DeleteSportUseCase.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+import { DeleteSportValidator } from './domain/services/DeleteSportValidator.js';
+import { SportController } from './delivery/SportController.js';
 
 // EquipmentLoan
 import { PrismaEquipmentLoanRepository } from './infrastructure/PrismaEquipmentLoanRepository.js';
@@ -100,14 +108,32 @@ export function buildApp() {
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo);
     const getLockersUseCase = new GetLockersUseCase(lockerRepo);
     const updateLockerUseCase = new UpdateLockerUseCase(lockerRepo);
+    const deleteLockerUseCase = new DeleteLockerUseCase(lockerRepo);
     const lockerController = new LockerController(
         createLockerUseCase,
         getLockersUseCase,
         updateLockerUseCase,
+        deleteLockerUseCase,
     );
 
     server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
+    server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));
+    server.delete('/api/v1/lockers/:id', lockerController.delete.bind(lockerController));
+
+    // --- Sports ---
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator(sportRepo);
+    const deleteSportValidator = new DeleteSportValidator(sportRepo);
+    const createSportUseCase = new CreateSportUseCase(sportRepo);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
+    const deleteSportUseCase = new DeleteSportUseCase(sportRepo, deleteSportValidator);
+    const sportController = new SportController(createSportUseCase, updateSportUseCase, deleteSportUseCase);
+
+    server.post('/api/v1/deportes', sportController.create.bind(sportController));
+    server.put('/api/v1/deportes/:id', sportController.update.bind(sportController));
+    server.delete('/api/v1/deportes/:id', sportController.delete.bind(sportController));
+    
     server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));  
 
     

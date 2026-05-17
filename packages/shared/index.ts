@@ -86,6 +86,33 @@ export interface UpdateLockerRequest {
 }
 
 // ==========================================
+// Sport
+// ==========================================
+export interface SportDTO {
+  id: string;
+  name: string;
+  description: string;
+  maxCapacity: number;
+  additionalPrice: number;
+  requiresMedicalCertificate: boolean;
+}
+
+export interface CreateSportRequest {
+  name: string;
+  description: string;
+  maxCapacity: number;
+  additionalPrice: number;
+  requiresMedicalCertificate: boolean;
+}
+
+export interface UpdateSportRequest {
+  description?: string;
+  maxCapacity?: number;
+  additionalPrice?: number;
+  requiresMedicalCertificate?: boolean;
+}
+
+// ==========================================
 // EquipmentLoan
 // ==========================================
 export type LoanStatus = 'Loaned' | 'Returned' | 'Damaged';
