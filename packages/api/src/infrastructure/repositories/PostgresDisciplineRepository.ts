@@ -13,39 +13,42 @@ const prisma = new PrismaClient({
 
 type DBDiscipline = {
     id: string;
-    motivo: string;
-    fechaInicio: Date;
-    fechaFin: Date;
-    esSuspensionTotal: boolean;
-    miembro_id: string;
-    created_at: Date;
+    reason: string;
+    startDate: Date;
+    endDate: Date;
+    isTotalSuspension: boolean;
+    memberId: string;
+    deletedAt: Date | null;
+    createdAt: Date;
     updatedAt: Date;
 };
 
 export class PostgresDisciplineRepository implements IDisciplineRepository {
     async create(data: CreateDisciplineRequest): Promise<DisciplineResponse> {
-        const sancion = await prisma.discipline.create({
+        const discipline = await prisma.discipline.create({
             data: {
-                motivo: data.motivo,
-                fechaInicio: new Date(data.fechaInicio),
-                fechaFin: new Date(data.fechaFin),
-                esSuspensionTotal: data.esSuspensionTotal,
-                miembro_id: data.miembro_id,
+                reason: data.reason,
+                startDate: new Date(data.startDate),
+                endDate: new Date(data.endDate),
+                isTotalSuspension: data.isTotalSuspension,
+                memberId: data.memberId,
             },
         });
 
-        return this.mapToDTO(sancion);
+        return this.mapToDTO(discipline);
     }
-    private mapToDTO(sancion: DBDiscipline): DisciplineResponse {
+
+    private mapToDTO(discipline: DBDiscipline): DisciplineResponse {
         return {
-            id: sancion.id,
-            motivo: sancion.motivo,
-            fechaInicio: sancion.fechaInicio.toISOString().split('T')[0],
-            fechaFin: sancion.fechaFin.toISOString().split('T')[0],
-            esSuspensionTotal: sancion.esSuspensionTotal,
-            miembro_id: sancion.miembro_id,
-            created_at: sancion.created_at.toISOString(),
-            updatedAt: sancion.updatedAt.toISOString(),
+            id: discipline.id,
+            reason: discipline.reason,
+            startDate: discipline.startDate.toISOString().split('T')[0],
+            endDate: discipline.endDate.toISOString().split('T')[0],
+            isTotalSuspension: discipline.isTotalSuspension,
+            memberId: discipline.memberId,
+            deletedAt: discipline.deletedAt ? discipline.deletedAt.toISOString() : null,
+            createdAt: discipline.createdAt.toISOString(),
+            updatedAt: discipline.updatedAt.toISOString(),
         };
     }
 }

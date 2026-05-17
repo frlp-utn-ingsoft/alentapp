@@ -9,19 +9,9 @@ export class CreateDisciplineUseCase {
     ) { }
 
     async execute(data: CreateDisciplineRequest): Promise<DisciplineResponse> {
-        // 1. Validaciones de negocio
-        this.disciplineValidator.validateMotivo(data.motivo);
-        this.disciplineValidator.validateDates(data.fechaInicio, data.fechaFin);
+        this.disciplineValidator.validateReason(data.reason);
+        this.disciplineValidator.validateDates(data.startDate, data.endDate);
 
-        // 2. Persistencia
-        const sancion = await this.disciplineRepository.create({
-            motivo: data.motivo,
-            fechaInicio: data.fechaInicio,
-            fechaFin: data.fechaFin,
-            esSuspensionTotal: data.esSuspensionTotal,
-            miembro_id: data.miembro_id,
-        });
-
-        return sancion;
+        return this.disciplineRepository.create(data);
     }
 }
