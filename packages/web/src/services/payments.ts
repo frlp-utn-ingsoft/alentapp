@@ -4,7 +4,7 @@ const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/ap
 
 export const paymentsService = {
   async getAll(): Promise<PaymentDTO[]> {
-    const response = await fetch(`${API_URL}/payments`);
+    const response = await fetch(`${API_URL}/pagos`);
     if (!response.ok) {
       throw new Error('Error al obtener los pagos');
     }
@@ -13,7 +13,7 @@ export const paymentsService = {
   },
 
   async create(data: CreatePaymentRequest): Promise<PaymentDTO> {
-    const response = await fetch(`${API_URL}/payments`, {
+    const response = await fetch(`${API_URL}/pagos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ export const paymentsService = {
   },
 
   async update(id: string, data: UpdatePaymentRequest): Promise<PaymentDTO> {
-    const response = await fetch(`${API_URL}/payments/${id}`, {
+    const response = await fetch(`${API_URL}/pagos/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export const paymentsService = {
   },
 
   async pay(id: string): Promise<PaymentDTO> {
-    const response = await fetch(`${API_URL}/payments/${id}/pay`, {
+    const response = await fetch(`${API_URL}/pagos/${id}/pay`, {
       method: 'PATCH',
     });
     if (!response.ok) {
@@ -57,7 +57,7 @@ export const paymentsService = {
   },
 
   async cancel(id: string): Promise<PaymentDTO> {
-    const response = await fetch(`${API_URL}/payments/${id}/cancel`, {
+    const response = await fetch(`${API_URL}/pagos/${id}/cancel`, {
       method: 'PATCH',
     });
     if (!response.ok) {
