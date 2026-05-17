@@ -1,11 +1,53 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreatePaymentUseCase } from '../application/CreatePaymentUseCase.js';
-import { CreatePaymentRequest } from '@alentapp/shared';
+import { GetPaymentsUseCase } from '../application/GetPaymentsUseCase.js';
+import { GetPaymentByIdUseCase } from '../application/GetPaymentByIdUseCase.js';
+import { CreatePaymentRequest, GetPaymentsQuery } from '@alentapp/shared';
 
 export class PaymentController {
     constructor(
         private readonly createPaymentUseCase: CreatePaymentUseCase,
+        private readonly getPaymentsUseCase: GetPaymentsUseCase,
+        private readonly getPaymentByIdUseCase: GetPaymentByIdUseCase,
     ) {}
+
+    async getAll(
+        request: FastifyRequest<{ Querystring: GetPaymentsQuery }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const { month } = request.query;
+
+            if (month !== undefined && (month < 1 || month > 12)) {
+                return reply.status(400).send({ error: 'El mes debe estar entre 1 y 12' });
+            }
+
+            const payments = await this.getPaymentsUseCase.execute(request.query);
+            return reply.status(200).send({ data: payments });
+        } catch (error: any) {
+            return reply.status(500).send({
+                error: 'Error interno, reintente más tarde',
+            });
+        }
+    }
+
+    async getById(
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const payment = await this.getPaymentByIdUseCase.execute(request.params.id);
+            return reply.status(200).send({ data: payment });
+        } catch (error: any) {
+            if (error.message === 'El pago especificado no existe') {
+                return reply.status(404).send({ error: error.message });
+            }
+
+            return reply.status(500).send({
+                error: 'Error interno, reintente más tarde',
+            });
+        }
+    }
 
     async create(
         request: FastifyRequest<{ Body: CreatePaymentRequest }>,
