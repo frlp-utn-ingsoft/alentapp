@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { PaymentRepository } from '../domain/PaymentRepository.js';
-import { CreatePaymentRequest, GetPaymentsQuery, PaymentResponse } from '@alentapp/shared';
+import { CreatePaymentRequest, GetPaymentsQuery, PaymentResponse, UpdatePaymentRequest } from '@alentapp/shared';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -73,6 +73,44 @@ export class PostgresPaymentRepository implements PaymentRepository {
         if (!payment) {
             return null;
         }
+
+        return this.mapToDTO(payment);
+    }
+
+    async update(id: string, data: UpdatePaymentRequest): Promise<PaymentResponse> {
+        const updateData: any = {};
+
+        if (data.amount !== undefined) {
+            updateData.amount = data.amount;
+        }
+
+        if (data.month !== undefined) {
+            updateData.month = data.month;
+        }
+
+        if (data.year !== undefined) {
+            updateData.year = data.year;
+        }
+
+        if (data.dueDate !== undefined) {
+            updateData.due_date = new Date(data.dueDate);
+        }
+
+        if (data.paymentDate !== undefined) {
+            updateData.payment_date = data.paymentDate ? new Date(data.paymentDate) : null;
+        }
+
+        if (data.status !== undefined) {
+            updateData.status = data.status;
+            if (data.status === 'Paid') {
+                updateData.payment_date = new Date();
+            }
+        }
+
+        const payment = await prisma.payment.update({
+            where: { id },
+            data: updateData,
+        });
 
         return this.mapToDTO(payment);
     }
