@@ -1,12 +1,14 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { CreateLockerRequest } from '@alentapp/shared';
+import { CreateLockerRequest, UpdateLockerRequest } from '@alentapp/shared';
 import { CreateLockerUseCase } from '../application/Locker/NewLockerUseCase.js';
 import { GetLockersUseCase } from '../application/Locker/GetLockersUseCase.js';
+import { UpdateLockerUseCase } from '../application/Locker/UpdateLockerUseCase.js';
 
 export class LockerController {
     constructor(
         private readonly createLockerUseCase: CreateLockerUseCase,
         private readonly getLockersUseCase: GetLockersUseCase,
+        private readonly updateLockerUseCase: UpdateLockerUseCase,
     ) {}
 
     async create(
@@ -40,6 +42,55 @@ export class LockerController {
             const lockers = await this.getLockersUseCase.execute();
             return reply.status(200).send({ data: lockers });
         } catch {
+            return reply
+                .status(500)
+                .send({ error: 'Error interno, reintente más tarde' });
+        }
+    }
+
+    async update(
+        request: FastifyRequest<{
+            Params: { id: string };
+            Body: UpdateLockerRequest;
+        }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const { id } = request.params;
+
+            const locker = await this.updateLockerUseCase.execute(
+                id,
+                request.body,
+            );
+
+            return reply.status(200).send({ data: locker });
+        } catch (error: any) {
+            const message =
+                error instanceof Error ? error.message : 'Error desconocido';
+
+            if (
+                message === 'El socio no existe' ||
+                message === 'El número de Locker debe ser positivo' ||
+                message === 'La ubicación es obligatoria' ||
+                message === 'Debe informar al menos un campo para actualizar'
+            ) {
+                return reply.status(400).send({ error: message });
+            }
+
+            if (message === 'El Locker no existe') {
+                return reply.status(404).send({ error: message });
+            }
+
+            if (
+                message === 'El Locker está en mantenimiento y no puede asignarse' ||
+                message ===
+                    'No se puede poner en mantenimiento un Locker ocupado. Desasigná el socio primero' ||
+                message === 'El Locker ya se encuentra ocupado' ||
+                message === 'Ya existe un Locker con ese número'
+            ) {
+                return reply.status(409).send({ error: message });
+            }
+
             return reply
                 .status(500)
                 .send({ error: 'Error interno, reintente más tarde' });
