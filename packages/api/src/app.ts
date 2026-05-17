@@ -10,6 +10,7 @@ import { MemberController } from './delivery/MemberController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/NewSportUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
 
 export function buildApp() {
@@ -50,7 +51,8 @@ export function buildApp() {
     const sportRepo = new PostgresSportRepository();
     const sportValidator = new SportValidator(sportRepo);
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
-    const sportController = new SportController(createSportUseCase);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
+    const sportController = new SportController(createSportUseCase, updateSportUseCase);
 
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
@@ -58,6 +60,7 @@ export function buildApp() {
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
 
     server.post('/api/v1/sports', sportController.create.bind(sportController));
+    server.put('/api/v1/sports/:id', sportController.update.bind(sportController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
