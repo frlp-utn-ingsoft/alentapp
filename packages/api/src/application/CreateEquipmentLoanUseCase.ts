@@ -22,7 +22,7 @@ export class CreateEquipmentLoanUseCase {
 
         // 3. Validar categoría del socio (regla de negocio de dominio)
         if (member.category === 'Cadete') {
-            throw new Error('Los socios Cadet no pueden solicitar equipamiento.');
+            throw new Error('Los socios Cadete no pueden solicitar equipamiento.');
         }
 
         // 4. Validar dueDate > NOW()

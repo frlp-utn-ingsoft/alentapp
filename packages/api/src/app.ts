@@ -134,8 +134,6 @@ export function buildApp() {
     server.put('/api/v1/deportes/:id', sportController.update.bind(sportController));
     server.delete('/api/v1/deportes/:id', sportController.delete.bind(sportController));
     
-    server.put('/api/v1/lockers/:id', lockerController.update.bind(lockerController));  
-
     
     // --- EquipmentLoan ---
     const equipmentLoanRepo = new PrismaEquipmentLoanRepository();
