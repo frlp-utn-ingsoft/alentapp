@@ -93,6 +93,13 @@ export interface CreateDisciplineRequest {
   member_id: string; // UUID
 }
 
+export interface UpdateDisciplineRequest {
+  reason?: string;
+  start_date?: string;
+  end_date?: string;
+  is_total_suspension?: boolean;
+}
+
 // ==========================================
 // Sport
 // ==========================================
