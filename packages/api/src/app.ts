@@ -7,15 +7,11 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
+import { GetPaymentUseCase } from './application/GetPaymentUseCase.js'; 
 
-// 💳 IMPORTS DE PAGOS (Agregados para conectar tu nuevo módulo)
-// packages/api/src/app.ts
-
-// ... (dejá los imports de Fastify, cors y miembros como estaban)
-
-// 💳 IMPORTS DE PAGOS CORREGIDOS (Alineados exactamente con tu árbol de archivos de la izquierda)
+// IMPORTS DE PAGOS
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js'; 
-import { NewPaymentUseCase } from './application/NewPaymentUseCase.js'; // 👈 Sin la palabra "payments" porque está suelto en application
+import { NewPaymentUseCase } from './application/NewPaymentUseCase.js'; 
 import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
@@ -54,19 +50,24 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
-    // --- 💳 INSTANCIACIÓN DE PAGOS (Acoplamos los componentes) ---
+    // --- INSTANCIACIÓN DE PAGOS ---
     const paymentRepo = new PostgresPaymentRepository();
     const newPaymentUseCase = new NewPaymentUseCase(paymentRepo);
-    const paymentController = new PaymentController(newPaymentUseCase);
+    const getPaymentUseCase = new GetPaymentUseCase(paymentRepo); 
+    const paymentController = new PaymentController(newPaymentUseCase, getPaymentUseCase);
 
     // --- ENDPOINTS DE MIEMBROS ---
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+    
+    // Busca un único socio por su DNI
+    server.get('/api/v1/socios/dni/:dni', memberController.getByDni.bind(memberController));
 
-    // --- 💳 ENDPOINT DE PAGOS (Registrado oficialmente) ---
-    server.post('/api/v1/payments', paymentController.create.bind(paymentController)); // 👈 Clave para matar el 404
+    // --- ENDPOINTS DE PAGOS ---
+    server.post('/api/v1/payments', paymentController.create.bind(paymentController));
+    server.get('/api/v1/payments/member/:memberId', paymentController.getByMember.bind(paymentController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
