@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { SportRepository } from '../domain/SportRepository.js';
-import { CreateSportRequest, SportDTO } from '@alentapp/shared';
+import { CreateSportRequest, SportDTO, UpdateSportRequest } from '@alentapp/shared';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -79,6 +79,37 @@ export class PostgresSportRepository implements SportRepository {
         });
 
         return sports.map((sport) => this.mapToDTO(sport));
+    }
+
+    async findById(id: string): Promise<SportDTO | null> {
+        const sport = await prisma.sport.findUnique({
+            where: { id },
+        });
+
+        return sport ? this.mapToDTO(sport) : null;
+    }
+
+    async update(id: string, data: UpdateSportRequest): Promise<SportDTO> {
+        const sport = await prisma.sport.update({
+            where: { id },
+            data: {
+                // !== undefined permite valores validos como false o 0. 
+                ...(data.description !== undefined && {
+                    description: data.description.trim(),
+                }),
+                ...(data.max_capacity !== undefined && {
+                    max_capacity: data.max_capacity,
+                }),
+                ...(data.additional_price !== undefined && {
+                    additional_price: data.additional_price,
+                }),
+                ...(data.requires_medical_certificate !== undefined && {
+                    requires_medical_certificate: data.requires_medical_certificate,
+                }),
+            },
+        });
+
+        return this.mapToDTO(sport);
     }
 
     // Transforma el resultado de Prisma en respuesta. 

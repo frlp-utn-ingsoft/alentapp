@@ -10,11 +10,12 @@ import {
   Spinner,
   Center,
   Input,
+  IconButton,
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw } from "react-icons/lu";
+import { LuPencil, LuPlus, LuRefreshCw } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import { sportsService } from "../services/sports";
-import type { SportDTO, CreateSportRequest } from "@alentapp/shared";
+import type { SportDTO, CreateSportRequest, UpdateSportRequest } from "@alentapp/shared";
 import {
   DialogRoot,
   DialogContent,
@@ -49,6 +50,7 @@ export function SportsView() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingSportId, setEditingSportId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<CreateSportRequest>({
     name: "",
@@ -73,6 +75,7 @@ export function SportsView() {
   };
 
   const openCreateModal = () => {
+    setEditingSportId(null);
     setFormData({
       name: "",
       description: "",
@@ -83,16 +86,40 @@ export function SportsView() {
     setIsDialogOpen(true);
   };
 
+  const openEditModal = (sport: SportDTO) => {
+    setEditingSportId(sport.id);
+    setFormData({
+      name: sport.name,
+      description: sport.description,
+      max_capacity: sport.max_capacity,
+      additional_price: sport.additional_price,
+      requires_medical_certificate: sport.requires_medical_certificate,
+    });
+    setIsDialogOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      await sportsService.create(formData);
+      if (editingSportId) {
+        const updateData: UpdateSportRequest = {
+          description: formData.description,
+          max_capacity: formData.max_capacity,
+          additional_price: formData.additional_price,
+          requires_medical_certificate: formData.requires_medical_certificate,
+        };
+
+        await sportsService.update(editingSportId, updateData);
+      } else {
+        await sportsService.create(formData);
+      }
+
       setIsDialogOpen(false);
       fetchSports();
     } catch (err: any) {
-      alert(err.message || "Error al crear el deporte");
+      alert(err.message || "Error al guardar el deporte");
     } finally {
       setIsSubmitting(false);
     }
@@ -128,7 +155,7 @@ export function SportsView() {
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Agregar Nuevo Deporte</DialogTitle>
+              <DialogTitle>{editingSportId ? "Editar Deporte" : "Agregar Nuevo Deporte"}</DialogTitle>
             </DialogHeader>
 
             <DialogBody>
@@ -140,6 +167,7 @@ export function SportsView() {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
+                    disabled={!!editingSportId}
                     required
                   />
                 </Field>
@@ -216,7 +244,7 @@ export function SportsView() {
                 <Button variant="outline">Cancelar</Button>
               </DialogActionTrigger>
               <Button type="submit" colorPalette="blue" loading={isSubmitting}>
-                Crear Deporte
+                {editingSportId ? "Guardar Cambios" : "Crear Deporte"}
               </Button>
             </DialogFooter>
 
@@ -272,6 +300,7 @@ export function SportsView() {
                   <Table.ColumnHeader py="4">Cupo</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Precio adicional</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Certificado médico</Table.ColumnHeader>
+                  <Table.ColumnHeader py="4" textAlign="end">Acciones</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
 
@@ -297,6 +326,18 @@ export function SportsView() {
                       >
                         {sport.requires_medical_certificate ? "Requerido" : "No requerido"}
                       </Box>
+                    </Table.Cell>
+                    <Table.Cell textAlign="end">
+                      <HStack gap="2" justify="flex-end">
+                        <IconButton
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Editar deporte"
+                          onClick={() => openEditModal(sport)}
+                        >
+                          <LuPencil />
+                        </IconButton>
+                      </HStack>
                     </Table.Cell>
                   </Table.Row>
                 ))}

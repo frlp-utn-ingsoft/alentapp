@@ -14,10 +14,12 @@ import { GetMedicalCertificatesUseCase } from './application/GetMedicalCertifica
 import { MemberController } from './delivery/MemberController.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
 import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
-import { SportValidator } from './domain/services/SportValidator.js';
+
 
 import { PostgresDisciplineRepository } from './infrastructure/PostgresDisciplineRepository.js';
 import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
@@ -128,7 +130,16 @@ export function buildApp() {
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
 
-    const sportController = new SportController(createSportUseCase, getSportsUseCase);
+    const updateSportUseCase = new UpdateSportUseCase(
+        sportRepo,
+        sportValidator,
+    );
+
+    const sportController = new SportController(
+        createSportUseCase,
+        getSportsUseCase,
+        updateSportUseCase,
+    );
 
     // ============================================================
     // Payments - PR 1: Crear y listar (TDD-0010)
@@ -168,14 +179,15 @@ export function buildApp() {
 
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
-
+    server.patch('/api/v1/sports/:id', sportController.update.bind(sportController));
+    
     server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
 
-    server.get('/', async (_req, rep) => {
-        rep.status(200).send({ msg: 'asd' });
+    server.get('/', async (req, rep) => {
+        rep.status(200).send({ msg: 'asd' })
     });
-
+    
     return server;
 }
 
