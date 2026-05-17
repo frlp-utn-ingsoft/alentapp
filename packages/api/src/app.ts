@@ -4,9 +4,9 @@ import { PostgresMemberRepository } from './infrastructure/PostgresMemberReposit
 import { MemberValidator } from './domain/services/MemberValidator.js';
 import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
 import { GetMembersUseCase } from './application/GetMembersUseCase.js';
-import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
-import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
+import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js'; 
 import { MemberController } from './delivery/MemberController.js';
+import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 // --- IMPORTS DE PAGOS (PAYMENTS) ---
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js'; 
 import { NewPaymentUseCase } from './application/NewPaymentUseCase.js';
@@ -55,6 +55,7 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
+    // --- INSTANCIACIÓN DE DEPORTES ---
     const sportRepo = new PostgresSportRepository();
     const sportValidator = new SportValidator(sportRepo);
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
@@ -71,6 +72,9 @@ export function buildApp() {
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
+    server.post('/api/v1/payments', paymentController.create.bind(paymentController));
+    server.get('/api/v1/payments/member/:memberId', paymentController.getByMember.bind(paymentController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
