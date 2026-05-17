@@ -19,6 +19,7 @@ import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
 import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.js';
 import { DisciplineController } from './delivery/DisciplineController.js';
 import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
+import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.js';
 
 // === Payment imports (PR 1: foundation + create) ===
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
@@ -76,9 +77,14 @@ export function buildApp() {
         disciplineRepo,
         disciplineValidator,
     );
+    const updateDisciplineUseCase = new UpdateDisciplineUseCase(
+        disciplineRepo, disciplineValidator
+    );
+
     const disciplineController = new DisciplineController(
         createDisciplineUseCase,
         getDisciplinesUseCase,
+        updateDisciplineUseCase,
     );
 
     // ============================================================
@@ -120,6 +126,7 @@ export function buildApp() {
 
     server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
     server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
+    server.patch('/api/v1/disciplines/:id', disciplineController.update.bind(disciplineController));
 
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
