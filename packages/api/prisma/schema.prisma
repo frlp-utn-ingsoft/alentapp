@@ -43,7 +43,33 @@ model Member {
     payments    Payment[]
     disciplines Discipline[]
 
-    @@map("members")
+    lockers Locker[]
+
+  @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+}
+
+enum LockerLocation {
+    MALE
+    FEMALE
+    CHILDREN
+}
+
+enum LockerStatus {
+    AVAILABLE
+    OCCUPIED
+    MAINTENANCE
+}
+
+model Locker {
+    id                String @id @default(uuid())
+    number            Int            @unique
+    location          LockerLocation
+    status            LockerStatus   @default(AVAILABLE)
+    member_id         String?
+    member            Member?        @relation(fields: [member_id], references: [id])
+    contract_end_date DateTime?
+
+  @@map("lockers") // Para que en la DB la tabla se llame 'lockers' en minúscula
 }
 
 model MedicalCertificate {
