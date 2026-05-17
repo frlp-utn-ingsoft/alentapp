@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+
 import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
 import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
 import { MemberValidator } from './domain/services/MemberValidator.js';
@@ -11,31 +12,53 @@ import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCert
 import { GetMedicalCertificatesUseCase } from './application/GetMedicalCertificatesUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { SportController } from './delivery/SportController.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+
+import { PostgresDisciplineRepository } from './infrastructure/PostgresDisciplineRepository.js';
+import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
+import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.js';
+import { DisciplineController } from './delivery/DisciplineController.js';
+import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
+
+// === Payment imports (PR 1: foundation + create) ===
+import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
+import { SystemClock } from './infrastructure/SystemClock.js';
+import { PaymentValidator } from './domain/services/PaymentValidator.js';
+import { NewPaymentUseCase } from './application/NewPaymentUseCase.js';
+import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
+import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
     const server = Fastify({
         logger: {
             level: 'info',
-            transport: process.env.NODE_ENV === 'development' 
-            ? {
-                target: 'pino-pretty',
-                options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
-                } 
-            : undefined,
+            transport: process.env.NODE_ENV === 'development'
+                ? {
+                    target: 'pino-pretty',
+                    options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
+                }
+                : undefined,
         },
     });
 
     server.register(cors, {
         origin: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     });
 
+    // ============================================================
+    // Members
+    // ============================================================
     const memberRepo = new PostgresMemberRepository();
     const medicalCertificateRepo = new PostgresMedicalCertificateRepository();
     const memberValidator = new MemberValidator(memberRepo);
-    
+
     const createMemberUseCase = new CreateMemberUseCase(memberRepo, memberValidator);
     const getMembersUseCase = new GetMembersUseCase(memberRepo);
     const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
@@ -45,10 +68,10 @@ export function buildApp() {
     const getMedicalCertificatesUseCase = new GetMedicalCertificatesUseCase(medicalCertificateRepo);
 
     const memberController = new MemberController(
-        createMemberUseCase, 
+        createMemberUseCase,
         getMembersUseCase,
         updateMemberUseCase,
-        deleteMemberUseCase
+        deleteMemberUseCase,
     );
 
     const medicalCertificateController = new MedicalCertificateController(
@@ -56,6 +79,53 @@ export function buildApp() {
         getMedicalCertificatesUseCase
     );
 
+    // ============================================================
+    // Disciplines
+    // ============================================================
+    const disciplineRepo = new PostgresDisciplineRepository();
+    const disciplineValidator = new DisciplineValidator(memberRepo);
+    const getDisciplinesUseCase = new GetDisciplinesUseCase(disciplineRepo);
+    const createDisciplineUseCase = new CreateDisciplineUseCase(
+        disciplineRepo,
+        disciplineValidator,
+    );
+    const disciplineController = new DisciplineController(
+        createDisciplineUseCase,
+        getDisciplinesUseCase,
+    );
+
+    // ============================================================
+    // Sports
+    // ============================================================
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator();
+
+    const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
+    const getSportsUseCase = new GetSportsUseCase(sportRepo);
+
+    const sportController = new SportController(createSportUseCase, getSportsUseCase);
+
+    // ============================================================
+    // Payments - PR 1: Crear y listar (TDD-0010)
+    // Cobrar, editar y cancelar se sumarán en PRs siguientes
+    // ============================================================
+    const clock = new SystemClock();
+    const paymentRepo = new PostgresPaymentRepository();
+    const paymentValidator = new PaymentValidator(clock);
+
+    const newPaymentUseCase = new NewPaymentUseCase(
+        paymentRepo,
+        memberRepo,
+        paymentValidator,
+        clock,
+    );
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo, paymentValidator);
+
+    const paymentController = new PaymentController(newPaymentUseCase, getPaymentsUseCase);
+
+    // ============================================================
+    // Routes
+    // ============================================================
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
@@ -64,8 +134,17 @@ export function buildApp() {
     server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));
     server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
 
-    server.get('/', async (req, rep) => {
-        rep.status(200).send({ msg: 'asd' })
+    server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
+    server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
+
+    server.get('/api/v1/sports', sportController.getAll.bind(sportController));
+    server.post('/api/v1/sports', sportController.create.bind(sportController));
+
+    server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
+    server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
+
+    server.get('/', async (_req, rep) => {
+        rep.status(200).send({ msg: 'asd' });
     });
 
     return server;
@@ -77,7 +156,7 @@ if (process.argv[1] && process.argv[1].endsWith('app.ts')) {
     const port = parseInt(process.env.PORT || '3000', 10);
 
     server.listen({ port, host: '0.0.0.0' }, () =>
-        server.log.info(`API server running on http://localhost:${port}`)
+        server.log.info(`API server running on http://localhost:${port}`),
     );
 
     ['SIGINT', 'SIGTERM'].forEach((signal) => {

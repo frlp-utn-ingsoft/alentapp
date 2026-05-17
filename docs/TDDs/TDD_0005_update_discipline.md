@@ -24,6 +24,9 @@ Permitir a los administradores modificar sanciones disciplinarias existentes, co
     - Escenario de éxito: "Si el usuario actualiza la sanción con datos válidos, el sistema debe guardar los cambios y notificar al usuario".
     - Escenario de fallo: "Si el usuario ingresa una sanción que no existe, el sistema debe notificar el error al usuario y cancelar la operación".
     - Escenario de fallo: "Si el usuario ingresa una fecha de fin menor o igual a la fecha de inicio, el sistema debe notificar que la fecha de fin debe ser estrictamente posterior a la fecha de inicio y cancelar la operación".
+    - Escenario de fallo: "Si el usuario intenta actualizar una sanción eliminada, el sistema debe bloquear la acción y notificar que no se puede modificar una sanción eliminada".
+    - Escenario de fallo: "Si el usuario envía una actualización sin campos modificables, el sistema debe bloquear la acción y notificar que debe enviarse al menos un campo para actualizar".
+    - Escenario de fallo: "Si el usuario intenta modificar el socio asociado a la sanción, el sistema debe bloquear la acción y notificar que no se permite modificar el socio de una sanción existente".
 
 ## 2. Diseño Técnico 
 
@@ -36,21 +39,38 @@ La entidad de dominio `Discipline` mantiene los mismos campos definidos para el 
 *   `start_date`: Fecha, obligatoria.
 *   `end_date`: Fecha, obligatoria.
 *   `is_total_suspension`: Booleano, obligatorio.
-*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción está activa en el sistema.
+*   `deleted_at`: Fecha de eliminación lógica, opcional. Si es `null`, la sanción no fue eliminada.
 *   `member_id`: Identificador del socio sancionado, obligatorio.
 
 
 ### 2.2. Contrato de API (@alentapp/shared)
 
-*   **Endpoint**: `PUT /api/v1/disciplines/:id`
+*   **Endpoint**: `PATCH /api/v1/disciplines/:id`
 *   **Request Body**:
 ```
 {
     reason: string (opcional);
-    start_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ), (opcional)
-    end_date: string en formato ISO 8601 datetime (YYYY-MM-DDTHH:mm:ssZ), (opcional)
+    start_date: string en formato ISO 8601 datetime, (opcional)
+    end_date: string en formato ISO 8601 datetime, (opcional)
     is_total_suspension: boolean (opcional);
 }
+```
+* **Response (Success):** `200 OK`
+* **Response Body:** `DisciplineResponseDTO`
+```
+type DisciplineResponseDTO = {
+  id: string;
+  reason: string;
+  start_date: string; en formato ISO 8601 datetime
+  end_date: string; en formato ISO 8601 datetime
+  is_total_suspension: boolean;
+  deleted_at: string | null; en formato ISO 8601 datetime
+  member_id: string;
+};
+
+type ErrorResponse = {
+  message: string;
+};
 ```
 
 ### 2.3. Esquema de Persistencia
@@ -83,24 +103,29 @@ model Discipline {
 1. Recibir el `id` de la sanción a actualizar.
 2. Buscar la sanción por `id`.
 3. Si no existe o tiene `deleted_at` distinto de null, retornar error.
-4. Validar los datos de entrada.
-5. Si se modifican fechas, verificar que `end_date` sea estrictamente posterior a `start_date`.
-6. Validar que `start_date` y `end_date` cumplan con el formato ISO 8601.
-7. Verificar que no exista superposición con otras sanciones activas del mismo socio.
-8. Mapear el DTO a Entidad de Dominio.
-9. Persistir los cambios a través de `DisciplineRepository`.
-10. Retornar la sanción actualizada.
+4. Validar que el body contenga al menos un campo modificable.
+5. Validar los datos de entrada.
+6. Validar que `reason`, si se envía, no esté vacío ni compuesto solo por espacios.
+7. Validar que `is_total_suspension`, si se envía, sea un valor booleano.
+8. Si se modifican fechas, verificar que `end_date` sea estrictamente posterior a `start_date`.
+9. Validar que `start_date` y `end_date` cumplan con el formato ISO 8601.
+10. Mapear el DTO a Entidad de Dominio.
+11. Persistir los cambios a través de `DisciplineRepository`.
+12. Retornar la sanción actualizada.
 
 
 ## 4. Casos de Borde y Errores
 | Escenario                   | Resultado Esperado                            | Código HTTP               |
 | ----------------------------| --------------------------------------------- | ------------------------- |
+| Actualización exitosa | La sanción es actualizada correctamente | 200 OK |
 | Sanción inexistente     | "La sanción no existe"       | 404 Not Found              |
+| Body vacío o sin campos modificables | "Debe enviarse al menos un campo para actualizar" | 400 Bad Request |
 | Fecha de fin menor a fecha de inicio | "La fecha de fin debe ser estrictamente posterior a la fecha de inicio" | 400 Bad Request |
 | Campos con formato inválido | "Formato de datos inválido" | 400 Bad Request |
-| Request sin campos para actualizar | "Debe enviar al menos un campo para actualizar" | 400 Bad Request |
+| Motivo vacío o compuesto solo por espacios | "El motivo de la sanción es obligatorio" | 400 Bad Request |
+| `is_total_suspension` no booleano | "El campo is_total_suspension debe ser booleano" | 400 Bad Request |
+| Intento de modificar `member_id` | "No se permite modificar el socio asociado a la sanción" | 400 Bad Request |
 | Sanción eliminada | "No se puede modificar una sanción eliminada" | 409 Conflict |
-| Superposición de sanciones | "Ya existe una sanción activa en ese período" | 409 Conflict |
 | Error de conexión a DB | "Error interno, reintente más tarde" | 500 Internal Server Error |
 
 ## 5. Plan de Implementación
@@ -109,13 +134,13 @@ model Discipline {
 2. Ampliar el puerto `DisciplineRepository` con los métodos `findById(id)` y `update(id, data)`.
 3. Implementar el caso de uso `UpdateDisciplineUseCase`, validando fechas y existencia de la sanción.
 4. Implementar la actualización en `PostgresDisciplineRepository`.
-5. Crear la ruta `PUT /api/v1/disciplines/:id` en `DisciplineController`.
+5. Crear la ruta `PATCH /api/v1/disciplines/:id` en `DisciplineController`.
 6. Conectar el formulario de edición con el endpoint del backend.
+7. Ejecutar pruebas unitarias del caso de uso y pruebas de integración del endpoint `PATCH`.
 
 ## 6. Observaciones Adicionales
 
-* Aunque el endpoint utiliza `PUT`, la actualización se realiza de forma parcial, solo se modifican los campos enviados en el request.
+* La actualización debe ser parcial: solo los campos enviados en el body deben modificarse.
 * No se permite modificar el `member_id` desde este endpoint para evitar reasignar sanciones entre socios.
 * No se permite modificar una sanción que ya ha sido eliminada. Atributo `deleted_at` distinto de null.
-* Las operaciones sobre sanciones deben verse reflejadas en el estado disciplinario del socio.
-* El estado del socio debe recalcularse en función de las sanciones activas.
+

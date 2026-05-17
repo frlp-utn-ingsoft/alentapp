@@ -40,6 +40,8 @@ model Member {
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
     certificates MedicalCertificate[]
+    payments    Payment[]
+    disciplines Discipline[]
 
     @@map("members")
 }
@@ -56,4 +58,55 @@ model MedicalCertificate {
     member         Member   @relation(fields: [member_id], references: [id])
 
     @@map("medical_certificates")
+}
+
+enum PaymentStatus {
+    Pendiente
+    Pagado
+    Cancelado
+}
+
+
+model Payment {
+    id           String        @id @default(uuid())
+    member_id    String
+    amount       Decimal       @db.Decimal(12, 2)
+    month        Int
+    year         Int
+    status       PaymentStatus @default(Pendiente)
+    due_date     DateTime      @db.Date
+    payment_date DateTime?
+    created_at   DateTime      @default(now())
+    updated_at   DateTime      @updatedAt
+    canceled_at  DateTime?
+    member       Member        @relation(fields: [member_id], references: [id])
+
+    @@index([member_id])
+    @@index([status, due_date])
+    @@map("payments")
+}
+
+model Discipline {
+    id                  String    @id @default(uuid())
+    reason              String
+    start_date          DateTime
+    end_date            DateTime
+    is_total_suspension Boolean
+    deleted_at          DateTime?
+    member_id           String
+    member              Member    @relation(fields: [member_id], references: [id])
+
+    @@map("disciplines")
+}
+
+model Sport {
+    id                           String    @id @default(uuid())
+    name                         String
+    description                  String
+    max_capacity                 Int
+    additional_price             Float
+    requires_medical_certificate Boolean
+    deleted_at                   DateTime?
+
+    @@map("sports")
 }

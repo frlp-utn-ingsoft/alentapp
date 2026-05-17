@@ -59,3 +59,85 @@ export interface CreateMedicalCertificateRequest {
   institution: string;
   member_id: string;
 }
+
+// ==========================================
+// Payment
+// ==========================================
+export type PaymentStatus = 'Pendiente' | 'Pagado' | 'Cancelado';
+
+export interface PaymentDTO {
+  id: string;
+  member_id: string;
+  amount: number;
+  month: number;
+  year: number;
+  status: PaymentStatus;
+  due_date: string;
+  payment_date: string | null;
+  created_at: string;
+  updated_at: string;
+  canceled_at: string | null;
+}
+
+export interface CreatePaymentRequest {
+  member_id: string;
+  amount: number;
+  month: number;
+  year: number;
+  due_date: string;
+}
+
+export interface UpdatePaymentRequest {
+  amount?: number;
+  due_date?: string;
+}
+
+export interface PaymentResponse {
+  data: PaymentDTO;
+}
+
+export interface PaymentsResponse {
+  data: PaymentDTO[];
+}
+
+// ==========================================
+// Discipline
+// ==========================================
+export interface DisciplineDTO {
+  id: string; // UUID
+  reason: string;
+  start_date: string; // ISO Date String
+  end_date: string; // ISO Date String
+  is_total_suspension: boolean;
+  deleted_at: string | null; // ISO Date String or null
+  member_id: string; // UUID
+}
+
+export interface CreateDisciplineRequest {
+  reason: string;
+  start_date: string; // ISO Date String
+  end_date: string; // ISO Date String
+  is_total_suspension: boolean;
+  member_id: string; // UUID
+}
+
+// ==========================================
+// Sport
+// ==========================================
+export interface SportDTO {
+  id: string;
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+  deleted_at: string | null;
+}
+
+export interface CreateSportRequest {
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+}
