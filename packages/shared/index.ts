@@ -3,6 +3,8 @@
 // ==========================================
 export type MemberCategory = 'Pleno' | 'Cadete' | 'Honorario';
 export type MemberStatus = 'Activo' | 'Moroso' | 'Suspendido';
+// Use TS module path (no .js) so TypeScript can resolve the declaration files
+export * from './application/discipline';
 
 export interface MemberDTO {
   id: string; // UUID
@@ -31,3 +33,5 @@ export interface UpdateMemberRequest {
   category?: MemberCategory;
   status?: MemberStatus;
 }
+
+
