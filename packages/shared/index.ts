@@ -33,7 +33,6 @@ export interface UpdateMemberRequest {
 }
 
 // ==========================================
-<<<<<<< HEAD
 // Locker
 // ==========================================
 
@@ -53,7 +52,7 @@ export interface CreateLockerRequest {
   number: number;
   location: LockerLocation;
 }
-=======
+// ==========================================
 // Medical Certificate
 // ==========================================
 export type MedicalCertificateStatus = 'in_review' | 'validated' | 'historical';
@@ -169,4 +168,3 @@ export interface CreateSportRequest {
   additional_price: number;
   requires_medical_certificate: boolean;
 }
->>>>>>> main
