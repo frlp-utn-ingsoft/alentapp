@@ -22,4 +22,12 @@ export class SportController {
             return reply.status(500).send({ error: 'Error interno, reintente más tarde' });
         }
     }
+
+    async update(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      return reply.status(200).send({ msg: "Edición de deporte no implementada aún" });
+    } catch (error: any) {
+      return reply.status(500).send({ error: error.message });
+    }
+  }
 }
