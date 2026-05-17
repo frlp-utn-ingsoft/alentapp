@@ -17,6 +17,7 @@ type DBLocker = {
     location: string;
     status: 'Disponible' | 'Ocupado' | 'Mantenimiento';
     member_id: string | null;
+    member?: { name: string } | null;
 };
 
 export class PostgresLockerRepository implements LockerRepository {
@@ -35,6 +36,9 @@ export class PostgresLockerRepository implements LockerRepository {
 
     async findAll(): Promise<LockerDTO[]> {
         const lockers = await prisma.locker.findMany({
+            include: {
+                member: { select: { name: true } },
+            },
             orderBy: { number: 'asc' },
         });
 
@@ -56,6 +60,7 @@ export class PostgresLockerRepository implements LockerRepository {
             location: locker.location,
             status: locker.status,
             member_id: locker.member_id,
+            member: locker.member ?? null,
         };
     }
 }
