@@ -35,18 +35,19 @@ export function HomeView() {
                     to="/sports"
                     icon={LuTrophy}
                 />
+                <SectionCard
+                title="Inscripciones"
+                description="Gestiona las inscripciones de miembros a deportes."
+                to="/enrollments"
+                icon={LuReceipt}
+                />
                 <SectionCard 
                     title="Certificados Médicos"
                     description="Administra los certificados médicos de los socios, vencimientos y validaciones."
                     to="/medical-certificates"
                     icon={LuFileText}
                 />
-                <SectionCard
-                    title="Inscripciones"
-                    description="Gestiona las inscripciones de miembros a deportes."
-                    to="/enrollments"
-                    icon={LuWalletCards}
-                />
+
 
                 <SectionCard
                     title="Pagos"
