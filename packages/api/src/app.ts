@@ -1,18 +1,18 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { PostgresMemberRepository } from './infrastructure/member/PostgresMemberRepository.js';
-import { MemberValidator } from './domain/member/MemberValidator.js';
-import { CreateMemberUseCase } from './application/member/NewMemberUseCase.js';
-import { GetMembersUseCase } from './application/member/GetMembersUseCase.js';
-import { UpdateMemberUseCase } from './application/member/UpdateMemberUseCase.js';
-import { DeleteMemberUseCase } from './application/member/DeleteMemberUseCase.js';
-import { MemberController } from './delivery/member/MemberController.js';
-import { registerMemberRouter } from './infrastructure/routes/member/MemberRouter.js';
-import { PostgresLockerRepository } from './infrastructure/locker/PostgresLockerRepository.js';
-import { LockerValidator } from './domain/locker/LockerValidator.js';
-import { CreateLockerUseCase } from './application/locker/CreateLockerUseCase.js';
-import { LockerController } from './delivery/locker/LockerController.js';
-import { registerLockerRouter } from './infrastructure/routes/locker/LockerRouter.js';
+import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
+import { GetMembersUseCase } from './application/GetMembersUseCase.js';
+import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
+import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
+import { CreateLockerUseCase } from './application/useCases/CreateLockerUseCase.js';
+import { LockerValidator } from './domain/services/LockerValidator.js';
+import { MemberValidator } from './domain/services/MemberValidator.js';
+import { LockerController } from './infrastructure/controllers/LockerController.js';
+import { MemberController } from './infrastructure/delivery/MemberController.js';
+import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
+import { PostgresLockerRepository } from './infrastructure/repositories/PostgresLockerRepository.js';
+import { registerLockerRouter } from './infrastructure/routers/LockerRouter.js';
+import { registerMemberRouter } from './infrastructure/routers/MemberRouter.js';
 
 export function buildApp() {
     const server = Fastify({
