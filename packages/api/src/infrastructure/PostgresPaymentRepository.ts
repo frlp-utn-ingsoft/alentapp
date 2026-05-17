@@ -19,6 +19,7 @@ type DBPayment = {
     status: 'Pending' | 'Paid' | 'Canceled';
     due_date: Date;
     payment_date: Date | null;
+    created_at: Date;
     member_id: string;
 };
 
