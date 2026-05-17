@@ -31,6 +31,7 @@ import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepos
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
+import { GetLockersUseCase } from './application/GetLockersUseCase.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -140,7 +141,8 @@ export function buildApp() {
     const lockerRepo = new PostgresLockerRepository();
     const lockerValidator = new LockerValidator(lockerRepo);
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
-    const lockerController = new LockerController(createLockerUseCase);
+    const getLockersUseCase = new GetLockersUseCase(lockerRepo)
+    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase);
   
     const paymentController = new PaymentController(createPaymentUseCase);
 
@@ -207,6 +209,7 @@ export function buildApp() {
 
     // rutas de locker
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
+    server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
