@@ -20,6 +20,7 @@ import { MedicalCertificateValidator } from './domain/services/MedicalCertificat
 import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCertificateUseCase.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.ts';
+import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.ts';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.ts';
 import { PaymentController } from './delivery/PaymentController.ts';
@@ -81,7 +82,8 @@ export function buildApp() {
     );
 
     const paymentRepo = new PostgresPaymentRepository();
-    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, memberRepo);
+    const paymentValidator = new PaymentValidator(memberRepo);
+    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, paymentValidator);
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
     const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase);
 
