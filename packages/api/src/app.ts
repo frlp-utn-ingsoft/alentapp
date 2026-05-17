@@ -23,15 +23,23 @@ import { GetLoansUseCase } from './application/GetLoansUseCase.js';
 import { DeleteLoanUseCase } from './application/DeleteLoanUseCase.js';
 import { UpdateLoanStatusUseCase } from './application/UpdateLoanStatusUseCase.js';
 import { LoanController } from './delivery/LoanController.js';
+import { PostgresLockerRepository } from './infrastructure/PostgresLockerRepository.js';
+import { LockerValidator } from './domain/services/LockerValidator.js';
+import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
+import { LockerController } from './delivery/LockerController.js';
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
+<<<<<<< HEAD
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
 
+=======
+import { GetLockersUseCase } from './application/GetLockersUseCase.js';
+>>>>>>> origin/main
 
 export function buildApp() {
     const server = Fastify({
@@ -145,6 +153,13 @@ export function buildApp() {
         updateLoanStatusUseCase,
     );
 
+    // instancias de locker
+    const lockerRepo = new PostgresLockerRepository();
+    const lockerValidator = new LockerValidator(lockerRepo);
+    const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
+    const getLockersUseCase = new GetLockersUseCase(lockerRepo)
+    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase);
+  
     const paymentController = new PaymentController(createPaymentUseCase);
     const sportController = new SportController(createSportUseCase);
 
@@ -212,6 +227,10 @@ export function buildApp() {
         '/api/v1/sports',
         sportController.create.bind(sportController),
     );
+
+    // rutas de locker
+    server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
+    server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });

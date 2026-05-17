@@ -1,5 +1,5 @@
 import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
-import { LuShieldAlert, LuUsers, LuTrophy } from "react-icons/lu";
+import { LuShieldAlert, LuUsers, LuLockKeyhole, LuTrophy  } from "react-icons/lu";
 import { SectionCard } from "../components/SectionCard";
 
 export function HomeView() {
@@ -38,6 +38,12 @@ export function HomeView() {
           icon={LuShieldAlert}
         />
 
+        <SectionCard
+          title="Casilleros"
+          description="Administra los alquileres y el mantenimiento de los casilleros del club"
+          to="/lockers"
+          icon={LuLockKeyhole}
+        />
         <SectionCard
           title="Pagos"
           description="Administra los pagos asociados a los socios del club."
