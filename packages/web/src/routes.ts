@@ -1,14 +1,12 @@
 import { createBrowserRouter } from "react-router";
 
 import { MembersView } from "./views/Members";
-import { LockersView } from "./views/Lockers";
-import { HomeView } from "./views/Home";
-import Layout from "./Layout";
-import { MembersView } from "./views/Members";
-import { DisciplinesView } from "./views/Disciplines";
 import { PaymentsView } from "./views/Payments";
+import { SportsView } from "./views/Sport";
 import { HomeView } from "./views/Home";
 import Layout from "./Layout";
+import { LockersView } from "./views/Lockers";
+import { DisciplinesView } from "./views/Disciplines";
 
 export let router = createBrowserRouter([
   {
@@ -23,24 +21,22 @@ export let router = createBrowserRouter([
         Component: MembersView,
       },
       {
-        path: "/lockers",
-        Component: LockersView,
-      },
-    ],
-  },
-]);
-      {
-        path: "/members",
-        Component: MembersView,
-      },
-      {
-        path: "/disciplines",
-        Component: DisciplinesView,
-      },
-      {
         path: "/payments",
         Component: PaymentsView,
       },
+      {
+        path: "/sports",
+        Component: SportsView,
+      },
+       {
+        path: "/lockers",
+        Component: LockersView,
+      },
+       {
+        path: "/disciplines",
+        Component: DisciplinesView,
+      }
     ],
   },
 ]);
+     
