@@ -11,11 +11,11 @@ import {
   Text,
   Spinner,
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw } from "react-icons/lu";
+import { LuPlus, LuRefreshCw, LuPencil, LuCheck } from "react-icons/lu";
 import { useEffect, useMemo, useState } from "react";
 import { membersService } from "../services/members";
 import { paymentsService } from "../services/payments";
-import type { CreatePaymentRequest, GetPaymentsQuery, MemberDTO, PaymentResponse, PaymentStatus } from "@alentapp/shared";
+import type { CreatePaymentRequest, GetPaymentsQuery, MemberDTO, PaymentResponse, PaymentStatus, UpdatePaymentRequest } from "@alentapp/shared";
 import { Field } from "../components/ui/field";
 import {
   SelectRoot,
@@ -51,8 +51,11 @@ export function PaymentsView() {
   const [yearFilter, setYearFilter] = useState<string>("");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
+  const [editingPaymentStatus, setEditingPaymentStatus] = useState<PaymentStatus | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<CreatePaymentRequest>({
+  const [formData, setFormData] = useState<CreatePaymentRequest & Partial<UpdatePaymentRequest>>({
     amount: 0,
     month: currentMonth,
     year: currentYear,
@@ -99,6 +102,9 @@ export function PaymentsView() {
 
   const openCreateModal = () => {
     fetchMembers();
+    setIsEditMode(false);
+    setEditingPaymentId(null);
+    setEditingPaymentStatus(null);
     setFormData({
       amount: 0,
       month: currentMonth,
@@ -110,20 +116,35 @@ export function PaymentsView() {
     setIsDialogOpen(true);
   };
 
+  const openEditModal = (payment: PaymentResponse) => {
+    setIsEditMode(true);
+    setEditingPaymentId(payment.id);
+    setEditingPaymentStatus(payment.status);
+    setFormData({
+      amount: payment.amount,
+      month: payment.month,
+      year: payment.year,
+      dueDate: payment.dueDate.split('T')[0],
+      paymentDate: payment.paymentDate ? payment.paymentDate.split('T')[0] : undefined,
+    });
+    setFormError(null);
+    setIsDialogOpen(true);
+  };
+
   const validateForm = () => {
-    if (!formData.memberId) {
+    if (!isEditMode && !formData.memberId) {
       return "Seleccione un miembro";
     }
-    if (!Number.isFinite(formData.amount) || formData.amount <= 0) {
+    if (formData.amount !== undefined && (!Number.isFinite(formData.amount) || formData.amount <= 0)) {
       return "El monto debe ser mayor a cero";
     }
-    if (!Number.isInteger(formData.month) || formData.month < 1 || formData.month > 12) {
+    if (formData.month !== undefined && (!Number.isInteger(formData.month) || formData.month < 1 || formData.month > 12)) {
       return "El mes debe estar entre 1 y 12";
     }
-    if (!Number.isInteger(formData.year) || formData.year <= 2000) {
+    if (formData.year !== undefined && (!Number.isInteger(formData.year) || formData.year <= 2000)) {
       return "El año ingresado no es válido";
     }
-    if (!formData.dueDate) {
+    if (!isEditMode && !formData.dueDate) {
       return "Faltan campos requeridos";
     }
     return null;
@@ -140,11 +161,22 @@ export function PaymentsView() {
     setIsSubmitting(true);
     setFormError(null);
     try {
-      await paymentsService.create(formData);
+      if (isEditMode && editingPaymentId) {
+        const updateData: UpdatePaymentRequest = {};
+        if (formData.amount !== undefined) updateData.amount = formData.amount;
+        if (formData.month !== undefined) updateData.month = formData.month;
+        if (formData.year !== undefined) updateData.year = formData.year;
+        if (formData.dueDate !== undefined) updateData.dueDate = formData.dueDate;
+        if (formData.paymentDate !== undefined) updateData.paymentDate = formData.paymentDate || undefined;
+
+        await paymentsService.update(editingPaymentId, updateData);
+      } else {
+        await paymentsService.create(formData as CreatePaymentRequest);
+      }
       setIsDialogOpen(false);
       fetchPayments();
     } catch (err: any) {
-      setFormError(err.message || "Error al crear el pago");
+      setFormError(err.message || (isEditMode ? "Error al actualizar el pago" : "Error al crear el pago"));
     } finally {
       setIsSubmitting(false);
     }
@@ -153,6 +185,19 @@ export function PaymentsView() {
   const getMemberName = (memberId: string) => {
     const member = members.find((m) => m.id === memberId);
     return member ? member.name : memberId;
+  };
+
+  const handleMarkAsPaid = async (paymentId: string) => {
+    if (!window.confirm('¿Está seguro de que desea marcar este pago como pagado?')) {
+      return;
+    }
+
+    try {
+      await paymentsService.update(paymentId, { status: 'Paid' });
+      fetchPayments();
+    } catch (err: any) {
+      alert(err.message || 'Error al marcar el pago como pagado');
+    }
   };
 
   useEffect(() => {
@@ -275,6 +320,7 @@ export function PaymentsView() {
                 <Table.ColumnHeader py="4">Vencimiento</Table.ColumnHeader>
                 <Table.ColumnHeader py="4">Estado</Table.ColumnHeader>
                 <Table.ColumnHeader py="4">Fecha Pago</Table.ColumnHeader>
+                <Table.ColumnHeader py="4" w="120px">Acciones</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -319,6 +365,26 @@ export function PaymentsView() {
                   <Table.Cell color="fg.muted">
                     {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : '-'}
                   </Table.Cell>
+                  <Table.Cell>
+                    <HStack gap="1">
+                      <Button
+                        size="xs"
+                        variant="ghost"
+                        onClick={() => openEditModal(payment)}
+                      >
+                        <LuPencil />
+                      </Button>
+                      {payment.status === 'Pending' && (
+                        <Button
+                          size="xs"
+                          colorPalette="green"
+                          onClick={() => handleMarkAsPaid(payment.id)}
+                        >
+                          <LuCheck /> Marcar Pagado
+                        </Button>
+                      )}
+                    </HStack>
+                  </Table.Cell>
                 </Table.Row>
               ))}
             </Table.Body>
@@ -350,7 +416,7 @@ export function PaymentsView() {
             w="90%"
             onClick={(e) => e.stopPropagation()}
           >
-            <Heading size="lg" mb="4">Nuevo Pago</Heading>
+            <Heading size="lg" mb="4">{isEditMode ? "Editar Pago" : "Nuevo Pago"}</Heading>
             <form onSubmit={handleSubmit}>
               <Stack gap="4">
                 {formError && (
@@ -359,75 +425,87 @@ export function PaymentsView() {
                   </Box>
                 )}
 
-                <Field label="Socio" required>
-                  <SelectRoot
-                    collection={createListCollection({
-                      items: members.map((m) => ({ label: `${m.name} - ${m.dni}`, value: m.id })),
-                    })}
-                    value={[formData.memberId]}
-                    onValueChange={(e) => setFormData({ ...formData, memberId: e.value[0] })}
-                  >
-                    <SelectTrigger>
-                      <SelectValueText placeholder="Seleccione un socio" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {members.map((m) => (
-                        <SelectItem item={{ label: `${m.name} - ${m.dni}`, value: m.id }} key={m.id}>
-                          {m.name} - {m.dni}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </SelectRoot>
-                </Field>
+                {!isEditMode && (
+                  <Field label="Socio" required>
+                    <SelectRoot
+                      collection={createListCollection({
+                        items: members.map((m) => ({ label: `${m.name} - ${m.dni}`, value: m.id })),
+                      })}
+                      value={[formData.memberId]}
+                      onValueChange={(e) => setFormData({ ...formData, memberId: e.value[0] })}
+                    >
+                      <SelectTrigger>
+                        <SelectValueText placeholder="Seleccione un socio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {members.map((m) => (
+                          <SelectItem item={{ label: `${m.name} - ${m.dni}`, value: m.id }} key={m.id}>
+                            {m.name} - {m.dni}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectRoot>
+                  </Field>
+                )}
 
-                <Field label="Monto" required>
+                <Field label="Monto" required={!isEditMode}>
                   <Input
                     type="number"
                     min="0"
                     step="0.01"
                     value={formData.amount || ""}
                     onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                    required
+                    required={!isEditMode}
                   />
                 </Field>
 
                 <Flex gap="4">
-                  <Field label="Mes" required flex="1">
+                  <Field label="Mes" required={!isEditMode} flex="1">
                     <Input
                       type="number"
                       min="1"
                       max="12"
                       value={formData.month}
                       onChange={(e) => setFormData({ ...formData, month: Number(e.target.value) })}
-                      required
+                      required={!isEditMode}
                     />
                   </Field>
-                  <Field label="Año" required flex="1">
+                  <Field label="Año" required={!isEditMode} flex="1">
                     <Input
                       type="number"
                       min="2001"
                       value={formData.year}
                       onChange={(e) => setFormData({ ...formData, year: Number(e.target.value) })}
-                      required
+                      required={!isEditMode}
                     />
                   </Field>
                 </Flex>
 
-                <Field label="Vencimiento" required>
+                <Field label="Vencimiento" required={!isEditMode}>
                   <Input
                     type="date"
                     value={formData.dueDate}
                     onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                    required
+                    required={!isEditMode}
                   />
                 </Field>
+
+                {isEditMode && editingPaymentStatus === 'Paid' && (
+                  <Field label="Fecha de Pago">
+                    <Input
+                      type="date"
+                      value={formData.paymentDate || ""}
+                      onChange={(e) => setFormData({ ...formData, paymentDate: e.target.value })}
+                    />
+                  </Field>
+                )}
 
                 <Flex justify="flex-end" gap="3" mt="4">
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
                   </Button>
                   <Button type="submit" colorPalette="blue" loading={isSubmitting}>
-                    <LuPlus /> Crear Pago
+                    {isEditMode ? "Guardar Cambios" : <><LuPlus /> Crear Pago</>}
                   </Button>
                 </Flex>
               </Stack>
