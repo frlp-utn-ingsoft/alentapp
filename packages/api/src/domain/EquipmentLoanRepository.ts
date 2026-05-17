@@ -9,4 +9,5 @@ export interface IEquipmentLoanRepository {
   findById(id: string): Promise<EquipmentLoanDTO | null>;
   findAll(): Promise<EquipmentLoanDTO[]>;
   update(id: string, data: UpdateEquipmentLoanRequest): Promise<EquipmentLoanDTO>;
+  delete(id: string): Promise<void>;
 }
