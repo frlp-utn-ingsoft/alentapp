@@ -31,15 +31,12 @@ import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepos
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
-<<<<<<< HEAD
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
 
-=======
 import { GetLockersUseCase } from './application/GetLockersUseCase.js';
->>>>>>> origin/main
 
 export function buildApp() {
     const server = Fastify({
