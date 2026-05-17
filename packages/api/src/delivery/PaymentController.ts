@@ -6,12 +6,17 @@ import {
     DuplicateActivePaymentError,
 } from '../application/NewPaymentUseCase.js';
 import { GetPaymentsUseCase } from '../application/GetPaymentsUseCase.js';
-import { CreatePaymentRequest } from '@alentapp/shared';
+import { MarkPaymentAsPaidUseCase } from '../application/MarkPaymentAsPaidUseCase.js';
+import { UpdatePaymentUseCase } from '../application/UpdatePaymentUseCase.js';
+import { PaymentNotPendingError } from '../domain/PaymentRepository.js';
+import { CreatePaymentRequest, UpdatePaymentRequest } from '@alentapp/shared';
 
 export class PaymentController {
     constructor(
         private readonly newPaymentUseCase: NewPaymentUseCase,
         private readonly getPaymentsUseCase: GetPaymentsUseCase,
+        private readonly markPaidUseCase: MarkPaymentAsPaidUseCase,
+        private readonly updateUseCase: UpdatePaymentUseCase,
     ) {}
 
     async getAll(
@@ -41,6 +46,33 @@ export class PaymentController {
         }
     }
 
+    async pay(
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const payment = await this.markPaidUseCase.execute(request.params.id);
+            return reply.status(200).send({ data: payment });
+        } catch (error) {
+            return this.handleError(error, reply, request);
+        }
+    }
+
+    async update(
+        request: FastifyRequest<{ Params: { id: string }; Body: UpdatePaymentRequest }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const payment = await this.updateUseCase.execute(
+                request.params.id,
+                request.body,
+            );
+            return reply.status(200).send({ data: payment });
+        } catch (error) {
+            return this.handleError(error, reply, request);
+        }
+    }
+
     private handleError(error: unknown, reply: FastifyReply, request: FastifyRequest) {
         request.log.error({ err: error }, 'Payment operation failed');
 
@@ -50,16 +82,17 @@ export class PaymentController {
 
         if (
             error instanceof MemberNotActiveError ||
-            error instanceof DuplicateActivePaymentError
+            error instanceof DuplicateActivePaymentError ||
+            error instanceof PaymentNotPendingError
         ) {
             return reply.status(409).send({ error: error.message });
         }
 
         if (error instanceof Error) {
-            if (
-                error.message.includes('inválido') ||
-                error.message.includes('La fecha de vencimiento debe ser futura')
-            ) {
+            if (error.message === 'El pago no existe') {
+                return reply.status(404).send({ error: error.message });
+            }
+            if (error.message.includes('inválido')) {
                 return reply.status(400).send({ error: error.message });
             }
         }
