@@ -111,6 +111,13 @@ export interface PaymentResponse {
     memberId: string;
 }
 
+export interface GetPaymentsQuery {
+    memberId?: string;
+    status?: PaymentStatus;
+    month?: number;
+    year?: number;
+}
+
 export interface GetLoansQuery {
   status?: 'Loaned' | 'Returned' | 'Damaged';
   search?: string;
