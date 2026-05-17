@@ -43,7 +43,7 @@ Campo **inmutable** (no editable post-creación):
 
 - **Endpoint**: `PATCH /api/v1/sports/:id`
 - **Request Body** (UpdateSportRequest):
-```ts
+```tsx
 {
   description?: string;
   maxCapacity?: number;       // Entero > 0 si se especifica
@@ -52,15 +52,17 @@ Campo **inmutable** (no editable post-creación):
 }
 ```
 - **Response Body** (200 OK):
-```ts
-{
-  id: string;
-  name: string;
-  description: string | null;
-  maxCapacity: number;
-  additionalPrice: number | null;
-  requiresMedicalCertificate: boolean;
-}
+```tsx
+{ "data":   
+  {
+    id: string;
+    name: string;
+    description: string | null;
+    maxCapacity: number;
+    additionalPrice: number | null;
+    requiresMedicalCertificate: boolean;
+  }
+}  
 ```
 
 ### Componentes de Arquitectura Hexagonal

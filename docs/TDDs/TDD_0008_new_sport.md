@@ -41,7 +41,7 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 
 - **Endpoint**: `POST /api/v1/sports`
 - **Request Body** (CreateSportRequest):
-```ts
+```tsx
 {
   name: string;                            // Único
   description?: string;
@@ -51,14 +51,16 @@ Sin cambios en el schema existente. Se utiliza el modelo `Sport` ya definido en 
 }
 ```
 - **Response Body** (201 Created):
-```ts
-{
-  id: string;
-  name: string;
-  description: string | null;
-  maxCapacity: number;
-  additionalPrice: number | null;
-  requiresMedicalCertificate: boolean;
+```tsx
+{ "data" : 
+  {
+    id: string;
+    name: string;
+    description: string | null;
+    maxCapacity: number;
+    additionalPrice: number | null;
+    requiresMedicalCertificate: boolean;
+  }
 }
 ```
 

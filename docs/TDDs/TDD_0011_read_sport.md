@@ -40,15 +40,20 @@ Sin cambios en el schema. Operaciones de sólo lectura sobre el modelo `Sport`.
 }
 ```
 - **Response Body (200 OK)**:
-```ts
-Array<{
-  id: string;
-  name: string;
-  description: string | null;
-  maxCapacity: number;
-  additionalPrice: number | null;
-  requiresMedicalCertificate: boolean;
-}>
+```tsx
+{ "data": 
+  {
+    Array<{
+      id: string;
+      name: string;
+      description: string | null;
+      maxCapacity: number;
+      additionalPrice: number | null;
+      requiresMedicalCertificate: boolean;
+    }>
+  }
+}
+
 ```
 
 **Endpoint 2 — Obtener un deporte por ID:**
