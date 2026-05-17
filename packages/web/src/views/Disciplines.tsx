@@ -10,12 +10,13 @@ import {
   Spinner,
   Center,
   Input,
+  IconButton
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw } from "react-icons/lu";
+import { LuPlus, LuRefreshCw, LuPencil } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import { disciplinesService } from "../services/disciplines";
 import { membersService } from "../services/members";
-import type { DisciplineDTO, CreateDisciplineRequest } from "@alentapp/shared";
+import type { DisciplineDTO, CreateDisciplineRequest, UpdateDisciplineRequest } from "@alentapp/shared";
 import {
   DialogRoot,
   DialogContent,
@@ -39,6 +40,12 @@ export function DisciplinesView() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [editingDisciplineId, setEditingDisciplineId] = useState<string | null>(null);
+  
+  const toDateInputValue = (date: string) => {
+    return date.split("T")[0];
+  
+  };
   const [formData, setFormData] = useState<CreateDisciplineRequest>({
     reason: "",
     start_date: "",
@@ -76,6 +83,7 @@ export function DisciplinesView() {
   };
 
   const openCreateModal = () => {
+    setEditingDisciplineId(null);
     setFormData({
       reason: "",
       start_date: "",
@@ -83,31 +91,57 @@ export function DisciplinesView() {
       is_total_suspension: false,
       member_id: "",
     });
-
     setMemberDni("");
+    setIsDialogOpen(true);
+  }
+
+  const openEditModal = (discipline: DisciplineDTO) => {
+    setEditingDisciplineId(discipline.id);
+
+    setFormData({
+      reason: discipline.reason,
+      start_date: toDateInputValue(discipline.start_date),
+      end_date: toDateInputValue(discipline.end_date),
+      is_total_suspension: discipline.is_total_suspension,
+      member_id: discipline.member_id,
+    });
+
+    setMemberDni(memberDniById[discipline.member_id] || "");
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const members = await membersService.getAll();
-      const member = members.find((m) => m.dni === memberDni.trim());
+      if (editingDisciplineId) {
+        const disciplineToUpdate: UpdateDisciplineRequest = {
+          reason: formData.reason,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
+          is_total_suspension: formData.is_total_suspension,
+        };
 
-      if (!member) {
-        throw new Error("No se encontró un socio con ese DNI");
+        await disciplinesService.update(editingDisciplineId, disciplineToUpdate);
+      } else {
+        const members = await membersService.getAll();
+        const member = members.find((m) => m.dni === memberDni.trim());
+
+        if (!member) {
+          throw new Error("No se encontró un socio con ese DNI");
+        }
+
+        const disciplineToCreate: CreateDisciplineRequest = {
+          ...formData,
+          member_id: member.id,
+        };
+
+        await disciplinesService.create(disciplineToCreate);
       }
 
-      const disciplineToCreate: CreateDisciplineRequest = {
-        ...formData,
-        member_id: member.id,
-      };
-
-      await disciplinesService.create(disciplineToCreate);
-
       setIsDialogOpen(false);
+      setEditingDisciplineId(null);
       await fetchDisciplines();
     } catch (err: any) {
       alert(err.message || "Error al guardar la sanción");
@@ -115,6 +149,8 @@ export function DisciplinesView() {
       setIsSubmitting(false);
     }
   };
+
+
 
   useEffect(() => {
     fetchDisciplines();
@@ -147,7 +183,9 @@ export function DisciplinesView() {
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Agregar Nueva Sanción</DialogTitle>
+              <DialogTitle>
+                {editingDisciplineId ? "Editar Sanción" : "Agregar Nueva Sanción"}
+              </DialogTitle>
             </DialogHeader>
 
             <DialogBody>
@@ -157,7 +195,8 @@ export function DisciplinesView() {
                     placeholder="Ej. 12345678"
                     value={memberDni}
                     onChange={(e) => setMemberDni(e.target.value)}
-                    required
+                    disabled={!!editingDisciplineId}
+                    required={!editingDisciplineId}
                   />
                 </Field>
 
@@ -218,7 +257,7 @@ export function DisciplinesView() {
               </DialogActionTrigger>
 
               <Button type="submit" colorPalette="blue" loading={isSubmitting}>
-                Crear Sanción
+                {editingDisciplineId ? "Guardar Cambios" : "Crear Sanción"}
               </Button>
             </DialogFooter>
           </form>
@@ -274,6 +313,7 @@ export function DisciplinesView() {
                 <Table.ColumnHeader py="4">Fin</Table.ColumnHeader>
                 <Table.ColumnHeader py="4">Suspensión total</Table.ColumnHeader>
                 <Table.ColumnHeader py="4">DNI Socio</Table.ColumnHeader>
+                <Table.ColumnHeader py="4" textAlign="end">Acciones</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
 
@@ -298,6 +338,16 @@ export function DisciplinesView() {
 
                   <Table.Cell color="fg.muted">
                     {memberDniById[discipline.member_id] || "Socio no encontrado"}
+                  </Table.Cell>
+                  <Table.Cell textAlign="end">
+                    <IconButton
+                      variant="ghost"
+                      size="sm"
+                      aria-label="Editar sanción"
+                      onClick={() => openEditModal(discipline)}
+                    >
+                      <LuPencil />
+                    </IconButton>
                   </Table.Cell>
                 </Table.Row>
               ))}
