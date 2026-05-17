@@ -1,4 +1,4 @@
-import { SportDTO } from '@alentapp/shared';
+import { SportDTO, UpdateSportRequest } from '@alentapp/shared';
 
 
  //Esta interfaz es el "Puerto de Salida" para la entidad Sport.
@@ -14,4 +14,6 @@ export interface SportRepository {
   //recupera lista completa de deportes
   findAll(): Promise<SportDTO[]>;
 
+  //Acutualizaar un deporte existente
+  update(id: string, data: UpdateSportRequest): Promise<SportDTO>;
 }
