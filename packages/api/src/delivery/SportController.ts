@@ -1,12 +1,14 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateSportUseCase } from '../application/NewSportUseCase.js';
 import { GetSportsUseCase } from '../application/GetSportsUseCase.js';
-import { CreateSportRequest } from '@alentapp/shared';
+import { UpdateSportUseCase } from '../application/UpdateSportUseCase.js';
+import { CreateSportRequest,UpdateSportRequest } from '@alentapp/shared';
 
 export class SportController {
     constructor(
         private readonly createSportUseCase: CreateSportUseCase,
         private readonly getSportsUseCase: GetSportsUseCase,
+        private readonly updateSportUseCase: UpdateSportUseCase,
     ) {}
 
     //obtiene lista de deportes registrados
@@ -40,6 +42,31 @@ export class SportController {
             }
 
             return reply.status(500).send({ error: "Error interno al crear el deporte" });
+        }
+    }
+
+    async update(
+        request: FastifyRequest<{ Params: { id: string }; Body: UpdateSportRequest }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            const { id } = request.params;
+            
+            const deporteActualizado = await this.updateSportUseCase.execute(id, request.body);
+            
+            return reply.status(200).send({ data: deporteActualizado });
+        } catch (error: any) {
+            // Manejo de error si el deporte no existe (Error 404)
+            if (error.message.includes('no existe')) {
+                return reply.status(404).send({ error: error.message });
+            }
+            
+            // Manejo de errores de validación de negocio (ej: capacidad inválida) (Error 400)
+            if (error.message.includes('capacidad') || error.message.includes('inválido')) {
+                return reply.status(400).send({ error: error.message });
+            }
+
+            return reply.status(500).send({ error: "Error interno al actualizar el deporte" });
         }
     }
 }
