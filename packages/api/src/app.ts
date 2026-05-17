@@ -33,6 +33,12 @@ import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { GetPaymentByIdUseCase } from './application/GetPaymentByIdUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { SportController } from './delivery/SportController.js';
+
+import { GetLockersUseCase } from './application/GetLockersUseCase.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -41,12 +47,12 @@ export function buildApp() {
             transport:
                 process.env.NODE_ENV === 'development'
                     ? {
-                          target: 'pino-pretty',
-                          options: {
-                              translateTime: 'HH:MM:ss Z',
-                              ignore: 'pid,hostname',
-                          },
-                      }
+                        target: 'pino-pretty',
+                        options: {
+                            translateTime: 'HH:MM:ss Z',
+                            ignore: 'pid,hostname',
+                        },
+                    }
                     : undefined,
         },
     });
@@ -118,6 +124,14 @@ export function buildApp() {
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
     const getPaymentByIdUseCase = new GetPaymentByIdUseCase(paymentRepo);
 
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator();
+    const createSportUseCase = new CreateSportUseCase(
+        sportRepo,
+        sportValidator,
+    );
+
+
     const memberController = new MemberController(
         createMemberUseCase,
         getMembersUseCase,
@@ -144,13 +158,15 @@ export function buildApp() {
     const lockerRepo = new PostgresLockerRepository();
     const lockerValidator = new LockerValidator(lockerRepo);
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
-    const lockerController = new LockerController(createLockerUseCase);
+    const getLockersUseCase = new GetLockersUseCase(lockerRepo)
+    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase);
   
     const paymentController = new PaymentController(
         createPaymentUseCase,
         getPaymentsUseCase,
         getPaymentByIdUseCase,
     );
+    const sportController = new SportController(createSportUseCase);
 
     server.get(
         '/api/v1/socios',
@@ -220,9 +236,14 @@ export function buildApp() {
         '/api/v1/payments/:id',
         paymentController.getById.bind(paymentController),
     );
+    server.post(
+        '/api/v1/sports',
+        sportController.create.bind(sportController),
+    );
 
     // rutas de locker
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
+    server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
