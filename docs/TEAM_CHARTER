@@ -1,0 +1,109 @@
+# Team Charter
+
+## 1. Información General del Equipo
+- **Nombre del equipo:**  Commit & Pray
+- **Proyecto / Materia:**  Ingeniería y Calidad de Software
+- **Fecha de creación:**  14/5/2026
+- **Duración estimada del proyecto:** Final de la cursada
+
+### Integrantes
+- Braunstein Melissa - Full stack developer - melissa.braunstein@gmail.com
+- Porzio Maria Pia - Full stack developer - piaporzio1@gmail.com
+- Wagner Pilar - Full stack developer - pilarwagner94@gmail.com
+- Noval Leandro Andres - Full stack developer - leandronoval4@gmail.com
+- Gonzalez D'Angelo Santiago - Full stack developer - santigonzalezdangelo@gmail.com
+
+---
+
+# 2. Propósito del Equipo
+
+## Objetivo General
+Se busca desarrollar una aplicación para la gestión administrativa de las actividades y recursos de un club deportivo. El proyecto busca implementar buenas prácticas de desarrollo y calidad de software para la construcción, testing y deployment de la aplicación. 
+
+## Objetivos Específicos
+- Documentar el desarrollo de software
+- Implementar las entidades del dominio, aplicando buenas practicas
+- Realizar pruebas de software
+- Entrega de una aplicación completa construible a través de docker
+
+---
+
+# 3. Roles y Responsabilidades
+
+| Integrante | Rol | Responsabilidades |
+|---|---|---|
+| Braunstein Melissa | Full stack developer | Desarrollo de la entidad `Payment` |
+| Porzio Maria Pia | Full stack developer | Desarrollo de la entidad `Sport` |
+| Wagner Pilar | Full stack developer | Desarrollo de la entidad `Locker` |
+| Noval Leandro Andres | Full stack developer | Desarrollo de la entidad `MedicalCertificate` |
+| Gonzalez D'Angelo Santiago | Full stack developer | Desarrollo de la entidad `Discipline` |
+
+---
+
+# 4. Normas de Trabajo
+
+## Comunicación
+- Medio principal de comunicación: Repositorio Github / WhatsApp
+
+## Participación
+- Cada miembro debe cumplir con las tareas asignadas.
+- Los cambios importantes deben comunicarse al equipo.
+- Los miembros deben atender a los comentarios de cambio en las PRs
+
+## Entregas
+- Las tareas deben entregarse antes de la fecha límite acordada.
+- El trabajo debe revisarse antes de enviarse.
+- Para que la entrega sea correcta la aplicación debe correr sin fallas.
+
+---
+
+# 5. Toma de Decisiones
+
+Describir cómo se tomarán las decisiones del equipo.
+
+Ejemplo:
+- Las decisiones de diseño y detalles de implementación de cada entidad serán realizadas por el integrante al que le fue asignada.
+- Las decisiones acerca de estructura del proyecto y practicas implementadas se llevaran a discusión en reuniones.
+- Las decisiones por fuera del alcance del dominio serán consultadas a la catedra.
+
+---
+
+# 6. Manejo de Conflictos
+
+Describir cómo se resolverán desacuerdos o problemas internos.
+
+1. Conversación entre las partes involucradas.
+2. Reunión grupal para buscar solución.
+3. Escalar al docente/líder si el conflicto continúa.
+
+---
+
+# 7. Herramientas y Recursos
+
+| Herramienta | Uso |
+|---|---|
+| WhatsApp / Github | Comunicación |
+| Google Drive | Compartir archivos |
+| GitHub | Control de versiones |
+
+
+---
+
+# 8. Valores del Equipo
+- Respeto
+- Responsabilidad
+- Compromiso
+- Colaboración
+- Comunicación efectiva
+
+---
+
+# 9. Aprobación del Team Charter
+
+| Integrante | Firma | Fecha |
+|---|---|---|
+| Porzio María Pia | Aprobado | 14/05/2026 |
+| Noval Leandro Andrés | Aprobado | 14/05/2026 |
+| Gonzalez D'Angelo Santiago | Aprobado | 14/05/2026 |
+| Wagner Pilar | Aprobado | 14/05/2026 |
+| Braunstein Melissa | Aprobado | 14/05/2026 |

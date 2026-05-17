@@ -8,6 +8,17 @@ import { GetMembersUseCase } from './application/GetMembersUseCase.js';
 import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { SportController } from './delivery/SportController.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+
+import { PostgresDisciplineRepository } from './infrastructure/PostgresDisciplineRepository.js';
+import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
+import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.js';
+import { DisciplineController } from './delivery/DisciplineController.js';
+import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
 
 // === Payment imports (PR 1: foundation + create) ===
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
@@ -21,12 +32,12 @@ export function buildApp() {
     const server = Fastify({
         logger: {
             level: 'info',
-            transport: process.env.NODE_ENV === 'development' 
-            ? {
-                target: 'pino-pretty',
-                options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
-                } 
-            : undefined,
+            transport: process.env.NODE_ENV === 'development'
+                ? {
+                      target: 'pino-pretty',
+                      options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
+                  }
+                : undefined,
         },
     });
 
@@ -38,7 +49,7 @@ export function buildApp() {
     });
 
     // ============================================================
-    // Members (existente)
+    // Members
     // ============================================================
     const memberRepo = new PostgresMemberRepository();
     const memberValidator = new MemberValidator(memberRepo);
@@ -52,13 +63,34 @@ export function buildApp() {
         createMemberUseCase,
         getMembersUseCase,
         updateMemberUseCase,
-        deleteMemberUseCase
+        deleteMemberUseCase,
     );
 
-    server.get('/api/v1/socios', memberController.getAll.bind(memberController));
-    server.post('/api/v1/socios', memberController.create.bind(memberController));
-    server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
-    server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+    // ============================================================
+    // Disciplines
+    // ============================================================
+    const disciplineRepo = new PostgresDisciplineRepository();
+    const disciplineValidator = new DisciplineValidator(memberRepo);
+    const getDisciplinesUseCase = new GetDisciplinesUseCase(disciplineRepo);
+    const createDisciplineUseCase = new CreateDisciplineUseCase(
+        disciplineRepo,
+        disciplineValidator,
+    );
+    const disciplineController = new DisciplineController(
+        createDisciplineUseCase,
+        getDisciplinesUseCase,
+    );
+
+    // ============================================================
+    // Sports
+    // ============================================================
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator();
+
+    const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
+    const getSportsUseCase = new GetSportsUseCase(sportRepo);
+
+    const sportController = new SportController(createSportUseCase, getSportsUseCase);
 
     // ============================================================
     // Payments - PR 1: Crear y listar (TDD-0010)
@@ -68,13 +100,29 @@ export function buildApp() {
     const paymentRepo = new PostgresPaymentRepository();
     const paymentValidator = new PaymentValidator(clock);
 
-    const newPaymentUseCase = new NewPaymentUseCase(paymentRepo, memberRepo, paymentValidator, clock);
+    const newPaymentUseCase = new NewPaymentUseCase(
+        paymentRepo,
+        memberRepo,
+        paymentValidator,
+        clock,
+    );
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo, paymentValidator);
 
-    const paymentController = new PaymentController(
-        newPaymentUseCase,
-        getPaymentsUseCase,
-    );
+    const paymentController = new PaymentController(newPaymentUseCase, getPaymentsUseCase);
+
+    // ============================================================
+    // Routes
+    // ============================================================
+    server.get('/api/v1/socios', memberController.getAll.bind(memberController));
+    server.post('/api/v1/socios', memberController.create.bind(memberController));
+    server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
+    server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
+    server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
+    server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
+
+    server.get('/api/v1/sports', sportController.getAll.bind(sportController));
+    server.post('/api/v1/sports', sportController.create.bind(sportController));
 
     server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
@@ -92,7 +140,7 @@ if (process.argv[1] && process.argv[1].endsWith('app.ts')) {
     const port = parseInt(process.env.PORT || '3000', 10);
 
     server.listen({ port, host: '0.0.0.0' }, () =>
-        server.log.info(`API server running on http://localhost:${port}`)
+        server.log.info(`API server running on http://localhost:${port}`),
     );
 
     ['SIGINT', 'SIGTERM'].forEach((signal) => {

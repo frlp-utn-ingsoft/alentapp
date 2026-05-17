@@ -30,21 +30,20 @@ enum PaymentStatus {
     Cancelado
 }
 
-
 model Member {
-    id         String         @id @default(uuid())
-    dni        String         @unique
-    name       String
-    email      String         @unique
-    birthdate  DateTime?      @db.Date
-    category   MemberCategory
-    status     MemberStatus   @default(Activo)
-    created_at DateTime       @default(now())
-    payments   Payment[]
+    id          String         @id @default(uuid())
+    dni         String         @unique
+    name        String
+    email       String         @unique
+    birthdate   DateTime?      @db.Date
+    category    MemberCategory
+    status      MemberStatus   @default(Activo)
+    created_at  DateTime       @default(now())
+    payments    Payment[]
+    disciplines Discipline[]
 
-    @@map("members") 
+    @@map("members")
 }
-
 
 model Payment {
     id           String        @id @default(uuid())
@@ -58,10 +57,34 @@ model Payment {
     created_at   DateTime      @default(now())
     updated_at   DateTime      @updatedAt
     canceled_at  DateTime?
-
     member       Member        @relation(fields: [member_id], references: [id])
 
     @@index([member_id])
-    @@index([status, due_date]) 
+    @@index([status, due_date])
     @@map("payments")
+}
+
+model Discipline {
+    id                  String    @id @default(uuid())
+    reason              String
+    start_date          DateTime
+    end_date            DateTime
+    is_total_suspension Boolean
+    deleted_at          DateTime?
+    member_id           String
+    member              Member    @relation(fields: [member_id], references: [id])
+
+    @@map("disciplines")
+}
+
+model Sport {
+    id                           String    @id @default(uuid())
+    name                         String
+    description                  String
+    max_capacity                 Int
+    additional_price             Float
+    requires_medical_certificate Boolean
+    deleted_at                   DateTime?
+
+    @@map("sports")
 }

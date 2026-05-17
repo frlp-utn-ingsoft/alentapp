@@ -32,7 +32,9 @@ export interface UpdateMemberRequest {
   status?: MemberStatus;
 }
 
-
+// ==========================================
+// Payment
+// ==========================================
 export type PaymentStatus = 'Pendiente' | 'Pagado' | 'Cancelado';
 
 export interface PaymentDTO {
@@ -68,4 +70,46 @@ export interface PaymentResponse {
 
 export interface PaymentsResponse {
   data: PaymentDTO[];
+}
+
+// ==========================================
+// Discipline
+// ==========================================
+export interface DisciplineDTO {
+  id: string; // UUID
+  reason: string;
+  start_date: string; // ISO Date String
+  end_date: string; // ISO Date String
+  is_total_suspension: boolean;
+  deleted_at: string | null; // ISO Date String or null
+  member_id: string; // UUID
+}
+
+export interface CreateDisciplineRequest {
+  reason: string;
+  start_date: string; // ISO Date String
+  end_date: string; // ISO Date String
+  is_total_suspension: boolean;
+  member_id: string; // UUID
+}
+
+// ==========================================
+// Sport
+// ==========================================
+export interface SportDTO {
+  id: string;
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+  deleted_at: string | null;
+}
+
+export interface CreateSportRequest {
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
 }

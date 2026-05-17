@@ -1,5 +1,5 @@
 import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
-import { LuUsers, LuCreditCard } from "react-icons/lu";
+import { LuUsers, LuCreditCard, LuShieldAlert, LuDumbbell } from "react-icons/lu";
 import { SectionCard } from "../components/SectionCard";
 
 export function HomeView() {
@@ -29,19 +29,29 @@ export function HomeView() {
           to="/members"
           icon={LuUsers}
         />
-        
-        <SectionCard 
+        <SectionCard
           title="Pagos"
           description="Gestiona el cobro de cuotas, registra pagos y anula comprobantes."
           to="/payments"
-          icon={LuCreditCard} 
+          icon={LuCreditCard}
         />
-
-        <Box 
-          p="6" 
-          bg="bg.muted/30" 
-          borderRadius="2xl" 
-          borderWidth="1px" 
+        <SectionCard
+          title="Sanciones"
+          description="Gestiona sanciones disciplinarias, períodos de suspensión y restricciones de socios."
+          to="/disciplines"
+          icon={LuShieldAlert}
+        />
+        <SectionCard
+          title="Deportes"
+          description="Administra el catálogo de actividades deportivas, cupos, precios adicionales y requisitos médicos."
+          to="/sports"
+          icon={LuDumbbell}
+        />
+        <Box
+          p="6"
+          bg="bg.muted/30"
+          borderRadius="2xl"
+          borderWidth="1px"
           borderColor="border.subtle"
           borderStyle="dashed"
           display="flex"
