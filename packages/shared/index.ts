@@ -172,6 +172,14 @@ export interface GetSportsQuery {
   name?: string;
 }
 
+export interface UpdateSportRequest {
+  description?: string;
+  max_capacity?: number;
+}
+
+export interface UpdateSportEnrollmentCountRequest {
+  action: 'increment' | 'decrement';
+}
 // Locker
 // ==========================================
 
