@@ -74,7 +74,8 @@ export function buildApp() {
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
 
     
-    server.post('/api/v1/sports', sportController.create.bind(sportController));  
+    server.post('/api/v1/sports', sportController.create.bind(sportController)); 
+    server.put('/api/v1/sports/:id', sportController.update.bind(sportController)) 
 
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
     server.get('/api/v1/payments/member/:memberId', paymentController.getByMember.bind(paymentController));
