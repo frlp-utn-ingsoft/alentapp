@@ -1,7 +1,7 @@
 import { CreateLockerRequest } from '@alentapp/shared';
-import { Locker } from '../../domain/locker/Locker.js';
-import { LockerRepository } from '../../domain/locker/LockerRepository.js';
-import { LockerValidator } from '../../domain/locker/LockerValidator.js';
+import { Locker } from '../../domain/entities/Locker.js';
+import { LockerValidator } from '../../domain/services/LockerValidator.js';
+import { ILockerRepository } from '../ports/ILockerRepository.js';
 
 export class CreateLockerUseCase {
     constructor(
@@ -23,3 +23,4 @@ export class CreateLockerUseCase {
 
         return this.lockerRepository.create(locker);
     }
+}
