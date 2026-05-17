@@ -40,12 +40,12 @@ Definición de los endpoints de consulta en el paquete compartido:
 *   **Endpoint (Individual)**: `GET /api/v1/medical-certificates/:id`
 *   **Response Body (MedicalCertificateResponse)**:
 ```ts
-{
+data: {
     id: string;
     issueDate: string;
     expiryDate: string;
     doctorLicence: string;
-    reason: string;
+    institution: string;
     isValidated: boolean;
     miembroId: string
 }
@@ -65,12 +65,12 @@ Definición de los endpoints de consulta en el paquete compartido:
 
 
 ## Casos de Borde y Errores
-| Escenario                   | Resultado Esperado                                       | Código HTTP               |
-| ----------------------------| -------------------------------------------------------- | ------------------------- |
-| Socio sin certificados      | Mensaje: "No se encontraron certificados para este socio"| 200 OK (Lista vacía)      |
-| ID de certificado inválido  | Mensaje: "El ID proporcionado no es un UUID válido"      | 400 Bad Request           |
-| Certificado no encontrado   | Mensaje: "El recurso solicitado no existe"               | 404 Not Found             |
-| Error de infraestructura    | Mensaje: "Error al recuperar los datos de la DB"         | 500 Internal Server Error |
+| Escenario                   | Resultado Esperado                                         | Código HTTP               |
+| ----------------------------| -----------------------------------------------------------| ------------------------- |
+| Socio sin certificados      | { error: "No se encontraron certificados para este socio" }| 200 OK (Lista vacía)      |
+| ID de certificado inválido  | { error: "El ID proporcionado no es un UUID válido" }      | 400 Bad Request           |
+| Certificado no encontrado   | { error: "El recurso solicitado no existe" }               | 404 Not Found             |
+| Error de infraestructura    | { error: "Error al recuperar los datos de la DB" }         | 500 Internal Server Error |
 
 ## Plan de Implementación
 1. Definir los tipos de respuesta (DTOs) en el paquete compartido @alentapp/shared.

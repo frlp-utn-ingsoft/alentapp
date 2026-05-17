@@ -30,7 +30,7 @@ La operación de actualización impacta sobre la entidad `MedicalCertificate` ex
 *   `issueDate`: DateTime (Editable).
 *   `expiryDate`: DateTime (Editable, con validación de rango).
 *   `doctorLicence`: String (Editable).
-*   `reason`: String (Editable).
+*   `institution`: String (Editable).
 
 ### Contrato de API (@alentapp/shared)
 **Éxito:** el cuerpo JSON usa `{ "data: ... "}`. **Errores:** `{ "error": "<mensaje en español>"}`. 
@@ -39,11 +39,11 @@ Definición del contrato para la actualización parcial (Put):
 *   **Endpoint**: `PUT /api/v1/medical-certificates/:id`
 *   **Request Body (UpdateMedicalCertificateRequest)**:
 ```ts
-{
+data: {
     issueDate: string;
     expiryDate?: string;
     doctorLicence?: string;
-    reason?: string;
+    institution?: string;
 }
 ```
 
@@ -59,12 +59,12 @@ Definición del contrato para la actualización parcial (Put):
 	* MedicalCertificateController: Valida que el ID enviado en la URL sea un UUID válido antes de pasar la petición al caso de uso.
 
 ## Casos de Borde y Errores
-| Escenario                                      | Resultado Esperado                                                         | Código HTTP     |     
-| -----------------------------------------------|--------------------------------------------------------------------------- |-----------------| 
-| ID de certificado inexistente                  | Mensaje: "Certificado no encontrado"                                       | 404 Not Found   |      
-| Nueva expiryDate menor que issueDate           | Mensaje: "La fecha de vencimiento no puede ser anterior a la de la emisión"| 400 Bad Request |   
-| Intento de modificar miembroId                 | El campo debe ser ignorado o retornar error de validación                  | 400 Bad Request |
-|  Error de concurrencia en BD                   | Mensaje: "El registro fue modificado por otro usuario"                     | 409 Conflict    |
+| Escenario                                      | Resultado Esperado                                                           | Código HTTP     |     
+| -----------------------------------------------|------------------------------------------------------------------------------|-----------------| 
+| ID de certificado inexistente                  | { error: "Certificado no encontrado" }                                       | 404 Not Found   |      
+| Nueva expiryDate menor que issueDate           | { error: "La fecha de vencimiento no puede ser anterior a la de la emisión" }| 400 Bad Request |   
+| Intento de modificar miembroId                 | { error: "Error de validación" }                                             | 400 Bad Request |
+|  Error de concurrencia en BD                   | { error: "El registro fue modificado por otro usuario" }                     | 409 Conflict    |
 
 ## Plan de Implementación
 1. Definir el DTO de actualización en el paquete.

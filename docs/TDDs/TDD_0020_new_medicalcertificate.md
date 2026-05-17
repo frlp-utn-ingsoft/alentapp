@@ -11,7 +11,7 @@ titulo: Registro de Nuevo Certificado Médico
 ## Contexto de Negocio (PRD)
 
 ### Objetivo
-Digitalizar la gestión de aptos físicos para garantizar que el club cumpla con las normativas legales de salud. El sistema debe actuar como una "llave" de seguridad, asegurando que solo los socios con certificados vigentes puedan realizar actividades deportivas.
+Digitalizar la gestión de aptos físicos para garantizar que el club cumpla con las normativas legales de salud. El sistema debe actuar como una "llave" de seguridad, asegurando que solo los socios con certificados vigentes puedan realizar actividades deportivas. La validación de que lo que se carga sea un certificado médico la hace el usuario.
 
 ### User Persona
 *   **Nombre**: Administrador del Club
@@ -32,7 +32,7 @@ Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propie
 *   `issueDate`: DateTime (Fecha de emisión).
 *   `expiryDate`: DateTime (Fecha de vencimiento).
 *   `doctorLicence`: String (Número de matrícula del profesional).
-*   `reason`: String (Nombre de la entidad emisora).
+*   `institution`: String (Nombre de la entidad emisora).
 *   `isValidated`: Boolean (Estado de vigencia actual).
 *   `memberId`: UUID (FK hacia la entidad Member).
 
@@ -42,11 +42,11 @@ Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propie
 *   **Endpoint**: `POST /api/v1/medical-certificates`
 *   **Request Body**: (CreateMedicalCertificateRequest)
 ```ts
-{
+data: {
     issueDate: string;      // ISO Date String
     expiryDate: string;  // ISO Date String
     doctorLicence: string;
-    reason: string;
+    institution: string;
     memberId: string;          // UUID del socio
 }
 ```
@@ -62,12 +62,12 @@ Se definirá la entidad 'MedicalCertificate' en Prisma con las siguientes propie
 	* MedicalCertificateController: Adaptador de entrada que recibe y valida el DTO mediante fastify.
 
 ## Casos de Borde y Errores
-| Escenario                              | Resultado Esperado                                           | Código HTTP              |
-| ---------------------------------------| -------------------------------------------------------------| -------------------------|
-| expiryDate <= issueDate                | Mensaje: "La fecha de fin debe ser posterior a la de inicio" | 400 Bad Request          |
-| Socio inexistente                      | Mensaje: "Socio no encontrado"                               | 404 Not found            |
-| Datos Obligatorios nulos               | Mensaje: "Datos inválidos"                                   | 400 Bad Request          |
-| Error de conexión a DB                 | Mensaje: "Error interno, reintente más tarde"                | 500 Internal Server Error|
+| Escenario                              | Resultado Esperado                                            | Código HTTP              |
+| ---------------------------------------| ------------------------------------------------------------- | -------------------------|
+| expiryDate <= issueDate                | { error: "La fecha de fin debe ser posterior a la de inicio" }| 400 Bad Request          |
+| Socio inexistente                      | { error: "Socio no encontrado" }                              | 404 Not found            |
+| Datos Obligatorios nulos               | { error: "Datos inválidos" }                                  | 400 Bad Request          |
+| Error de conexión a DB                 | { error: "Error interno, reintente más tarde" }               | 500 Internal Server Error|
 
 ## Plan de Implementación
 1. Definir el esquema de persistencia en schema.prisma y ejecutar la migración.
