@@ -24,6 +24,22 @@ enum MemberStatus {
     Suspendido
 }
 
+model Locker {
+    id       String       @id @default(uuid())
+    number   Int          @unique
+    location String
+    status   LockerStatus @default(Available)
+    memberId String?
+
+    @@map("lockers")
+}
+
+enum LockerStatus {
+    Available
+    Occupied
+    Maintenance
+}
+
 model Member {
     id         String         @id @default(uuid())
     dni        String         @unique
