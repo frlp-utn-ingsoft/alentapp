@@ -30,6 +30,9 @@ import { LockerController } from './delivery/LockerController.js';
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
+import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
+import { GetPaymentByIdUseCase } from './application/GetPaymentByIdUseCase.js';
+import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { SportValidator } from './domain/services/SportValidator.js';
@@ -119,6 +122,9 @@ export function buildApp() {
         memberRepo,
         paymentValidator,
     );
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
+    const getPaymentByIdUseCase = new GetPaymentByIdUseCase(paymentRepo);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo);
 
     const sportRepo = new PostgresSportRepository();
     const sportValidator = new SportValidator();
@@ -157,7 +163,12 @@ export function buildApp() {
     const getLockersUseCase = new GetLockersUseCase(lockerRepo)
     const lockerController = new LockerController(createLockerUseCase, getLockersUseCase);
   
-    const paymentController = new PaymentController(createPaymentUseCase);
+    const paymentController = new PaymentController(
+        createPaymentUseCase,
+        getPaymentsUseCase,
+        getPaymentByIdUseCase,
+        updatePaymentUseCase,
+    );
     const sportController = new SportController(createSportUseCase);
 
     server.get(
@@ -219,6 +230,18 @@ export function buildApp() {
     server.post(
         '/api/v1/payments',
         paymentController.create.bind(paymentController),
+    );
+    server.get(
+        '/api/v1/payments',
+        paymentController.getAll.bind(paymentController),
+    );
+    server.get(
+        '/api/v1/payments/:id',
+        paymentController.getById.bind(paymentController),
+    );
+    server.put(
+        '/api/v1/payments/:id',
+        paymentController.update.bind(paymentController),
     );
     server.post(
         '/api/v1/sports',
