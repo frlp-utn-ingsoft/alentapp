@@ -28,35 +28,45 @@ export class PostgresLockerRepository implements LockerRepository {
                 location: data.location,
                 status: data.status,
                 member_id: data.member_id,
+                deleted_at: null,
             },
-        });
+        } as any);
 
         return this.mapToDTO(locker);
     }
 
     async findAll(): Promise<LockerDTO[]> {
         const lockers = await prisma.locker.findMany({
+            where: {
+                deleted_at: null,
+            },
             include: {
                 member: { select: { name: true } },
             },
             orderBy: { number: 'asc' },
-        });
+        } as any);
 
         return lockers.map((locker) => this.mapToDTO(locker));
     }
 
     async findById(id: string): Promise<LockerDTO | null> {
-        const locker = await prisma.locker.findUnique({
-            where: { id },
-        });
+        const locker = await prisma.locker.findFirst({
+            where: {
+                id,
+                deleted_at: null,
+            },
+        } as any);
 
         return locker ? this.mapToDTO(locker) : null;
     }
 
     async findByNumber(number: number): Promise<LockerDTO | null> {
-        const locker = await prisma.locker.findUnique({
-            where: { number },
-        });
+        const locker = await prisma.locker.findFirst({
+            where: {
+                number,
+                deleted_at: null,
+            },
+        } as any);
 
         return locker ? this.mapToDTO(locker) : null;
     }
@@ -73,6 +83,16 @@ export class PostgresLockerRepository implements LockerRepository {
         });
 
         return this.mapToDTO(locker);
+    }
+
+    async delete(id: string): Promise<void> {
+        await prisma.locker.update({
+            where: { id },
+            data: {
+                member_id: null,
+                deleted_at: new Date(),
+            },
+        } as any);
     }
 
     private mapToDTO(locker: DBLocker): LockerDTO {
