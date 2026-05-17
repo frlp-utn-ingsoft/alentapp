@@ -6,7 +6,7 @@ export interface PaymentRepository {
      * El estado inicial siempre será 'Pending' según las reglas de negocio.
      * Se usa Omit parra indicar que al crear el pago no necesitamos el id (lo genera la DB), ni el status (por defecto es Pending))
      */
-    create(payment: Omit<PaymentDTO, 'id' | 'status' | 'payment_date'>): Promise<PaymentDTO>;
+    create(payment: Omit<PaymentDTO, 'id' | 'status' | 'payment_date' | 'created_at' | 'updated_at'>): Promise<PaymentDTO>;
 
 
     /**

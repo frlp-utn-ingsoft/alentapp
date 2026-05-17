@@ -20,13 +20,13 @@ type DBPayment = {
     due_date: Date;
     payment_date: Date | null;
     member_id: string;
+    created_at: Date;
+    updated_at: Date;
     deleted_at: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
 };
 
 export class PostgresPaymentRepository implements PaymentRepository {
-    async create(data: Omit<PaymentDTO, 'id' | 'status' | 'payment_date'>): Promise<PaymentDTO> {
+    async create(data: Omit<PaymentDTO, 'id' | 'status' | 'payment_date' | 'created_at' | 'updated_at'>): Promise<PaymentDTO> {
         const payment = await prisma.payment.create({
             data: {
                 amount: data.amount,
@@ -54,7 +54,7 @@ export class PostgresPaymentRepository implements PaymentRepository {
     async findAll(): Promise<PaymentDTO[]> {
         const payments = await prisma.payment.findMany({
             where: { deleted_at: null },
-            orderBy: { createdAt: 'desc' },
+            orderBy: { created_at: 'desc' },
         });
 
         return payments.map(p => this.mapToDTO(p as DBPayment));
@@ -70,6 +70,8 @@ export class PostgresPaymentRepository implements PaymentRepository {
             due_date: payment.due_date.toISOString().split('T')[0],
             payment_date: payment.payment_date ? payment.payment_date.toISOString().split('T')[0] : null,
             member_id: payment.member_id,
+            created_at: payment.created_at.toISOString(),
+            updated_at: payment.updated_at.toISOString(),
         };
     }
 }
