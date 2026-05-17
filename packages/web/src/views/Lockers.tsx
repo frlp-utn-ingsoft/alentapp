@@ -487,7 +487,11 @@ export function LockersView() {
                                         Socio asignado
                                     </Table.ColumnHeader>
 
-                                    <Table.ColumnHeader py="4">
+                                    <Table.ColumnHeader
+                                        py="4"
+                                        textAlign="center"
+                                        w="140px"
+                                    >
                                         Acciones
                                     </Table.ColumnHeader>
                                 </Table.Row>
@@ -534,10 +538,10 @@ export function LockersView() {
                                                 {locker.member?.name || 'Sin asignar'}
                                             </Table.Cell>
 
-                                            <Table.Cell>
+                                            <Table.Cell w="140px">
                                                 <HStack
                                                     gap="2"
-                                                    justify="flex-end"
+                                                    justify="center"
                                                 >
                                                     <IconButton
                                                         type="button"
