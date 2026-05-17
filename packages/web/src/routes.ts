@@ -1,6 +1,10 @@
 import { createBrowserRouter } from "react-router";
 
 import { MembersView } from "./views/Members";
+import { LockersView } from "./views/Lockers";
+import { HomeView } from "./views/Home";
+import Layout from "./Layout";
+import { MembersView } from "./views/Members";
 import { DisciplinesView } from "./views/Disciplines";
 import { PaymentsView } from "./views/Payments";
 import { HomeView } from "./views/Home";
@@ -14,6 +18,17 @@ export let router = createBrowserRouter([
         path: "/",
         Component: HomeView,
       },
+      {
+        path: "/members",
+        Component: MembersView,
+      },
+      {
+        path: "/lockers",
+        Component: LockersView,
+      },
+    ],
+  },
+]);
       {
         path: "/members",
         Component: MembersView,

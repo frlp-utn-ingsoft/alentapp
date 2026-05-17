@@ -1,4 +1,5 @@
 import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
+import { LuArchive, LuUsers } from "react-icons/lu";
 
 import {LuShieldAlert } from "react-icons/lu";
 
@@ -10,9 +11,9 @@ export function HomeView() {
   return (
     <Box>
       <VStack gap="6" align="flex-start" mb="12">
-        <Heading 
-          size="4xl" 
-          fontWeight="extrabold" 
+        <Heading
+          size="4xl"
+          fontWeight="extrabold"
           letterSpacing="tight"
           bgGradient="to-r"
           gradientFrom="blue.600"
@@ -22,15 +23,15 @@ export function HomeView() {
           Bienvenido a Alentapp
         </Heading>
         <Text fontSize="xl" color="fg.muted" maxW="2xl">
-          El panel de administración central para gestionar todos los aspectos de tu club. 
-          Selecciona una sección a continuación para comenzar.
+          El panel de administracion central para gestionar todos los aspectos de tu club.
+          Selecciona una seccion a continuacion para comenzar.
         </Text>
       </VStack>
 
       <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="8">
-        <SectionCard 
+        <SectionCard
           title="Miembros"
-          description="Administra el padrón de socios, sus categorías, estados de cuenta y datos personales."
+          description="Administra el padron de socios, sus categorias, estados de cuenta y datos personales."
           to="/members"
           icon={LuUsers}
         />
@@ -42,6 +43,10 @@ export function HomeView() {
         />
 
         <SectionCard
+          title="Lockers"
+          description="Registra nuevos lockers del club con numero unico, ubicacion y disponibilidad inicial."
+          to="/lockers"
+          icon={LuArchive}
           title="Disciplinas"
           description="Gestiona sanciones, suspensiones y el historial disciplinario de los miembros."
           to="/disciplines"
