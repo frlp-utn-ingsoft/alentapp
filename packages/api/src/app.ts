@@ -31,6 +31,11 @@ import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepos
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
+import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
+import { CreateSportUseCase } from './application/CreateSportUseCase.js';
+import { SportController } from './delivery/SportController.js';
+
 import { GetLockersUseCase } from './application/GetLockersUseCase.js';
 
 export function buildApp() {
@@ -40,12 +45,12 @@ export function buildApp() {
             transport:
                 process.env.NODE_ENV === 'development'
                     ? {
-                          target: 'pino-pretty',
-                          options: {
-                              translateTime: 'HH:MM:ss Z',
-                              ignore: 'pid,hostname',
-                          },
-                      }
+                        target: 'pino-pretty',
+                        options: {
+                            translateTime: 'HH:MM:ss Z',
+                            ignore: 'pid,hostname',
+                        },
+                    }
                     : undefined,
         },
     });
@@ -115,6 +120,14 @@ export function buildApp() {
         paymentValidator,
     );
 
+    const sportRepo = new PostgresSportRepository();
+    const sportValidator = new SportValidator();
+    const createSportUseCase = new CreateSportUseCase(
+        sportRepo,
+        sportValidator,
+    );
+
+
     const memberController = new MemberController(
         createMemberUseCase,
         getMembersUseCase,
@@ -145,6 +158,7 @@ export function buildApp() {
     const lockerController = new LockerController(createLockerUseCase, getLockersUseCase);
   
     const paymentController = new PaymentController(createPaymentUseCase);
+    const sportController = new SportController(createSportUseCase);
 
     server.get(
         '/api/v1/socios',
@@ -205,6 +219,10 @@ export function buildApp() {
     server.post(
         '/api/v1/payments',
         paymentController.create.bind(paymentController),
+    );
+    server.post(
+        '/api/v1/sports',
+        sportController.create.bind(sportController),
     );
 
     // rutas de locker
