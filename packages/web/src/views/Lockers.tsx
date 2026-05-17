@@ -12,8 +12,14 @@ import {
     Table,
     Text,
 } from '@chakra-ui/react';
-import { useState } from 'react';
-import type { CreateLockerRequest, LockerDTO, LockerStatus } from '@alentapp/shared';
+import { useEffect, useRef, useState } from 'react';
+import type {
+    CreateLockerRequest,
+    LockerDTO,
+    LockerStatus,
+    MemberDTO,
+    UpdateLockerRequest,
+} from '@alentapp/shared';
 import { LuPencil, LuPlus, LuRefreshCw, LuTrash2 } from 'react-icons/lu';
 import { useLockers } from '../hooks/useLockers';
 import { useMemberSearch } from '../hooks/useMemberSearch';
@@ -31,6 +37,7 @@ import { ConfirmActionDialog } from '../components/ConfirmActionDialog';
 import { Field } from '../components/ui/field';
 import { MemberSearchInput } from '../components/MemberSearchInput';
 import { lockersService } from '../services/lockers';
+import { membersService } from '../services/members';
 import {
     SelectContent,
     SelectItem,
@@ -48,6 +55,9 @@ const statusCollection = createListCollection({
     ],
 });
 
+const getErrorMessage = (error: unknown, fallback: string) =>
+    error instanceof Error ? error.message : fallback;
+
 export function LockersView() {
     const { lockers, isLoading, error, fetchLockers } = useLockers();
     const lockerList = Array.isArray(lockers) ? lockers : [];
@@ -57,6 +67,10 @@ export function LockersView() {
     const [isDeleteSubmitting, setIsDeleteSubmitting] = useState(false);
     const [deletingLocker, setDeletingLocker] = useState<LockerDTO | null>(null);
     const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+    const [editingLocker, setEditingLocker] = useState<LockerDTO | null>(null);
+    const [editFormData, setEditFormData] = useState<UpdateLockerRequest | null>(null);
     const [formData, setFormData] = useState<CreateLockerRequest>({
         number: 1,
         location: '',
@@ -79,6 +93,10 @@ export function LockersView() {
         }));
     });
 
+    const [editMemberSearch, setEditMemberSearch] = useState('');
+    const [editMemberResults, setEditMemberResults] = useState<MemberDTO[]>([]);
+    const editMemberSearchRef = useRef<HTMLDivElement | null>(null);
+
     const handleSearchMember = (value: string) => {
         searchMembers(value);
 
@@ -89,6 +107,62 @@ export function LockersView() {
             }));
         }
     };
+
+    const loadEditMemberResults = async (query?: string) => {
+        try {
+            const results = await membersService.getAll(query);
+            setEditMemberResults(results);
+        } catch (err) {
+            console.error('Error al buscar miembros:', err);
+            setEditMemberResults([]);
+        }
+    };
+
+    const handleEditSearchMember = (value: string) => {
+        setEditMemberSearch(value);
+
+        if (value.trim().length === 0) {
+            setEditMemberResults([]);
+            setEditFormData((prev) =>
+                prev
+                    ? { ...prev, member_id: null, status: 'Disponible' }
+                    : prev,
+            );
+            return;
+        }
+
+        if (value.trim().length < 2) {
+            setEditMemberResults([]);
+            return;
+        }
+
+        loadEditMemberResults(value);
+    };
+
+    const handleSelectEditMember = (member: MemberDTO) => {
+        setEditMemberSearch(`${member.name} (${member.dni})`);
+        setEditMemberResults([]);
+        setEditFormData((prev) =>
+            prev ? { ...prev, member_id: member.id, status: 'Ocupado' } : prev,
+        );
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                editMemberSearchRef.current &&
+                !editMemberSearchRef.current.contains(event.target as Node)
+            ) {
+                setEditMemberResults([]);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleCreateLocker = () => {
         setFormData({
@@ -115,16 +189,57 @@ export function LockersView() {
             });
             setIsDialogOpen(false);
             fetchLockers();
-        } catch (submitError: any) {
-            alert(submitError.message || 'Error al crear el locker');
+        } catch (submitError) {
+            alert(getErrorMessage(submitError, 'Error al crear el locker'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleEditLocker = (lockerId: string) => {
-        // TODO: Implementar edición de locker cuando el backend esté listo
-        console.log('Edit locker', lockerId);
+    const openEditModal = (locker: LockerDTO) => {
+        setEditingLocker(locker);
+        setEditFormData({
+            location: locker.location,
+            status: locker.status,
+            member_id: locker.member_id,
+        });
+        setEditMemberSearch(locker.member?.name ?? '');
+        setEditMemberResults([]);
+        if (locker.status !== 'Mantenimiento') {
+            loadEditMemberResults();
+        }
+        setIsEditDialogOpen(true);
+    };
+
+    const handleUpdate = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!editingLocker || !editFormData) return;
+
+        if (editFormData.status === 'Ocupado' && !editFormData.member_id) {
+            alert('Seleccioná un socio para marcar el locker como ocupado');
+            return;
+        }
+
+        setIsEditSubmitting(true);
+
+        const payload: UpdateLockerRequest = {
+            ...editFormData,
+            location: editFormData.location?.trim(),
+            member_id:
+                editFormData.status === 'Ocupado'
+                    ? editFormData.member_id ?? null
+                    : null,
+        };
+
+        try {
+            await lockersService.update(editingLocker.id, payload);
+            setIsEditDialogOpen(false);
+            fetchLockers();
+        } catch (err) {
+            alert(getErrorMessage(err, 'Error al actualizar el locker'));
+        } finally {
+            setIsEditSubmitting(false);
+        }
     };
 
     const openDeleteModal = (locker: LockerDTO) => {
@@ -141,8 +256,8 @@ export function LockersView() {
             await lockersService.delete(deletingLocker.id);
             setIsDeleteDialogOpen(false);
             fetchLockers();
-        } catch (err: any) {
-            setDeleteError(err.message || 'Error al eliminar el locker');
+        } catch (err) {
+            setDeleteError(getErrorMessage(err, 'Error al eliminar el locker'));
         } finally {
             setIsDeleteSubmitting(false);
         }
@@ -372,7 +487,11 @@ export function LockersView() {
                                         Socio asignado
                                     </Table.ColumnHeader>
 
-                                    <Table.ColumnHeader py="4">
+                                    <Table.ColumnHeader
+                                        py="4"
+                                        textAlign="center"
+                                        w="140px"
+                                    >
                                         Acciones
                                     </Table.ColumnHeader>
                                 </Table.Row>
@@ -419,10 +538,10 @@ export function LockersView() {
                                                 {locker.member?.name || 'Sin asignar'}
                                             </Table.Cell>
 
-                                            <Table.Cell>
+                                            <Table.Cell w="140px">
                                                 <HStack
                                                     gap="2"
-                                                    justify="flex-end"
+                                                    justify="center"
                                                 >
                                                     <IconButton
                                                         type="button"
@@ -430,9 +549,7 @@ export function LockersView() {
                                                         size="sm"
                                                         aria-label="Editar locker"
                                                         onClick={() =>
-                                                            handleEditLocker(
-                                                                locker.id,
-                                                            )
+                                                            openEditModal(locker)
                                                         }
                                                     >
                                                         <LuPencil />
@@ -460,6 +577,120 @@ export function LockersView() {
                     )}
                 </Box>
             </Stack>
+        </DialogRoot>
+
+        <DialogRoot
+            open={isEditDialogOpen}
+            onOpenChange={(e) => setIsEditDialogOpen(e.open)}
+        >
+            <DialogContent>
+                <form onSubmit={handleUpdate}>
+                    <DialogHeader>
+                        <DialogTitle>Editar Locker</DialogTitle>
+                    </DialogHeader>
+
+                    <DialogBody>
+                        <Stack gap="4">
+                            <Field label="N° de Locker">
+                                <Text
+                                    fontSize="sm"
+                                    color="fg.muted"
+                                    py="2"
+                                    borderBottomWidth="1px"
+                                    borderColor="border.muted"
+                                    w="100%"
+                                >
+                                    {editingLocker?.number}
+                                </Text>
+                            </Field>
+
+                            <Field label="Ubicación" required>
+                                <Input
+                                    placeholder="Ej. Vestuario A"
+                                    value={editFormData?.location ?? ''}
+                                    onChange={(e) =>
+                                        setEditFormData((prev) =>
+                                            prev
+                                                ? { ...prev, location: e.target.value }
+                                                : prev,
+                                        )
+                                    }
+                                    required
+                                />
+                            </Field>
+
+                            <Field label="Estado" required>
+                                <SelectRoot
+                                    collection={statusCollection}
+                                    value={[editFormData?.status ?? 'Disponible']}
+                                    onValueChange={(e) => {
+                                        const nextStatus = e.value[0] as LockerStatus;
+
+                                        if (nextStatus !== 'Ocupado') {
+                                            setEditMemberSearch('');
+                                            setEditMemberResults([]);
+                                        } else {
+                                            loadEditMemberResults();
+                                        }
+
+                                        setEditFormData((prev) =>
+                                            prev
+                                                ? {
+                                                      ...prev,
+                                                      status: nextStatus,
+                                                      member_id:
+                                                          nextStatus === 'Ocupado'
+                                                              ? prev.member_id ?? null
+                                                              : null,
+                                                  }
+                                                : prev,
+                                        );
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValueText placeholder="Seleccione un estado" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {statusCollection.items.map((status) => (
+                                            <SelectItem item={status} key={status.value}>
+                                                {status.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </SelectRoot>
+                            </Field>
+
+                            <Field label="Socio asignado">
+                                <MemberSearchInput
+                                    value={editMemberSearch}
+                                    results={editMemberResults}
+                                    searchRef={editMemberSearchRef}
+                                    onSearch={handleEditSearchMember}
+                                    onSelect={handleSelectEditMember}
+                                    required={false}
+                                    disabled={editFormData?.status === 'Mantenimiento'}
+                                />
+                            </Field>
+                        </Stack>
+                    </DialogBody>
+
+                    <DialogFooter>
+                        <DialogActionTrigger asChild>
+                            <Button variant="outline">Cancelar</Button>
+                        </DialogActionTrigger>
+
+                        <Button
+                            type="submit"
+                            colorPalette="blue"
+                            loading={isEditSubmitting}
+                        >
+                            Guardar Cambios
+                        </Button>
+                    </DialogFooter>
+
+                    <DialogCloseTrigger />
+                </form>
+            </DialogContent>
         </DialogRoot>
 
         <DialogRoot
