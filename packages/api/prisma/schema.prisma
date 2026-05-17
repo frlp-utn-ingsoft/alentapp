@@ -74,15 +74,12 @@ model Payment {
 
 model Locker {
   id        String       @id @default(uuid())
-  number    Int
+  number    Int          @unique
   location  String
   status    LockerStatus @default(Disponible)
   member_id String?
-  deleted_at DateTime?
 
   member Member? @relation(fields: [member_id], references: [id])
-
-  @@index([number])
 
   @@map("lockers")
 }
