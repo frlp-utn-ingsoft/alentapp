@@ -21,8 +21,10 @@ export class LockerController {
             return reply.status(201).send({ data: locker });
         } catch (error: any) {
             if (
+                error.message.includes('El socio no existe') ||
                 error.message.includes('debe ser positivo') ||
-                error.message.includes('ubicación es obligatoria')
+                error.message.includes('ubicación es obligatoria') ||
+                error.message.includes('no puede tener un socio asignado')
             ) {
                 return reply.status(400).send({ error: error.message });
             }
