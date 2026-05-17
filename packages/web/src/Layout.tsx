@@ -33,7 +33,20 @@ function Layout() {
                                 Miembros
                             </Text>
                         </RouterLink>
+
                         <RouterLink to="/disciplines">
+                        
+                            <Text 
+                                    fontWeight="semibold" 
+                                    fontSize="sm" 
+                                    textTransform="uppercase" 
+                                    letterSpacing="wider"
+                                    color="fg.muted"
+                                    _hover={{ color: "blue.500", textDecoration: "none" }}
+                             >
+                                  Disciplinas
+                        <RouterLink to="/payments">
+
                             <Text 
                                 fontWeight="semibold" 
                                 fontSize="sm" 
@@ -42,7 +55,7 @@ function Layout() {
                                 color="fg.muted"
                                 _hover={{ color: "blue.500", textDecoration: "none" }}
                             >
-                                Disciplinas
+                                Pagos
                             </Text>
                         </RouterLink>
                     </HStack>

@@ -34,6 +34,7 @@ model Member {
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
     disciplines       Discipline[]
+    payments   Payment[]
 
     @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
 }
@@ -51,4 +52,24 @@ model Discipline {
   updatedAt         DateTime  @updatedAt
  
   @@map("disciplines")
+}
+enum PaymentStatus {
+    Pending
+    Paid
+    Canceled
+}
+
+model Payment {
+    id          String        @id @default(uuid())
+    amount      Decimal       @db.Decimal(10, 2)
+    description String?
+    status      PaymentStatus @default(Pending)
+    paymentDate DateTime
+    memberId    String
+    deletedAt   DateTime?
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    member      Member        @relation(fields: [memberId], references: [id])
+
+    @@map("payments")
 }

@@ -1,13 +1,8 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
-import { MemberValidator } from './domain/services/MemberValidator.js';
-import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
-import { GetMembersUseCase } from './application/GetMembersUseCase.js';
-import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
-import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
-import { MemberController } from './infrastructure/delivery/MemberController.js';
 import { disciplineRouter } from './infrastructure/routers/DisciplineRouter.js';
+import { memberRoutes } from './infrastructure/routers/memberRoutes.js';
+import { paymentRoutes } from './infrastructure/routers/paymentRoutes.js';
 
 
 export function buildApp() {
@@ -22,7 +17,6 @@ export function buildApp() {
                 : undefined,
         },
     });
-    server.register(disciplineRouter);
     server.register(cors, {
         origin: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -30,25 +24,10 @@ export function buildApp() {
         credentials: true,
     });
 
-    const memberRepo = new PostgresMemberRepository();
-    const memberValidator = new MemberValidator(memberRepo);
+    server.register(memberRoutes);
+    server.register(paymentRoutes);
+    server.register(disciplineRouter);
 
-    const createMemberUseCase = new CreateMemberUseCase(memberRepo, memberValidator);
-    const getMembersUseCase = new GetMembersUseCase(memberRepo);
-    const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
-    const deleteMemberUseCase = new DeleteMemberUseCase(memberRepo);
-
-    const memberController = new MemberController(
-        createMemberUseCase,
-        getMembersUseCase,
-        updateMemberUseCase,
-        deleteMemberUseCase
-    );
-
-    server.get('/api/v1/socios', memberController.getAll.bind(memberController));
-    server.post('/api/v1/socios', memberController.create.bind(memberController));
-    server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
-    server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })

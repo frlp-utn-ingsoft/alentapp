@@ -8,9 +8,9 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "paths": {
-            "@alentapp/shared": [
-                "../shared/index.ts"
-            ]
+            "@alentapp/shared": ["./packages/shared/index.ts"]
         }
-    }
+    },
+    "include": ["packages/api/src/**/*.ts", "packages/shared/index.ts"],
+    "exclude": ["node_modules"]
 }
