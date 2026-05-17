@@ -12,7 +12,7 @@ import {
   Input,
   IconButton
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw, LuPencil } from "react-icons/lu";
+import { LuPlus, LuRefreshCw, LuPencil, LuTrash2 } from "react-icons/lu";
 import { useEffect, useState, useCallback } from "react";
 import { sportsService } from "../services/sports";
 import type { SportDTO, CreateSportRequest, UpdateSportRequest } from "@alentapp/shared";
@@ -26,6 +26,7 @@ import {
   DialogActionTrigger,
   DialogCloseTrigger
 } from "../components/ui/dialog";
+import { ConfirmActionDialog } from "../components/ConfirmActionDialog";
 import { Field } from "../components/ui/field";
 
 export function SportsView() {
@@ -52,6 +53,12 @@ export function SportsView() {
     description: "",
     max_capacity: 1,
   });
+
+  // Delete dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleteSubmitting, setIsDeleteSubmitting] = useState(false);
+  const [deletingSport, setDeletingSport] = useState<SportDTO | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const fetchSports = useCallback(async () => {
     setIsLoading(true);
@@ -80,6 +87,12 @@ export function SportsView() {
     setIsEditDialogOpen(true);
   };
 
+  const openDeleteModal = (sport: SportDTO) => {
+    setDeletingSport(sport);
+    setDeleteError(null);
+    setIsDeleteDialogOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -105,6 +118,21 @@ export function SportsView() {
       alert(err.message || "Error al actualizar el deporte");
     } finally {
       setIsEditSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingSport) return;
+    setIsDeleteSubmitting(true);
+    setDeleteError(null);
+    try {
+      await sportsService.delete(deletingSport.id);
+      setIsDeleteDialogOpen(false);
+      fetchSports();
+    } catch (err: any) {
+      setDeleteError(err.message || "Error al eliminar el deporte");
+    } finally {
+      setIsDeleteSubmitting(false);
     }
   };
 
@@ -225,6 +253,19 @@ export function SportsView() {
         </DialogContent>
       </DialogRoot>
 
+      {/* Delete Dialog */}
+      <DialogRoot open={isDeleteDialogOpen} onOpenChange={(e) => setIsDeleteDialogOpen(e.open)}>
+        <ConfirmActionDialog
+          title="Eliminar Deporte"
+          description={`¿Estás segura de que deseas eliminar el deporte "${deletingSport?.name}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          isLoading={isDeleteSubmitting}
+          error={deleteError}
+          variant="danger"
+          onConfirm={handleDelete}
+        />
+      </DialogRoot>
+
       <Stack gap="8">
         <Flex justify="space-between" align="center">
           <Stack gap="1">
@@ -307,14 +348,25 @@ export function SportsView() {
                       </Box>
                     </Table.Cell>
                     <Table.Cell textAlign="end">
-                      <IconButton
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Editar deporte"
-                        onClick={() => openEditModal(sport)}
-                      >
-                        <LuPencil />
-                      </IconButton>
+                      <HStack gap="2" justify="flex-end">
+                        <IconButton
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Editar deporte"
+                          onClick={() => openEditModal(sport)}
+                        >
+                          <LuPencil />
+                        </IconButton>
+                        <IconButton
+                          variant="ghost"
+                          size="sm"
+                          colorPalette="red"
+                          aria-label="Eliminar deporte"
+                          onClick={() => openDeleteModal(sport)}
+                        >
+                          <LuTrash2 />
+                        </IconButton>
+                      </HStack>
                     </Table.Cell>
                   </Table.Row>
                 ))}
