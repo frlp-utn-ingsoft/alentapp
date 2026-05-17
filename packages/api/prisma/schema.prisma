@@ -51,3 +51,14 @@ model Discipline {
 
   @@map("disciplines") // Para que en la DB la tabla se llame 'disciplines' en minúscula
 }
+model Sport {
+  id                           String    @id @default(uuid())
+  name                         String
+  description                  String
+  max_capacity                 Int
+  additional_price             Float
+  requires_medical_certificate Boolean
+  deleted_at                   DateTime?
+
+  @@map("sports")
+}
