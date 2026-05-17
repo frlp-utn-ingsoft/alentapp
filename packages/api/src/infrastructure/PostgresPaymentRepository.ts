@@ -21,14 +21,13 @@ function getPrisma(): PrismaClient {
     return prismaInstance;
 }
 
-// Shape devuelto por Prisma. Lo tipamos a mano para no exponer el cliente generado.
 type DBPayment = {
     id: string;
     member_id: string;
-    amount: { toString(): string } | number | string; // Decimal | number | string
+    amount: any;
     month: number;
     year: number;
-    status: 'Pendiente' | 'Pagado' | 'Cancelado';
+    status: 'Pending' | 'Paid' | 'Canceled';
     due_date: Date;
     payment_date: Date | null;
     created_at: Date;
@@ -47,19 +46,19 @@ export class PostgresPaymentRepository implements PaymentRepository {
                 due_date: new Date(data.due_date),
             },
         });
-        return this.mapToDTO(payment as DBPayment);
+        return this.mapToDTO(payment as unknown as DBPayment);
     }
 
     async findById(id: string): Promise<PaymentDTO | null> {
         const payment = await getPrisma().payment.findUnique({ where: { id } });
-        return payment ? this.mapToDTO(payment as DBPayment) : null;
+        return payment ? this.mapToDTO(payment as unknown as DBPayment) : null;
     }
 
     async findAll(): Promise<PaymentDTO[]> {
         const payments = await getPrisma().payment.findMany({
             orderBy: { created_at: 'desc' },
         });
-        return payments.map((p) => this.mapToDTO(p as DBPayment));
+        return payments.map((p) => this.mapToDTO(p as unknown as DBPayment));
     }
 
     async findByMemberId(member_id: string): Promise<PaymentDTO[]> {
@@ -67,7 +66,7 @@ export class PostgresPaymentRepository implements PaymentRepository {
             where: { member_id },
             orderBy: { due_date: 'desc' },
         });
-        return payments.map((p) => this.mapToDTO(p as DBPayment));
+        return payments.map((p) => this.mapToDTO(p as unknown as DBPayment));
     }
 
     async existsActiveByMemberAndPeriod(
@@ -81,7 +80,7 @@ export class PostgresPaymentRepository implements PaymentRepository {
                 member_id,
                 month,
                 year,
-                status: { in: ['Pendiente', 'Pagado'] },
+                status: { in: ['Pending', 'Paid'] },
                 ...(excluding_payment_id ? { NOT: { id: excluding_payment_id } } : {}),
             },
         });
@@ -89,17 +88,13 @@ export class PostgresPaymentRepository implements PaymentRepository {
     }
 
     async updateIfPending(id: string, data: UpdatePaymentData): Promise<PaymentDTO> {
-        // Transacción con relectura: leer estado, validar, actualizar, todo dentro
-        // de la misma transacción. Si dos procesos concurrentes intentan operar
-        // sobre el mismo pago, solo uno verá `Pendiente` y materializará el cambio.
         const updated = await getPrisma().$transaction(async (tx) => {
             const current = await tx.payment.findUnique({ where: { id } });
             if (!current) {
-                // findById ya fue chequeado por el caso de uso, pero la DB cambió.
-                throw new PaymentNotPendingError('Cancelado'); // tratar como conflicto
+                throw new PaymentNotPendingError('Canceled');
             }
-            if (current.status !== 'Pendiente') {
-                throw new PaymentNotPendingError(current.status as 'Pagado' | 'Cancelado');
+            if (current.status !== 'Pending') {
+                throw new PaymentNotPendingError(current.status as 'Paid' | 'Canceled');
             }
             return tx.payment.update({
                 where: { id },
@@ -111,57 +106,55 @@ export class PostgresPaymentRepository implements PaymentRepository {
                 },
             });
         });
-        return this.mapToDTO(updated as DBPayment);
+        return this.mapToDTO(updated as unknown as DBPayment);
     }
 
     async markAsPaidIfPending(id: string, payment_date: Date): Promise<PaymentDTO> {
         const updated = await getPrisma().$transaction(async (tx) => {
             const current = await tx.payment.findUnique({ where: { id } });
             if (!current) {
-                throw new PaymentNotPendingError('Cancelado');
+                throw new PaymentNotPendingError('Canceled');
             }
-            if (current.status !== 'Pendiente') {
-                throw new PaymentNotPendingError(current.status as 'Pagado' | 'Cancelado');
+            if (current.status !== 'Pending') {
+                throw new PaymentNotPendingError(current.status as 'Paid' | 'Canceled');
             }
             return tx.payment.update({
                 where: { id },
-                data: { status: 'Pagado', payment_date },
+                data: { status: 'Paid', payment_date },
             });
         });
-        return this.mapToDTO(updated as DBPayment);
+        return this.mapToDTO(updated as unknown as DBPayment);
     }
 
     async cancelIfPending(id: string, canceled_at: Date): Promise<PaymentDTO> {
         const updated = await getPrisma().$transaction(async (tx) => {
             const current = await tx.payment.findUnique({ where: { id } });
             if (!current) {
-                throw new PaymentNotPendingError('Cancelado');
+                throw new PaymentNotPendingError('Canceled');
             }
-            if (current.status !== 'Pendiente') {
-                throw new PaymentNotPendingError(current.status as 'Pagado' | 'Cancelado');
+            if (current.status !== 'Pending') {
+                throw new PaymentNotPendingError(current.status as 'Paid' | 'Canceled');
             }
             return tx.payment.update({
                 where: { id },
-                data: { status: 'Cancelado', canceled_at },
+                data: { status: 'Canceled', canceled_at },
             });
         });
-        return this.mapToDTO(updated as DBPayment);
+        return this.mapToDTO(updated as unknown as DBPayment);
     }
 
     async findExpiredPending(now: Date): Promise<PaymentDTO[]> {
         const payments = await getPrisma().payment.findMany({
             where: {
-                status: 'Pendiente',
+                status: 'Pending',
                 due_date: { lt: now },
             },
             orderBy: { due_date: 'asc' },
         });
-        return payments.map((p) => this.mapToDTO(p as DBPayment));
+        return payments.map((p) => this.mapToDTO(p as unknown as DBPayment));
     }
 
     private mapToDTO(payment: DBPayment): PaymentDTO {
-        // Prisma puede devolver Decimal como objeto con toString(), o como number/string
-        // según la versión del client. Normalizamos a number.
         const amountRaw = payment.amount;
         const amountNumber =
             typeof amountRaw === 'number'
@@ -174,7 +167,7 @@ export class PostgresPaymentRepository implements PaymentRepository {
             amount: amountNumber,
             month: payment.month,
             year: payment.year,
-            status: payment.status,
+            status: payment.status as any,
             due_date: payment.due_date.toISOString(),
             payment_date: payment.payment_date ? payment.payment_date.toISOString() : null,
             created_at: payment.created_at.toISOString(),
