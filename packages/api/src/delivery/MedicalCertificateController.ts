@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateMedicalCertificateUseCase } from '../application/CreateMedicalCertificateUseCase.js';
-import { CreateMedicalCertificateRequest, UpdateMedicalCertificateRequest } from '@alentapp/shared';
+import { CreateMedicalCertificateRequest } from '@alentapp/shared';
 
 export class MedicalCertificateController {
     constructor(private readonly createUseCase: CreateMedicalCertificateUseCase) {}
@@ -17,9 +17,8 @@ export class MedicalCertificateController {
     private handleError(error: Error, reply: FastifyReply) {
         if (
             error.message.includes('Faltan campos requeridos') ||
-            error.message.includes('no es válido') ||
-            error.message.includes('La fecha de emisión no es válida') ||
-            error.message.includes('La fecha de vencimiento')
+            error.message.includes('no es valida') ||
+            error.message.includes('posterior')
         ) {
             return reply.status(400).send({ error: error.message });
         }
@@ -28,6 +27,9 @@ export class MedicalCertificateController {
             return reply.status(404).send({ error: error.message });
         }
 
-        return reply.status(500).send({ error: 'Error interno, reintente más tarde' });
+        return reply.status(500).send({ error: 'Error interno, reintente mas tarde' });
     }
 }
+
+export default MedicalCertificateController;
+
