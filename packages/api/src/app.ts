@@ -75,8 +75,7 @@ export function buildApp() {
 
     server.post('/api/v1/payments', paymentController.create.bind(paymentController));
     server.get('/api/v1/payments/member/:memberId', paymentController.getByMember.bind(paymentController));
-
-    server.get('/', async (req, rep) => {
+    server.post('/api/v1/sports', sportController.create.bind(sportController));    server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
     });
 
