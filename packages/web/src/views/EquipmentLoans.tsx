@@ -12,14 +12,16 @@ import {
   Center,
   Input,
 } from '@chakra-ui/react';
-import { LuPlus, LuPencil, LuRefreshCw } from 'react-icons/lu';
+import { LuPlus, LuPencil, LuTrash2, LuRefreshCw } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 import { equipmentLoansService } from '../services/equipmentLoans';
+import { membersService } from '../services/members'; // ← NUEVO: re-usar el servicio existente
 import type {
   EquipmentLoanDTO,
   CreateEquipmentLoanRequest,
   UpdateEquipmentLoanRequest,
   LoanStatus,
+  MemberDTO,          // ← NUEVO
 } from '@alentapp/shared';
 import {
   DialogRoot,
@@ -48,6 +50,14 @@ const updateStatusOptions = createListCollection({
   ],
 });
 
+const formatToDateTimeLocal = (dateString?: string | Date): string => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const tzOffset = date.getTimezoneOffset() * 60000;
+  const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+  return localISOTime;
+};
+
 export function EquipmentLoansView() {
   const [loans, setLoans] = useState<EquipmentLoanDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,6 +66,10 @@ export function EquipmentLoansView() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingLoanId, setEditingLoanId] = useState<string | null>(null);
+
+  // ← NUEVO: estado para la lista de socios elegibles
+  const [eligibleMembers, setEligibleMembers] = useState<MemberDTO[]>([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
 
   const [createForm, setCreateForm] = useState<CreateEquipmentLoanRequest>({
     itemName: '',
@@ -82,15 +96,38 @@ export function EquipmentLoansView() {
     }
   };
 
+  // ← NUEVO: cargar socios elegibles (Pleno u Honorario) al abrir el modal de alta
+  const fetchEligibleMembers = async () => {
+    setIsLoadingMembers(true);
+    try {
+      const allMembers = await membersService.getAll();
+      // Filtramos en el frontend para mostrar solo Pleno u Honorario
+      const eligible = allMembers.filter(
+        (m: MemberDTO) => m.category === 'Pleno' || m.category === 'Honorario'
+      );
+      setEligibleMembers(eligible);
+    } catch {
+      // Si falla, el campo queda vacío y el backend igual valida
+      setEligibleMembers([]);
+    } finally {
+      setIsLoadingMembers(false);
+    }
+  };
+
   const openCreateModal = () => {
     setEditingLoanId(null);
     setCreateForm({ itemName: '', dueDate: '', memberId: '' });
     setIsDialogOpen(true);
+    fetchEligibleMembers(); // ← NUEVO: cargar socios al abrir
   };
 
   const openEditModal = (loan: EquipmentLoanDTO) => {
     setEditingLoanId(loan.id);
-    setUpdateForm({ itemName: loan.itemName, status: undefined, dueDate: '' });
+    setUpdateForm({
+      itemName: loan.itemName,
+      status: undefined,
+      dueDate: formatToDateTimeLocal(loan.dueDate),
+    });
     setIsDialogOpen(true);
   };
 
@@ -99,7 +136,6 @@ export function EquipmentLoansView() {
     setIsSubmitting(true);
     try {
       if (editingLoanId) {
-        // Limpiar campos vacíos antes de enviar
         const payload: UpdateEquipmentLoanRequest = {};
         if (updateForm.itemName && updateForm.itemName.trim() !== '') {
           payload.itemName = updateForm.itemName;
@@ -112,7 +148,11 @@ export function EquipmentLoansView() {
         }
         await equipmentLoansService.update(editingLoanId, payload);
       } else {
-        await equipmentLoansService.create(createForm);
+        const payload: CreateEquipmentLoanRequest = {
+          ...createForm,
+          dueDate: new Date(createForm.dueDate).toISOString(),
+        };
+        await equipmentLoansService.create(payload);
       }
       setIsDialogOpen(false);
       fetchLoans();
@@ -120,6 +160,21 @@ export function EquipmentLoansView() {
       alert(err.message || 'Error al guardar el préstamo');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string, itemName: string) => {
+    if (
+      window.confirm(
+        `¿Estás seguro de que deseas eliminar el préstamo de "${itemName}"? Esta acción no se puede deshacer.`
+      )
+    ) {
+      try {
+        await equipmentLoansService.delete(id);
+        fetchLoans();
+      } catch (err: any) {
+        alert(err.message || 'Error al eliminar el préstamo');
+      }
     }
   };
 
@@ -132,6 +187,14 @@ export function EquipmentLoansView() {
   useEffect(() => {
     fetchLoans();
   }, []);
+
+  // ← NUEVO: construir colección para el Select de socios
+  const memberSelectOptions = createListCollection({
+    items: eligibleMembers.map((m) => ({
+      label: `${m.name} (DNI: ${m.dni}) — ${m.category}`,
+      value: m.id,
+    })),
+  });
 
   return (
     <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
@@ -166,7 +229,7 @@ export function EquipmentLoansView() {
             <DialogBody>
               <Stack gap="4">
                 {editingLoanId ? (
-                  /* Formulario de edición */
+                  /* ── Formulario de EDICIÓN (sin cambios respecto al original) ── */
                   <>
                     <Field label="Nombre del Ítem">
                       <Input
@@ -211,7 +274,7 @@ export function EquipmentLoansView() {
                     </Field>
                   </>
                 ) : (
-                  /* Formulario de creación */
+                  /* ── Formulario de ALTA ── */
                   <>
                     <Field label="Nombre del Ítem" required>
                       <Input
@@ -228,23 +291,43 @@ export function EquipmentLoansView() {
                         type="datetime-local"
                         value={createForm.dueDate}
                         onChange={(e) =>
-                          setCreateForm({
-                            ...createForm,
-                            dueDate: new Date(e.target.value).toISOString(),
-                          })
+                          setCreateForm({ ...createForm, dueDate: e.target.value })
                         }
                         required
                       />
                     </Field>
-                    <Field label="UUID del Socio" required>
-                      <Input
-                        placeholder="UUID del socio (Pleno u Honorario)"
-                        value={createForm.memberId}
-                        onChange={(e) =>
-                          setCreateForm({ ...createForm, memberId: e.target.value })
-                        }
-                        required
-                      />
+
+                    {/* ← NUEVO: Selector de socio en lugar del input de UUID */}
+                    <Field label="Socio (Pleno u Honorario)" required>
+                      {isLoadingMembers ? (
+                        <HStack>
+                          <Spinner size="sm" />
+                          <Text fontSize="sm" color="fg.muted">Cargando socios...</Text>
+                        </HStack>
+                      ) : eligibleMembers.length === 0 ? (
+                        <Text fontSize="sm" color="red.500">
+                          No hay socios Pleno u Honorario disponibles.
+                        </Text>
+                      ) : (
+                        <SelectRoot
+                          collection={memberSelectOptions}
+                          value={createForm.memberId ? [createForm.memberId] : []}
+                          onValueChange={(e) =>
+                            setCreateForm({ ...createForm, memberId: e.value[0] })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValueText placeholder="Seleccionar socio..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberSelectOptions.items.map((opt) => (
+                              <SelectItem item={opt} key={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </SelectRoot>
+                      )}
                     </Field>
                   </>
                 )}
@@ -342,14 +425,25 @@ export function EquipmentLoansView() {
                       {loan.memberId}
                     </Table.Cell>
                     <Table.Cell textAlign="end">
-                      <IconButton
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Editar préstamo"
-                        onClick={() => openEditModal(loan)}
-                      >
-                        <LuPencil />
-                      </IconButton>
+                      <HStack gap="2" justify="flex-end">
+                        <IconButton
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Editar préstamo"
+                          onClick={() => openEditModal(loan)}
+                        >
+                          <LuPencil />
+                        </IconButton>
+                        <IconButton
+                          variant="ghost"
+                          size="sm"
+                          colorPalette="red"
+                          aria-label="Eliminar préstamo"
+                          onClick={() => handleDelete(loan.id, loan.itemName)}
+                        >
+                          <LuTrash2 />
+                        </IconButton>
+                      </HStack>
                     </Table.Cell>
                   </Table.Row>
                 ))}
