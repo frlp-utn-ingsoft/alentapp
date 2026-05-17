@@ -13,6 +13,13 @@ import { GetSportsUseCase } from './application/GetSportsUseCase.js';
 import { SportController } from './delivery/SportController.js';
 import { SportValidator } from './domain/services/SportValidator.js';
 
+import { PostgresDisciplineRepository } from './infrastructure/PostgresDisciplineRepository.js';
+import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
+import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.js';
+import { DisciplineController } from './delivery/DisciplineController.js';
+import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
+
+
 export function buildApp() {
     const server = Fastify({
         logger: {
@@ -47,6 +54,21 @@ export function buildApp() {
         updateMemberUseCase,
         deleteMemberUseCase
     );
+    
+
+    const disciplineRepo = new PostgresDisciplineRepository();
+    const disciplineValidator = new DisciplineValidator(memberRepo);
+    const getDisciplinesUseCase = new GetDisciplinesUseCase(disciplineRepo);
+    const createDisciplineUseCase = new CreateDisciplineUseCase(
+        disciplineRepo,
+        disciplineValidator
+    );
+    const disciplineController = new DisciplineController(
+        createDisciplineUseCase,
+        getDisciplinesUseCase
+    );
+    
+    
 
     const sportRepo = new PostgresSportRepository();
     const sportValidator = new SportValidator();
@@ -67,6 +89,9 @@ export function buildApp() {
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+
+    server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
+    server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
 
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));

@@ -33,6 +33,27 @@ export interface UpdateMemberRequest {
 }
 
 // ==========================================
+// Discipline
+// ==========================================
+
+export interface DisciplineDTO {
+  id: string; // UUID
+  reason: string;
+  start_date: string; // ISO Date String
+  end_date: string; // ISO Date String
+  is_total_suspension: boolean;
+  deleted_at: string | null; // ISO Date String or null
+  member_id: string; // UUID
+}
+
+export interface CreateDisciplineRequest {
+  reason: string;
+  start_date: string; // ISO Date String
+  end_date: string; // ISO Date String
+  is_total_suspension: boolean;
+  member_id: string; // UUID
+}
+// ==========================================
 // Sport
 // ==========================================
 
