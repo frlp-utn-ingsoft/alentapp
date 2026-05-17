@@ -21,6 +21,7 @@ enum MemberStatus {
   Suspendido
 }
 
+<<<<<<< HEAD
 enum PaymentStatus {
   Pending
   Paid
@@ -63,6 +64,39 @@ model Payment {
   @@unique([memberId, month, year])
   
   @@map("payments")
+=======
+enum EquipmentLoanStatusEnum {
+    Loaned
+    Returned
+    Damaged
+}
+
+model Member {
+    id         String         @id @default(uuid())
+    dni        String         @unique
+    name       String
+    email      String         @unique
+    birthdate  DateTime?      @db.Date
+    category   MemberCategory
+    status     MemberStatus   @default(Activo)
+    created_at DateTime       @default(now())
+
+    equipment_loans EquipmentLoan[]
+
+    @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+>>>>>>> 62c409102443ef9aa5ceb24f821f9c13bee12ac5
+}
+
+model EquipmentLoan {
+    id         String         @id @default(uuid())
+    item_name  String
+    status     EquipmentLoanStatusEnum @default(Loaned)
+    loan_date  DateTime       @default(now())
+    due_date   DateTime
+    member_id  String
+    member     Member         @relation(fields: [member_id], references: [id])
+
+    @@map("equipment_loans")
 }
 
 model Sport {

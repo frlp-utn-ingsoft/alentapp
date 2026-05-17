@@ -9,6 +9,12 @@ export class SportValidator {
         }
     }
 
+    validateNameCannotBeModified(data: Record<string, unknown> | null | undefined): void {
+        if (data && Object.prototype.hasOwnProperty.call(data, 'name')) {
+            throw new Error('El nombre del deporte no puede modificarse');
+        }
+    }
+
     async validateNameIsUnique(name: string): Promise<void> {
         const sportWithSameName = await this.sportRepository.findByName(name);
         if (sportWithSameName) {

@@ -1,4 +1,9 @@
 // ==========================================
+// EquipmentLoan
+// ==========================================
+export * from './types/equipment-loan.js';
+
+// ==========================================
 // Member
 // ==========================================
 export type MemberCategory = 'Pleno' | 'Cadete' | 'Honorario';
@@ -50,4 +55,9 @@ export interface CreateSportRequest {
   max_capacity: number;
   additional_price: number;
   requires_medical_certificate: boolean;
+}
+
+export interface UpdateSportRequest {
+  description?: string;
+  max_capacity?: number;
 }

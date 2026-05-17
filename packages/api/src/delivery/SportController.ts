@@ -1,9 +1,13 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { CreateSportRequest } from '@alentapp/shared';
+import { CreateSportRequest, UpdateSportRequest } from '@alentapp/shared';
 import { CreateSportUseCase } from '../application/NewSportUseCase.js';
+import { UpdateSportUseCase } from '../application/UpdateSportUseCase.js';
 
 export class SportController {
-    constructor(private readonly createSportUseCase: CreateSportUseCase) {}
+    constructor(
+        private readonly createSportUseCase: CreateSportUseCase,
+        private readonly updateSportUseCase?: UpdateSportUseCase,
+    ) {}
 
     async create(
         request: FastifyRequest<{ Body: CreateSportRequest }>,
@@ -23,6 +27,7 @@ export class SportController {
         }
     }
 
+
     async update(request: FastifyRequest, reply: FastifyReply) {
     try {
       return reply.status(200).send({ msg: "Edición de deporte no implementada aún" });
@@ -30,4 +35,6 @@ export class SportController {
       return reply.status(500).send({ error: error.message });
     }
   }
+
+    
 }
