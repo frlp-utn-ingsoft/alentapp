@@ -1,12 +1,18 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
-import { MemberValidator } from './domain/services/MemberValidator.js';
-import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
-import { GetMembersUseCase } from './application/GetMembersUseCase.js';
-import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
-import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
-import { MemberController } from './infrastructure/delivery/MemberController.js';
+import { PostgresMemberRepository } from './infrastructure/member/PostgresMemberRepository.js';
+import { MemberValidator } from './domain/member/MemberValidator.js';
+import { CreateMemberUseCase } from './application/member/NewMemberUseCase.js';
+import { GetMembersUseCase } from './application/member/GetMembersUseCase.js';
+import { UpdateMemberUseCase } from './application/member/UpdateMemberUseCase.js';
+import { DeleteMemberUseCase } from './application/member/DeleteMemberUseCase.js';
+import { MemberController } from './delivery/member/MemberController.js';
+import { registerMemberRouter } from './infrastructure/routes/member/MemberRouter.js';
+import { PostgresLockerRepository } from './infrastructure/locker/PostgresLockerRepository.js';
+import { LockerValidator } from './domain/locker/LockerValidator.js';
+import { CreateLockerUseCase } from './application/locker/CreateLockerUseCase.js';
+import { LockerController } from './delivery/locker/LockerController.js';
+import { registerLockerRouter } from './infrastructure/routes/locker/LockerRouter.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -43,10 +49,13 @@ export function buildApp() {
         deleteMemberUseCase
     );
 
-    server.get('/api/v1/socios', memberController.getAll.bind(memberController));
-    server.post('/api/v1/socios', memberController.create.bind(memberController));
-    server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
-    server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+    const lockerRepo = new PostgresLockerRepository();
+    const lockerValidator = new LockerValidator(lockerRepo);
+    const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
+    const lockerController = new LockerController(createLockerUseCase);
+
+    registerMemberRouter(server, memberController);
+    registerLockerRouter(server, lockerController);
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
