@@ -26,6 +26,8 @@ import { LoanController } from './delivery/LoanController.js';
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
+import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
+import { GetPaymentByIdUseCase } from './application/GetPaymentByIdUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
@@ -109,6 +111,8 @@ export function buildApp() {
         memberRepo,
         paymentValidator,
     );
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
+    const getPaymentByIdUseCase = new GetPaymentByIdUseCase(paymentRepo);
 
     const memberController = new MemberController(
         createMemberUseCase,
@@ -132,7 +136,11 @@ export function buildApp() {
         updateLoanStatusUseCase,
     );
 
-    const paymentController = new PaymentController(createPaymentUseCase);
+    const paymentController = new PaymentController(
+        createPaymentUseCase,
+        getPaymentsUseCase,
+        getPaymentByIdUseCase,
+    );
 
     server.get(
         '/api/v1/socios',
@@ -193,6 +201,14 @@ export function buildApp() {
     server.post(
         '/api/v1/payments',
         paymentController.create.bind(paymentController),
+    );
+    server.get(
+        '/api/v1/payments',
+        paymentController.getAll.bind(paymentController),
+    );
+    server.get(
+        '/api/v1/payments/:id',
+        paymentController.getById.bind(paymentController),
     );
 
     server.get('/', async (req, rep) => {
