@@ -29,11 +29,11 @@ interface PaymentCreateDialogProps {
 
 export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }: PaymentCreateDialogProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState<CreatePaymentRequest>({
+    const [formData, setFormData] = useState({
         member_id: '',
-        amount: 0,
-        month: new Date().getMonth() + 1,
-        year: new Date().getFullYear(),
+        amount: '' as number | '',
+        month: (new Date().getMonth() + 1) as number | '',
+        year: new Date().getFullYear() as number | '',
         due_date: new Date().toISOString().split('T')[0]
     });
 
@@ -45,7 +45,12 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await paymentsService.create(formData);
+            await paymentsService.create({
+                ...formData,
+                amount: formData.amount === '' ? 0 : Number(formData.amount),
+                month: formData.month === '' ? 0 : Number(formData.month),
+                year: formData.year === '' ? 0 : Number(formData.year)
+            });
             toaster.create({ title: "Pago registrado", type: "success" });
             onOpenChange({ open: false });
             onSuccess();
@@ -53,7 +58,7 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
             // Limpiar formulario
             setFormData({ 
                 member_id: '', 
-                amount: 0, 
+                amount: '', 
                 month: new Date().getMonth() + 1, 
                 year: new Date().getFullYear(), 
                 due_date: new Date().toISOString().split('T')[0] 
@@ -97,7 +102,13 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
                                 <Input 
                                     type="number" 
                                     value={formData.amount} 
-                                    onChange={(e) => setFormData({...formData, amount: Number(e.target.value)})}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setFormData({
+                                            ...formData,
+                                            amount: val === '' ? '' : Number(val)
+                                        });
+                                    }}
                                     required
                                 />
                             </Field>
@@ -107,7 +118,13 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
                                     <Input 
                                         type="number" min={1} max={12}
                                         value={formData.month} 
-                                        onChange={(e) => setFormData({...formData, month: Number(e.target.value)})}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setFormData({
+                                                ...formData,
+                                                month: val === '' ? '' : Number(val)
+                                            });
+                                        }}
                                         required
                                     />
                                 </Field>
@@ -115,7 +132,13 @@ export const PaymentCreateDialog = ({ isOpen, onOpenChange, members, onSuccess }
                                     <Input 
                                         type="number" 
                                         value={formData.year} 
-                                        onChange={(e) => setFormData({...formData, year: Number(e.target.value)})}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setFormData({
+                                                ...formData,
+                                                year: val === '' ? '' : Number(val)
+                                            });
+                                        }}
                                         required
                                     />
                                 </Field>
