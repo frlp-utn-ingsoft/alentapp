@@ -58,6 +58,7 @@ model Payment {
   memberId  String        @map("member_id") @db.Uuid
 
   member    Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@unique([memberId, month, year])
   
