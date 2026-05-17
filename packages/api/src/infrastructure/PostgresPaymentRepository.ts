@@ -1,5 +1,3 @@
-// packages/api/src/infrastructure/PostgresPaymentRepository.ts
-
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { PaymentRepository } from '../application/NewPaymentUseCase.js';
@@ -22,7 +20,6 @@ export class PostgresPaymentRepository implements PaymentRepository {
     return member !== null;
   }
 
-  // Búsqueda de payments duplicados
   public async findByMemberAndPeriod(memberId: string, month: number, year: number): Promise<Payment | null> {
     const payment = await prisma.payment.findFirst({
       where: {
@@ -45,8 +42,8 @@ export class PostgresPaymentRepository implements PaymentRepository {
         month: p.month,
         year: p.year,
         status: (p.status || 'Pending') as any,
-        dueDate: p.dueDate || p.due_date,
-        memberId: p.memberId || p.member_id
+        dueDate: p.dueDate,
+        memberId: p.memberId
       } as any,
     });
 
@@ -71,7 +68,7 @@ export class PostgresPaymentRepository implements PaymentRepository {
       year: p.year,
       status: p.status,
       
-      dueDate: p.dueDate || p.due_date,
+      dueDate: p.dueDate,
       due_date: p.dueDate || p.due_date,
       
       createdAt: p.createdAt || p.created_at,
