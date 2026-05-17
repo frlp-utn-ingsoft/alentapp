@@ -33,6 +33,26 @@ export interface UpdateMemberRequest {
 }
 
 // ==========================================
+// Locker
+// ==========================================
+
+export type LockerLocation = 'MALE' | 'FEMALE' | 'CHILDREN';
+export type LockerStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE';
+
+export interface LockerDTO {
+  id: string;
+  number: number;
+  location: LockerLocation;
+  status: LockerStatus;
+  member_id: string | null;
+  contract_end_date: string | null; // ISO Date String (YYYY-MM-DD) or null
+}
+
+export interface CreateLockerRequest {
+  number: number;
+  location: LockerLocation;
+}
+// ==========================================
 // Medical Certificate
 // ==========================================
 export type MedicalCertificateStatus = 'in_review' | 'validated' | 'historical';
@@ -119,6 +139,13 @@ export interface CreateDisciplineRequest {
   end_date: string; // ISO Date String
   is_total_suspension: boolean;
   member_id: string; // UUID
+}
+
+export interface UpdateDisciplineRequest {
+  reason?: string;
+  start_date?: string;
+  end_date?: string;
+  is_total_suspension?: boolean;
 }
 
 // ==========================================

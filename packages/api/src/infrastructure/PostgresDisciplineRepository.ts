@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { DisciplineRepository } from '../domain/DisciplineRepository.js';
-import { DisciplineDTO } from '@alentapp/shared';
+import { DisciplineDTO, UpdateDisciplineRequest } from '@alentapp/shared';
 
 
 if (!process.env.DATABASE_URL) {
@@ -49,6 +49,32 @@ export class PostgresDisciplineRepository implements DisciplineRepository {
         });
     
         return disciplines.map((discipline) => this.mapToDTO(discipline));
+    }
+
+    async findById(id: string): Promise<DisciplineDTO | null> {
+        const discipline = await prisma.discipline.findUnique({
+            where: { id },
+        });
+        return discipline ? this.mapToDTO(discipline) : null;
+    }
+
+    async update(id: string, data: UpdateDisciplineRequest): Promise<DisciplineDTO> {
+        const updateDiscipline = await prisma.discipline.update({
+            where: { id },
+            data: {
+                ...(data.reason !== undefined && { 
+                    reason: data.reason }),
+                ...(data.start_date !== undefined && { 
+                    start_date: new Date(data.start_date) }),
+                ...(data.end_date !== undefined && { 
+                    end_date: new Date(data.end_date) }),
+                ...(data.is_total_suspension !== undefined && { 
+                    is_total_suspension: data.is_total_suspension 
+                }),
+            },
+        });
+
+        return this.mapToDTO(updateDiscipline);
     }
 
     private mapToDTO(discipline: DBDiscipline): DisciplineDTO {

@@ -26,6 +26,7 @@ import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
 import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.js';
 import { DisciplineController } from './delivery/DisciplineController.js';
 import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
+import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.js';
 
 // === Payment imports (PR 1: foundation + create) ===
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
@@ -34,6 +35,13 @@ import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { NewPaymentUseCase } from './application/NewPaymentUseCase.js';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
+
+import { PostgresLockerRepository } from './infrastructure/PostgresLockerRepository.js';
+import { LockerValidator } from './domain/services/LockerValidator.js';
+import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
+import { LockerController } from './delivery/LockerController.js';
+import { GetLockersUseCase } from './application/GetLockersUseCase.js';
+
 
 export function buildApp() {
     const server = Fastify({
@@ -78,6 +86,16 @@ export function buildApp() {
         deleteMemberUseCase,
     );
 
+    const lockerRepo = new PostgresLockerRepository();
+    const lockerValidator = new LockerValidator(lockerRepo);
+    const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
+    const getLockersUseCase = new GetLockersUseCase(lockerRepo);
+    const lockerController = new LockerController(
+    createLockerUseCase,
+    getLockersUseCase
+);
+
+
     const medicalCertificateController = new MedicalCertificateController(
         createMedicalCertificateUseCase,
         getMedicalCertificatesUseCase
@@ -93,9 +111,14 @@ export function buildApp() {
         disciplineRepo,
         disciplineValidator,
     );
+    const updateDisciplineUseCase = new UpdateDisciplineUseCase(
+        disciplineRepo, disciplineValidator
+    );
+
     const disciplineController = new DisciplineController(
         createDisciplineUseCase,
         getDisciplinesUseCase,
+        updateDisciplineUseCase,
     );
 
     // ============================================================
@@ -143,12 +166,16 @@ export function buildApp() {
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
+    
+    server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
+    server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
 
     server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));
     server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
 
     server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
     server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
+    server.patch('/api/v1/disciplines/:id', disciplineController.update.bind(disciplineController));
 
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
