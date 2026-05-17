@@ -145,3 +145,21 @@ export interface CreateLockerRequest {
   location: string;
   status?: 'Available' | 'Maintenance' // no puede ser occupied en la creacion
 }
+
+export interface LockerItemResponse {
+  id: string;
+  number: number;
+  location: string;
+  status: LockerStatus;
+  memberId: string | null;
+  member: {
+      name: string;
+      dni: string;
+  } | null;
+}
+
+export type LockerListResponse = LockerItemResponse[];
+
+export interface GetLockersQuery {
+  status?: string;
+}
