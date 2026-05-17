@@ -28,6 +28,7 @@ import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { GetPaymentByIdUseCase } from './application/GetPaymentByIdUseCase.js';
+import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
 
 export function buildApp() {
@@ -113,6 +114,7 @@ export function buildApp() {
     );
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
     const getPaymentByIdUseCase = new GetPaymentByIdUseCase(paymentRepo);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo);
 
     const memberController = new MemberController(
         createMemberUseCase,
@@ -140,6 +142,7 @@ export function buildApp() {
         createPaymentUseCase,
         getPaymentsUseCase,
         getPaymentByIdUseCase,
+        updatePaymentUseCase,
     );
 
     server.get(
@@ -209,6 +212,10 @@ export function buildApp() {
     server.get(
         '/api/v1/payments/:id',
         paymentController.getById.bind(paymentController),
+    );
+    server.put(
+        '/api/v1/payments/:id',
+        paymentController.update.bind(paymentController),
     );
 
     server.get('/', async (req, rep) => {
