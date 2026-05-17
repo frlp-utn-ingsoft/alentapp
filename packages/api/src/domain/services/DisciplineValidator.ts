@@ -1,6 +1,7 @@
 
-import { CreateDisciplineRequest } from '@alentapp/shared';
+import { CreateDisciplineRequest, UpdateDisciplineRequest } from '@alentapp/shared';
 import { MemberRepository } from '../MemberRepository.js';
+
 
 
 export class DisciplineValidator {
@@ -57,6 +58,42 @@ export class DisciplineValidator {
         const member = await this.memberRepo.findById(member_id);
         if (!member) {
             throw new Error('El socio no existe');
+        }
+    }
+
+    validateHasUpdateFields(data: UpdateDisciplineRequest): void {
+        if (
+            data.reason === undefined &&
+            data.start_date === undefined &&
+            data.end_date === undefined &&
+            data.is_total_suspension === undefined
+        ) {
+            throw new Error('Debe enviarse al menos un campo para actualizar');
+        }
+    }
+    validateMemberIdIsNotPresent(data: unknown): void {
+        if (
+            typeof data === 'object' &&
+            data !== null &&
+            'member_id' in data
+        ) {
+            throw new Error('No se permite modificar el socio asociado a la sanción');
+        }
+    }
+
+    validateUpdateReason(reason?: string): void {
+        if (reason !== undefined) {
+            this.validateReason(reason);
+        }
+    }
+    validateUpdateIsTotalSuspension(is_total_suspension?: unknown): void {
+        if (is_total_suspension !== undefined) {
+            this.validateIsTotalSuspension(is_total_suspension);
+        }
+    }
+    validateUpdateDateFormat(date?: string): void {
+        if (date !== undefined) {
+            this.validateDateFormat(date);
         }
     }
 }
