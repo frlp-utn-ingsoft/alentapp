@@ -87,6 +87,21 @@ export interface CreateLoanRequest {
     due_date: string; // ISO Date String
 }
 
+export interface GetLoansQuery {
+  status?: 'Loaned' | 'Returned' | 'Damaged';
+  search?: string;
+}
+
+export interface LoanWithMemberDTO extends LoanDTO {
+  member: {
+    name: string;
+  };
+}
+
+export interface UpdateLoanStatusRequest {
+  status: 'Returned' | 'Damaged';
+}
+
 // ==========================================
 // Payment
 // ==========================================
@@ -118,17 +133,11 @@ export interface GetPaymentsQuery {
     year?: number;
 }
 
-export interface GetLoansQuery {
-  status?: 'Loaned' | 'Returned' | 'Damaged';
-  search?: string;
-}
-
-export interface LoanWithMemberDTO extends LoanDTO {
-  member: {
-    name: string;
-  };
-}
-
-export interface UpdateLoanStatusRequest {
-  status: 'Returned' | 'Damaged';
+export interface UpdatePaymentRequest {
+    amount?: number;
+    month?: number;
+    year?: number;
+    dueDate?: string;
+    paymentDate?: string;
+    status?: "Paid";
 }
