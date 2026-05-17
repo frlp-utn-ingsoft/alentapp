@@ -19,6 +19,8 @@ import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresM
 import { MedicalCertificateValidator } from './domain/services/MedicalCertificateValidator.js';
 import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCertificateUseCase.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
+import { GetMedicalCertificatesUseCase } from './application/GetMedicalCertificateUseCase.js';
+import { UpdateMedicalCertificateUseCase } from './application/UpdateMedicalCertificateUseCase.js';
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.ts';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
 import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.ts';
@@ -78,8 +80,16 @@ export function buildApp() {
       memberRepo,
       medicalCertificateValidator
     );
+    const getMedicalCertificatesUseCase = new GetMedicalCertificatesUseCase(medicalCertificateRepo
+    );
+     const updateMedicalCertificateUseCase = new UpdateMedicalCertificateUseCase(
+      medicalCertificateRepo,
+      medicalCertificateValidator,
+    );
     const medicalCertificateController = new MedicalCertificateController(
-      createMedicalCertificateUseCase
+        createMedicalCertificateUseCase,
+        getMedicalCertificatesUseCase,
+        updateMedicalCertificateUseCase,
     );
 
     const paymentRepo = new PostgresPaymentRepository();
@@ -97,7 +107,9 @@ export function buildApp() {
     server.post('/api/v1/deportes', sportController.create.bind(sportController));
     server.put('/api/v1/deportes/:id', sportController.update.bind(sportController));
     server.delete('/api/v1/deportes/:id', sportController.delete.bind(sportController));
+    server.get('/api/v1/certificados-medicos', medicalCertificateController.getAll.bind(medicalCertificateController));
     server.post('/api/v1/certificados-medicos', medicalCertificateController.create.bind(medicalCertificateController));
+    server.put('/api/v1/certificados-medicos/:id', medicalCertificateController.update.bind(medicalCertificateController));
 
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
     server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));

@@ -73,6 +73,11 @@ export interface CreateMedicalCertificateRequest {
   doctorLicense: string
 }
 
+export interface UpdateMedicalCertificateRequest {
+  expiryDate?: string
+  isValidated?: boolean
+}
+
 //(Objeto de Transferencia de Datos) enviada de vuelta al front como respuesta
 export interface MedicalCertificateDTO {
   id: string

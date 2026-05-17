@@ -1,7 +1,6 @@
-import { Box, SimpleGrid, Heading, Text, VStack } from '@chakra-ui/react';
-import { LuCreditCard, LuReceipt, LuTrophy, LuUsers, LuWalletCards } from 'react-icons/lu';
-import { SectionCard } from '../components/SectionCard';
-
+import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
+import { LuTrophy, LuUsers, LuFileText, LuReceipt } from "react-icons/lu";
+import { SectionCard } from "../components/SectionCard";
 export function HomeView() {
     return (
         <Box>
@@ -23,7 +22,6 @@ export function HomeView() {
                     para comenzar.
                 </Text>
             </VStack>
-
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap="8">
                 <SectionCard
                     title="Miembros"
@@ -31,21 +29,24 @@ export function HomeView() {
                     to="/members"
                     icon={LuUsers}
                 />
-
                 <SectionCard
                     title="Deportes"
                     description="Administra la oferta deportiva, cupos, precios adicionales y requisitos médicos."
                     to="/sports"
                     icon={LuTrophy}
                 />
-
+                <SectionCard 
+                    title="Certificados Médicos"
+                    description="Administra los certificados médicos de los socios, vencimientos y validaciones."
+                    to="/medical-certificates"
+                    icon={LuFileText}
+                />
                 <SectionCard
                     title="Pagos"
                     description="Gestiona los pagos de las cuotas de los socios."
                     to="/payments"
                     icon={LuReceipt}
                 />
-
                 {/* Future sections can be added here following the same pattern */}
                 <Box
                     p="6"
