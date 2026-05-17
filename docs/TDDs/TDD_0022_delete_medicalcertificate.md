@@ -19,7 +19,7 @@ Permitir la anulación de un certificado médico en caso de que haya sido cargad
 
 ### Criterios de Aceptación
 *   El sistema no debe realizar un borrado físico (DELETE) de la fila en la base de datos para mantener la integridad referencial.
-*   Al ejecutar la acción, el campo `esta_validado` debe cambiar a `false` de forma permanente.
+*   Al ejecutar la acción, el campo `isValidated` debe cambiar a `false` de forma permanente.
 *   Una vez anulado, el certificado no podrá ser utilizado por otros módulos (como Inscripciones o Accesos) para habilitar al socio.
 *   El sistema debe solicitar una confirmación antes de proceder con la anulación.
 
@@ -27,9 +27,10 @@ Permitir la anulación de un certificado médico en caso de que haya sido cargad
 
 ### Modelo de Datos
 La operación impacta en la entidad `MedicalCertificate` modificando su estado de vigencia:
-*   `esta_validado`: Cambia de `true` a `false`.
+*   `isValidated`: Cambia de `true` a `false`.
 
 ### Contrato de API (@alentapp/shared)
+**Éxito:** el cuerpo JSON usa `{ "data": ... }`. **Errores:** `{ "error": "<mensaje en español>" }`
 Se utilizará el método DELETE semántico, aunque internamente realice una actualización de estado:
 
 *   **Endpoint**: `DELETE /api/v1/medical-certificates/:id`
@@ -39,20 +40,20 @@ Se utilizará el método DELETE semántico, aunque internamente realice una actu
 Organización de la lógica según el estándar del monorepo:
 
 *   **Domain**:
-    *   Puerto `MedicalCertificateRepository`: Método `logicalDelete(id)`.
+    *   Puerto `IMedicalCertificateRepository`: Método `LogicalDelete(id)`.
     *   Regla de negocio: Un certificado anulado no puede volver a activarse manualmente; se debe cargar uno nuevo.
 *   **Application**:
-    *   Caso de Uso `DeleteMedicalCertificate`: Valida la existencia del ID y ejecuta la transición de estado a través del repositorio.
+    *   Caso de Uso `DeleteMedicalCertificateUseCase`: Valida la existencia del ID y ejecuta la transición de estado a través del repositorio.
 *   **Infrastructure**:
     *   `MedicalCertificateController`: Adaptador de entrada que gestiona la respuesta exitosa (204 No Content) o errores de ruta.
     *   `PrismaMedicalCertificateRepository`: Implementación que ejecuta `prisma.medicalCertificate.update` seteando el flag `esta_validado: false`.
 
 ## Casos de Borde y Errores
-| Escenario                   | Resultado Esperado                                      | Código HTTP               |
-| ----------------------------| ------------------------------------------------------- | ------------------------- |
-| ID inexistente              | Mensaje: "Certificado no encontrado"                    | 404 Not Found             |
-| Certificado ya anulado      | El sistema confirma la operación exitosa (Idempotencia) | 204 No Content            |
-| Error de base de datos      | Mensaje: "Error al procesar la baja lógica"             | 500 Internal Server Error |
+| Escenario                   | Resultado Esperado                                                | Código HTTP               |
+| ----------------------------| ----------------------------------------------------------------- | ------------------------- |
+| ID inexistente              | { error: "Certificado no encontrado" }                            | 404 Not Found             |
+| Certificado ya anulado      | { data: El sistema confirma la operación exitosa (Idempotencia) } | 204 No Content            |
+| Error de base de datos      | { error: "Error al procesar la baja lógica" }                     | 500 Internal Server Error |
 
 ## Plan de Implementación
 1.  Definir el endpoint de eliminación en el controlador del backend.
