@@ -104,3 +104,10 @@ export interface CreateSportRequest {
   additionalPrice: number;
   requiresMedicalCertificate: boolean;
 }
+
+export interface UpdateSportRequest {
+  description?: string;
+  maxCapacity?: number;
+  additionalPrice?: number;
+  requiresMedicalCertificate?: boolean;
+}
