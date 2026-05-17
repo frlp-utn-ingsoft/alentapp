@@ -83,7 +83,6 @@ export function buildApp() {
         deleteMemberUseCase,
     );
 
-<<<<<<< HEAD
     const lockerRepo = new PostgresLockerRepository();
     const lockerValidator = new LockerValidator(lockerRepo);
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
@@ -94,7 +93,6 @@ export function buildApp() {
 );
 
 
-=======
     const medicalCertificateController = new MedicalCertificateController(
         createMedicalCertificateUseCase,
         getMedicalCertificatesUseCase
@@ -147,7 +145,6 @@ export function buildApp() {
     // ============================================================
     // Routes
     // ============================================================
->>>>>>> main
     server.get('/api/v1/socios', memberController.getAll.bind(memberController));
     server.post('/api/v1/socios', memberController.create.bind(memberController));
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
