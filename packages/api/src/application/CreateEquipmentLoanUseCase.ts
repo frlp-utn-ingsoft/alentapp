@@ -21,6 +21,12 @@ export class CreateEquipmentLoanUseCase {
             throw new Error('Los socios Cadete tienen prohibido solicitar material');
         }
 
+        // Validamos que sea solo las categorias permitidas
+        const categoriasHabilitadas = ['Pleno', 'Honorario']; 
+        if (!categoriasHabilitadas.includes(member.category)) {
+            throw new Error('Solo los socios Pleno u Honorario pueden solicitar material');
+        }
+
         // Persistencia a través del repositorio
         const nuevoPrestamo = await this.equipmentLoanRepository.create({
             ...data,

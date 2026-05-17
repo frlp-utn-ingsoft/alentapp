@@ -24,6 +24,12 @@ enum MemberStatus {
     Suspendido
 }
 
+enum EquipmentLoanStatusEnum {
+    Loaned
+    Returned
+    Damaged
+}
+
 model Member {
     id         String         @id @default(uuid())
     dni        String         @unique
@@ -42,7 +48,7 @@ model Member {
 model EquipmentLoan {
     id         String         @id @default(uuid())
     item_name  String
-    status     String         @default("Loaned")
+    status     EquipmentLoanStatusEnum @default(Loaned)
     loan_date  DateTime       @default(now())
     due_date   DateTime
     member_id  String

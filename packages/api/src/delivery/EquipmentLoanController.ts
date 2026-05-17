@@ -12,6 +12,10 @@ export class EquipmentLoanController {
         reply: FastifyReply,
     ) {
         try {
+            if (!request.body.item_name || !request.body.due_date || !request.body.member_id) {
+                return reply.status(400).send({ error: 'El nombre del ítem, la fecha de devolución y el member_id son requeridos' });
+            }
+
             const loan = await this.createEquipmentLoanUseCase.execute(request.body);
             return reply.status(201).send({ data: loan });
         } catch (error: any) {

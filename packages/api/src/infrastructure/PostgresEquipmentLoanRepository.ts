@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { EquipmentLoanRepository, EquipmentLoanEntity } from '../domain/EquipmentLoanRepository.js';
-import { CreateEquipmentLoanRequest } from '@alentapp/shared';
+import { CreateEquipmentLoanRequest, EquipmentLoanStatus } from '@alentapp/shared';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -15,7 +15,7 @@ const prisma = new PrismaClient({
 type DBEquipmentLoan = {
     id: string;
     item_name: string;
-    status: string;
+    status: EquipmentLoanStatus;
     loan_date: Date;
     due_date: Date;
     member_id: string;
@@ -23,7 +23,7 @@ type DBEquipmentLoan = {
 
 export class PostgresEquipmentLoanRepository implements EquipmentLoanRepository {
     
-    async create(data: CreateEquipmentLoanRequest & { status: string }): Promise<EquipmentLoanEntity> {
+    async create(data: CreateEquipmentLoanRequest & { status: EquipmentLoanStatus }): Promise<EquipmentLoanEntity> {
         const loan = await prisma.equipmentLoan.create({
             data: {
                 item_name: data.item_name,
