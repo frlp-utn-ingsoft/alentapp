@@ -9,6 +9,8 @@ export interface PaymentDTO {
     due_date: string;
     payment_date: string | null;
     member_id: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface CreatePaymentRequest {

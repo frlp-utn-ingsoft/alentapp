@@ -36,13 +36,13 @@ model Payment {
     month           Int
     year            Int
     status          PaymentStatus  @default(Pending)
-    due_date        DateTime       @db.Date
-    payment_date    DateTime?      @db.Date
+    due_date        DateTime      @db.Date
+    payment_date    DateTime?     @db.Date
     member_id       String
-    member          Member         @relation(fields: [member_id], references: [id])
-    deleted_at      DateTime?      @db.Timestamp
-    createdAt       DateTime       @default(now())
-    updatedAt       DateTime       @updatedAt
+    member          Member        @relation(fields: [member_id], references: [id])
+    created_at      DateTime      @default(now())
+    updated_at      DateTime      @updatedAt
+    deleted_at      DateTime?     @db.Timestamp
 
     @@map("payments") // Para que en la DB la tabla se llame 'payments' en minúscula
 }
