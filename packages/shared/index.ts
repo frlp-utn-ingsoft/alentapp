@@ -35,6 +35,7 @@ export interface UpdateMemberRequest {
 // ==========================================
 // Discipline
 // ==========================================
+
 export interface DisciplineDTO {
   id: string;
   reason: string;
@@ -58,4 +59,33 @@ export interface UpdateDisciplineRequest {
   start_date?: string;
   end_date?: string;
   is_total_suspension?: boolean;
+}
+
+// Sport
+// ==========================================
+
+export interface SportDTO {
+  id: string; // UUID
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+  created_at: string; // ISO Date String
+}
+
+export interface CreateSportRequest {
+  name: string;
+  description: string;
+  max_capacity: number;
+  additional_price: number;
+  requires_medical_certificate: boolean;
+}
+
+export interface UpdateSportRequest {
+  name?: string;
+  description?: string;
+  max_capacity?: number;
+  additional_price?: number;
+  requires_medical_certificate?: boolean;
 }

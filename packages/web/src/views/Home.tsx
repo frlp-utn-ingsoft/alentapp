@@ -1,5 +1,5 @@
 import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
-import { LuUsers, LuGavel } from "react-icons/lu";
+import { LuUsers, LuGavel, LuDumbbell } from "react-icons/lu";
 import { SectionCard } from "../components/SectionCard";
 
 export function HomeView() {
@@ -30,11 +30,19 @@ export function HomeView() {
           to="/members"
           icon={LuUsers}
         />
+
         <SectionCard
           title="Sanciones"
           description="Gestiona el tribunal de disciplina, registra sanciones y aplica suspensiones a los socios."
           to="/disciplines"
           icon={LuGavel}
+        />
+
+        <SectionCard 
+          title="Deportes"
+          description="Gestiona las disciplinas del club, cupos máximos, precios adicionales y requisitos médicos."
+          to="/sports"
+          icon={LuDumbbell}
         />
       </SimpleGrid>
     </Box>
