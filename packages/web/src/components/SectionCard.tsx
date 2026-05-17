@@ -20,6 +20,9 @@ export function SectionCard({ title, description, to, icon: Icon }: SectionCardP
         borderWidth="1px" 
         borderColor="border.muted"
         boxShadow="sm"
+        w="full"
+        h="full"
+        minH="250px"
         transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
         _hover={{ 
           transform: "translateY(-4px)", 
@@ -27,7 +30,7 @@ export function SectionCard({ title, description, to, icon: Icon }: SectionCardP
           borderColor: "blue.500",
         }}
       >
-      <VStack align="flex-start" gap="4">
+      <VStack align="flex-start" gap="4" h="full" justify="space-between">
         <Flex 
           w="12" 
           h="12" 
