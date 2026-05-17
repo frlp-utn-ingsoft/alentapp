@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client/client.js';
 import { SportRepository } from '../domain/SportRepository.js';
-import { CreateSportRequest, SportDTO } from '@alentapp/shared';
+import { CreateSportRequest, SportDTO, UpdateSportRequest } from '@alentapp/shared';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -56,6 +56,25 @@ export class PostgresSportRepository implements SportRepository {
         });
 
         return sport ? this.mapToDTO(sport) : null;
+    }
+
+    async update(id: string, data: UpdateSportRequest): Promise<SportDTO> {
+        try {
+            const sport = await prisma.sport.update({
+                where: { id },
+                data: {
+                    ...(data.description !== undefined && { description: data.description }),
+                    ...(data.max_capacity !== undefined && { max_capacity: data.max_capacity }),
+                },
+            });
+
+            return this.mapToDTO(sport);
+        } catch (error: any) {
+            if (error.code === 'P2025') {
+                throw new Error('El deporte no existe');
+            }
+            throw error;
+        }
     }
 
     private mapToDTO(sport: DBSport): SportDTO {
