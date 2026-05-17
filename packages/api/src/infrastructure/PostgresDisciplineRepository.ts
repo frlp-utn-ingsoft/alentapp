@@ -42,6 +42,9 @@ export class PostgresDisciplineRepository implements DisciplineRepository {
 
     async findAll(): Promise<DisciplineDTO[]> {
         const disciplines = await prisma.discipline.findMany({
+            where: {
+                deleted_at: null,
+            },
             orderBy: { start_date: 'desc' },
         });
     
