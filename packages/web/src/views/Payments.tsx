@@ -141,7 +141,7 @@ setYear(new Date().getFullYear());
       
       <VStack gap="2" align="flex-start" mb="8">
         <Heading size="3xl" fontWeight="extrabold" color="blue.600">
-          Gestión de Pagos y Cuotas
+          Gestión de Pagos
         </Heading>
         <Text fontSize="md" color="fg.muted">
           Buscá el historial de deudas de un socio o registrá un nuevo comprobante de pago.
