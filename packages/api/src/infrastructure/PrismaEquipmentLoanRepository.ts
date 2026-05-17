@@ -66,6 +66,12 @@ export class PrismaEquipmentLoanRepository implements IEquipmentLoanRepository {
         return this.mapToDTO(loan);
     }
 
+    async delete(id: string): Promise<void> {
+        await prisma.equipmentLoan.delete({
+            where: { id },
+        });
+    }
+
     private mapToDTO(loan: DBEquipmentLoan): EquipmentLoanDTO {
         return {
             id: loan.id,
