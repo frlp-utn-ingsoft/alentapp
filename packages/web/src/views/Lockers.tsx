@@ -13,9 +13,10 @@ import {
     Text,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import type { CreateLockerRequest } from '@alentapp/shared';
+import type { CreateLockerRequest, LockerStatus } from '@alentapp/shared';
 import { LuPencil, LuPlus, LuRefreshCw, LuTrash2 } from 'react-icons/lu';
 import { useLockers } from '../hooks/useLockers';
+import { useMemberSearch } from '../hooks/useMemberSearch';
 import {
     DialogActionTrigger,
     DialogBody,
@@ -27,7 +28,24 @@ import {
     DialogTitle,
 } from '../components/ui/dialog';
 import { Field } from '../components/ui/field';
+import { MemberSearchInput } from '../components/MemberSearchInput';
 import { lockersService } from '../services/lockers';
+import {
+    SelectContent,
+    SelectItem,
+    SelectRoot,
+    SelectTrigger,
+    SelectValueText,
+    createListCollection,
+} from '../components/ui/select';
+
+const statusCollection = createListCollection({
+    items: [
+        { label: 'Disponible', value: 'Disponible' },
+        { label: 'Ocupado', value: 'Ocupado' },
+        { label: 'Mantenimiento', value: 'Mantenimiento' },
+    ],
+});
 
 export function LockersView() {
     const { lockers, isLoading, error, fetchLockers } = useLockers();
@@ -37,13 +55,44 @@ export function LockersView() {
     const [formData, setFormData] = useState<CreateLockerRequest>({
         number: 1,
         location: '',
+        status: 'Disponible',
+        member_id: null,
     });
+
+    const {
+        memberSearch,
+        memberResults,
+        memberSearchRef,
+        searchMembers,
+        handleSelectMember,
+        resetMemberSearch,
+    } = useMemberSearch((member) => {
+        setFormData((prev) => ({
+            ...prev,
+            member_id: member.id,
+            status: 'Ocupado',
+        }));
+    });
+
+    const handleSearchMember = (value: string) => {
+        searchMembers(value);
+
+        if (value.trim().length === 0) {
+            setFormData((prev) => ({
+                ...prev,
+                member_id: null,
+            }));
+        }
+    };
 
     const handleCreateLocker = () => {
         setFormData({
             number: 1,
             location: '',
+            status: 'Disponible',
+            member_id: null,
         });
+        resetMemberSearch();
 
         setIsDialogOpen(true);
     };
@@ -56,6 +105,8 @@ export function LockersView() {
             await lockersService.create({
                 number: Number(formData.number),
                 location: formData.location.trim(),
+                status: formData.status ?? 'Disponible',
+                member_id: formData.member_id ?? null,
             });
             setIsDialogOpen(false);
             fetchLockers();
@@ -165,6 +216,55 @@ export function LockersView() {
                                             })
                                         }
                                         required
+                                    />
+                                </Field>
+
+                                <Field label="Estado" required>
+                                    <SelectRoot
+                                        collection={statusCollection}
+                                        value={[formData.status ?? 'Disponible']}
+                                        onValueChange={(e) => {
+                                            const nextStatus =
+                                                e.value[0] as LockerStatus;
+
+                                            if (nextStatus === 'Mantenimiento') {
+                                                resetMemberSearch();
+                                            }
+
+                                            setFormData({
+                                                ...formData,
+                                                status: nextStatus,
+                                                member_id:
+                                                    nextStatus ===
+                                                    'Mantenimiento'
+                                                        ? null
+                                                        : formData.member_id ??
+                                                          null,
+                                            });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValueText placeholder="Seleccione un estado" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {statusCollection.items.map((status) => (
+                                                <SelectItem item={status} key={status.value}>
+                                                    {status.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </SelectRoot>
+                                </Field>
+
+                                <Field label="Socio asignado">
+                                    <MemberSearchInput
+                                        value={memberSearch}
+                                        results={memberResults}
+                                        searchRef={memberSearchRef}
+                                        onSearch={handleSearchMember}
+                                        onSelect={handleSelectMember}
+                                        required={false}
+                                        disabled={formData.status === 'Mantenimiento'}
                                     />
                                 </Field>
                             </Stack>
@@ -294,7 +394,7 @@ export function LockersView() {
                                             </Table.Cell>
 
                                             <Table.Cell color="fg.muted">
-                                                {locker.member_id || 'Sin asignar'}
+                                                {locker.member?.name || 'Sin asignar'}
                                             </Table.Cell>
 
                                             <Table.Cell>
