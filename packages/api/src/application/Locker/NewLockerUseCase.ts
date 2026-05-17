@@ -24,6 +24,10 @@ export class CreateLockerUseCase {
             throw new Error('Un Locker en mantenimiento no puede tener un socio asignado');
         }
 
+        if (data.status === 'Disponible' && requestedMemberId !== null) {
+            throw new Error('Un Locker disponible no puede tener un socio asignado');
+        }
+
         const memberId = requestedMemberId;
 
         if (memberId !== null) {
