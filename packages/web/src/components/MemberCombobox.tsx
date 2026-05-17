@@ -16,7 +16,7 @@ export function MemberCombobox({
   selectedId,
   onSelect,
   disabled = false,
-  placeholder = 'Buscar socio por nombre o DNI...',
+  placeholder = 'Buscar miembro por nombre o DNI...',
 }: MemberComboboxProps) {
   const getDisplay = (id: string) => {
     const m = members.find((x) => x.id === id);

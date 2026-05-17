@@ -87,7 +87,7 @@ export function DisciplinesView() {
           <Stack gap="1">
             <Heading size="2xl" fontWeight="bold">Tribunal de Disciplina</Heading>
             <Text color="fg.muted" fontSize="md">
-              Gestiona las sanciones aplicadas a los socios.
+              Gestiona las sanciones aplicadas a los miembros.
             </Text>
           </Stack>
           <HStack gap="3">
@@ -107,7 +107,7 @@ export function DisciplinesView() {
             </DialogHeader>
             <DialogBody>
               <Stack gap="4">
-                <Field label="Socio" required>
+                <Field label="Miembro" required>
                   <MemberCombobox
                     members={members}
                     selectedId={formData.member_id}
@@ -147,7 +147,7 @@ export function DisciplinesView() {
                       onChange={(e) => setFormData({ ...formData, is_total_suspension: e.target.checked })}
                     />
                     <label htmlFor="is_total_suspension">
-                      Suspensión total (restringe acceso del socio)
+                      Suspensión total (restringe acceso del miembro)
                     </label>
                   </HStack>
                 </Field>
@@ -188,7 +188,7 @@ export function DisciplinesView() {
             <Table.Root size="md" variant="line" interactive>
               <Table.Header>
                 <Table.Row bg="bg.muted/50">
-                  <Table.ColumnHeader py="4">Socio</Table.ColumnHeader>
+                  <Table.ColumnHeader py="4">Miembro</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Motivo</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Inicio</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Fin</Table.ColumnHeader>
