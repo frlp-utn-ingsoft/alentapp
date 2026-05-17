@@ -1,4 +1,8 @@
-import type { CreateLockerRequest, LockerDTO } from '@alentapp/shared';
+import type {
+    CreateLockerRequest,
+    LockerDTO,
+    UpdateLockerRequest,
+} from '@alentapp/shared';
 
 const API_URL =
     (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api/v1';
@@ -28,6 +32,21 @@ export const lockersService = {
             throw new Error(result.error || 'Error al crear el locker');
         }
 
+        return result.data;
+    },
+
+    async update(id: string, payload: UpdateLockerRequest): Promise<LockerDTO> {
+        const response = await fetch(`${API_URL}/lockers/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || 'Error al actualizar el locker');
+        }
         return result.data;
     },
 
