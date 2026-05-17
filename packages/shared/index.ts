@@ -101,3 +101,25 @@ export interface LoanWithMemberDTO extends LoanDTO {
 export interface UpdateLoanStatusRequest {
   status: 'Returned' | 'Damaged';
 }
+
+// ==========================================
+// Medical Certificate
+// ==========================================
+export type MedicalCertificateStatus = 'Active' | 'Inactive';
+
+export interface MedicalCertificateDTO {
+  id: string; // UUID
+  member_id: string;
+  issue_date: string; // ISO Date String
+  expiration_date?: string; // ISO Date String
+  status: MedicalCertificateStatus;
+  created_at: string;
+  updated_at: string;
+  invalidated_at?: string;
+}
+
+export interface CreateMedicalCertificateRequest {
+  member_id: string;
+  issue_date: string; // ISO Date String
+  expiration_date?: string; // ISO Date String
+}
