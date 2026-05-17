@@ -49,12 +49,12 @@ export class PostgresPaymentRepository implements PaymentRepository {
             where.status = query.status;
         }
 
-        if (query.month) {
-            where.month = query.month;
+        if (query.month !== undefined) {
+            where.month = Number(query.month);
         }
 
-        if (query.year) {
-            where.year = query.year;
+        if (query.year !== undefined) {
+            where.year = Number(query.year);
         }
 
         const payments = await prisma.payment.findMany({
