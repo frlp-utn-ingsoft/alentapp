@@ -3,6 +3,7 @@ import {
   Button,
   Heading,
   HStack,
+  IconButton,
   Stack,
   Text,
   Box,
@@ -11,12 +12,14 @@ import {
   Center,
   Input,
 } from '@chakra-ui/react';
-import { LuPlus, LuRefreshCw } from 'react-icons/lu';
+import { LuPlus, LuPencil, LuRefreshCw } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 import { equipmentLoansService } from '../services/equipmentLoans';
 import type {
   EquipmentLoanDTO,
   CreateEquipmentLoanRequest,
+  UpdateEquipmentLoanRequest,
+  LoanStatus,
 } from '@alentapp/shared';
 import {
   DialogRoot,
@@ -29,6 +32,21 @@ import {
   DialogCloseTrigger,
 } from '../components/ui/dialog';
 import { Field } from '../components/ui/field';
+import {
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
+  SelectContent,
+  SelectItem,
+  createListCollection,
+} from '../components/ui/select';
+
+const updateStatusOptions = createListCollection({
+  items: [
+    { label: 'Returned', value: 'Returned' },
+    { label: 'Damaged', value: 'Damaged' },
+  ],
+});
 
 export function EquipmentLoansView() {
   const [loans, setLoans] = useState<EquipmentLoanDTO[]>([]);
@@ -37,11 +55,18 @@ export function EquipmentLoansView() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingLoanId, setEditingLoanId] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<CreateEquipmentLoanRequest>({
+  const [createForm, setCreateForm] = useState<CreateEquipmentLoanRequest>({
     itemName: '',
     dueDate: '',
     memberId: '',
+  });
+
+  const [updateForm, setUpdateForm] = useState<UpdateEquipmentLoanRequest>({
+    itemName: '',
+    status: undefined,
+    dueDate: '',
   });
 
   const fetchLoans = async () => {
@@ -58,7 +83,14 @@ export function EquipmentLoansView() {
   };
 
   const openCreateModal = () => {
-    setFormData({ itemName: '', dueDate: '', memberId: '' });
+    setEditingLoanId(null);
+    setCreateForm({ itemName: '', dueDate: '', memberId: '' });
+    setIsDialogOpen(true);
+  };
+
+  const openEditModal = (loan: EquipmentLoanDTO) => {
+    setEditingLoanId(loan.id);
+    setUpdateForm({ itemName: loan.itemName, status: undefined, dueDate: '' });
     setIsDialogOpen(true);
   };
 
@@ -66,17 +98,32 @@ export function EquipmentLoansView() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await equipmentLoansService.create(formData);
+      if (editingLoanId) {
+        // Limpiar campos vacíos antes de enviar
+        const payload: UpdateEquipmentLoanRequest = {};
+        if (updateForm.itemName && updateForm.itemName.trim() !== '') {
+          payload.itemName = updateForm.itemName;
+        }
+        if (updateForm.status) {
+          payload.status = updateForm.status;
+        }
+        if (updateForm.dueDate && updateForm.dueDate.trim() !== '') {
+          payload.dueDate = new Date(updateForm.dueDate).toISOString();
+        }
+        await equipmentLoansService.update(editingLoanId, payload);
+      } else {
+        await equipmentLoansService.create(createForm);
+      }
       setIsDialogOpen(false);
       fetchLoans();
     } catch (err: any) {
-      alert(err.message || 'Error al registrar el préstamo');
+      alert(err.message || 'Error al guardar el préstamo');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const statusColor = (status: EquipmentLoanDTO['status']) => {
+  const statusColor = (status: LoanStatus) => {
     if (status === 'Loaned') return { bg: 'blue.50', color: 'blue.700' };
     if (status === 'Returned') return { bg: 'green.50', color: 'green.700' };
     return { bg: 'red.50', color: 'red.700' };
@@ -108,44 +155,99 @@ export function EquipmentLoansView() {
           </HStack>
         </Flex>
 
-        {/* Modal de alta */}
+        {/* Modal */}
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Registrar Nuevo Préstamo</DialogTitle>
+              <DialogTitle>
+                {editingLoanId ? 'Editar Préstamo' : 'Registrar Nuevo Préstamo'}
+              </DialogTitle>
             </DialogHeader>
             <DialogBody>
               <Stack gap="4">
-                <Field label="Nombre del Ítem" required>
-                  <Input
-                    placeholder="Ej. Pelota de fútbol"
-                    value={formData.itemName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, itemName: e.target.value })
-                    }
-                    required
-                  />
-                </Field>
-                <Field label="Fecha de Devolución" required>
-                  <Input
-                    type="datetime-local"
-                    value={formData.dueDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, dueDate: new Date(e.target.value).toISOString() })
-                    }
-                    required
-                  />
-                </Field>
-                <Field label="UUID del Socio" required>
-                  <Input
-                    placeholder="UUID del socio (Pleno u Honorario)"
-                    value={formData.memberId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, memberId: e.target.value })
-                    }
-                    required
-                  />
-                </Field>
+                {editingLoanId ? (
+                  /* Formulario de edición */
+                  <>
+                    <Field label="Nombre del Ítem">
+                      <Input
+                        placeholder="Dejar vacío para no modificar"
+                        value={updateForm.itemName || ''}
+                        onChange={(e) =>
+                          setUpdateForm({ ...updateForm, itemName: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="Nuevo Estado">
+                      <SelectRoot
+                        collection={updateStatusOptions}
+                        value={updateForm.status ? [updateForm.status] : []}
+                        onValueChange={(e) =>
+                          setUpdateForm({
+                            ...updateForm,
+                            status: e.value[0] as 'Returned' | 'Damaged',
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValueText placeholder="Seleccionar estado (opcional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {updateStatusOptions.items.map((opt) => (
+                            <SelectItem item={opt} key={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </SelectRoot>
+                    </Field>
+                    <Field label="Nueva Fecha de Devolución">
+                      <Input
+                        type="datetime-local"
+                        value={updateForm.dueDate || ''}
+                        onChange={(e) =>
+                          setUpdateForm({ ...updateForm, dueDate: e.target.value })
+                        }
+                      />
+                    </Field>
+                  </>
+                ) : (
+                  /* Formulario de creación */
+                  <>
+                    <Field label="Nombre del Ítem" required>
+                      <Input
+                        placeholder="Ej. Pelota de fútbol"
+                        value={createForm.itemName}
+                        onChange={(e) =>
+                          setCreateForm({ ...createForm, itemName: e.target.value })
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field label="Fecha de Devolución" required>
+                      <Input
+                        type="datetime-local"
+                        value={createForm.dueDate}
+                        onChange={(e) =>
+                          setCreateForm({
+                            ...createForm,
+                            dueDate: new Date(e.target.value).toISOString(),
+                          })
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field label="UUID del Socio" required>
+                      <Input
+                        placeholder="UUID del socio (Pleno u Honorario)"
+                        value={createForm.memberId}
+                        onChange={(e) =>
+                          setCreateForm({ ...createForm, memberId: e.target.value })
+                        }
+                        required
+                      />
+                    </Field>
+                  </>
+                )}
               </Stack>
             </DialogBody>
             <DialogFooter>
@@ -153,7 +255,7 @@ export function EquipmentLoansView() {
                 <Button variant="outline">Cancelar</Button>
               </DialogActionTrigger>
               <Button type="submit" colorPalette="blue" loading={isSubmitting}>
-                Registrar
+                {editingLoanId ? 'Guardar Cambios' : 'Registrar'}
               </Button>
             </DialogFooter>
             <DialogCloseTrigger />
@@ -208,6 +310,7 @@ export function EquipmentLoansView() {
                   <Table.ColumnHeader py="4">Fecha Préstamo</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Fecha Devolución</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Socio ID</Table.ColumnHeader>
+                  <Table.ColumnHeader py="4" textAlign="end">Acciones</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -237,6 +340,16 @@ export function EquipmentLoansView() {
                     </Table.Cell>
                     <Table.Cell color="fg.muted" fontSize="xs">
                       {loan.memberId}
+                    </Table.Cell>
+                    <Table.Cell textAlign="end">
+                      <IconButton
+                        variant="ghost"
+                        size="sm"
+                        aria-label="Editar préstamo"
+                        onClick={() => openEditModal(loan)}
+                      >
+                        <LuPencil />
+                      </IconButton>
                     </Table.Cell>
                   </Table.Row>
                 ))}
