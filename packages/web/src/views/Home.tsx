@@ -1,9 +1,6 @@
 import { Box, SimpleGrid, Heading, Text, VStack } from "@chakra-ui/react";
-<<<<<<< HEAD
 import { LuUsers, LuBox } from "react-icons/lu";
-=======
-import { LuUsers, LuFileText, LuCreditCard, LuShieldAlert, LuDumbbell } from "react-icons/lu";
->>>>>>> main
+import { LuFileText, LuCreditCard, LuShieldAlert, LuDumbbell } from "react-icons/lu";
 import { SectionCard } from "../components/SectionCard";
 
 export function HomeView() {
