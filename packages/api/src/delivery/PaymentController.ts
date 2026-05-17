@@ -22,26 +22,21 @@ export class PaymentController {
       
       let member = null;
 
-    
-    
       if (!isNaN(Number(inputMemberId)) || inputMemberId.length < 15) {
         member = await prisma.member.findUnique({
           where: { dni: inputMemberId }
         });
       } else {
-        // Si el valor es largo y alfanumérico, asumimos que el Frontend ya mandó el UUID (id) directo.
         member = await prisma.member.findUnique({
           where: { id: inputMemberId }
         });
       }
 
-      
       if (!member) {
-        reply.status(404).send({ error: "Socio no encontrado." });
-        return;
+        return reply.status(400).send({ error: "Socio no encontrado." });
       }
 
-      // Parsea la fecha del frontend de forma segura
+      
       let parsedDueDate: Date;
       if (body.dueDate && typeof body.dueDate === 'string') {
         const parts = body.dueDate.includes('/') ? body.dueDate.split('/') : body.dueDate.split('-');
@@ -58,7 +53,7 @@ export class PaymentController {
         parsedDueDate = new Date();
       }
 
-      const cleanPaymentData = {
+           const cleanPaymentData = {
         amount: Number(body.amount),
         month: Math.floor(Number(body.month)),
         year: Math.floor(Number(body.year)),
@@ -71,16 +66,30 @@ export class PaymentController {
         data: cleanPaymentData as any
       });
       
-      reply.status(201).send({
+      return reply.status(201).send({
         id: newPayment.id,
         status: newPayment.status
       });
-      return;
 
     } catch (error: any) {
-      console.error(" ERROR CRÍTICO EN BYPASS:", error);
-      reply.status(400).send({ error: error.message || "Error al insertar." });
-      return;
+      console.error("ERROR CRÍTICO EN PAYMENT CONTROLLER:", error);
+
+    
+      if (error.message?.includes('Unique constraint') || error.code === 'P2002') {
+        return reply.status(409).send({ 
+          error: "Ya existe un pago registrado para este socio en el mes y año seleccionados." 
+        });
+      }
+
+      
+      if (error.name === 'ValidationError' || error.message?.includes('invalid')) {
+        return reply.status(400).send({ error: error.message });
+      }
+
+      
+      return reply.status(500).send({ 
+        error: "Ocurrió un error interno en el servidor al procesar el cobro." 
+      });
     }
   }
 
@@ -103,10 +112,11 @@ export class PaymentController {
       }
       
       const payments = await this.getPaymentUseCase.execute(finalId);
-      
       return reply.status(200).send(payments);
+
     } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
+      
+      return reply.status(500).send({ error: "Error al obtener los pagos del socio." });
     }
   }
 }
