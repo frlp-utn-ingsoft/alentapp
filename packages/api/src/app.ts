@@ -36,6 +36,7 @@ import { SportController } from './delivery/SportController.js';
 // EquipmentLoan
 import { PrismaEquipmentLoanRepository } from './infrastructure/PrismaEquipmentLoanRepository.js';
 import { CreateEquipmentLoanUseCase } from './application/CreateEquipmentLoanUseCase.js';
+import { UpdateEquipmentLoanUseCase } from './application/UpdateEquipmentLoanUseCase.js';
 import { EquipmentLoanController } from './delivery/EquipmentLoanController.js';
 
 
@@ -138,11 +139,15 @@ export function buildApp() {
     // --- EquipmentLoan ---
     const equipmentLoanRepo = new PrismaEquipmentLoanRepository();
     const createEquipmentLoanUseCase = new CreateEquipmentLoanUseCase(equipmentLoanRepo, memberRepo);
-    const equipmentLoanController = new EquipmentLoanController(createEquipmentLoanUseCase);
+    const updateEquipmentLoanUseCase = new UpdateEquipmentLoanUseCase(equipmentLoanRepo);
+    const equipmentLoanController = new EquipmentLoanController(
+        createEquipmentLoanUseCase,
+        updateEquipmentLoanUseCase,
+    );
 
     server.get('/api/v1/equipment-loans', equipmentLoanController.getAll.bind(equipmentLoanController));
     server.post('/api/v1/equipment-loans', equipmentLoanController.create.bind(equipmentLoanController));
-
+    server.put('/api/v1/equipment-loans/:id', equipmentLoanController.update.bind(equipmentLoanController));
     
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
