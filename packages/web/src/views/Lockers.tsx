@@ -13,7 +13,7 @@ import {
     Text,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import type { CreateLockerRequest, LockerStatus } from '@alentapp/shared';
+import type { CreateLockerRequest, LockerDTO, LockerStatus } from '@alentapp/shared';
 import { LuPencil, LuPlus, LuRefreshCw, LuTrash2 } from 'react-icons/lu';
 import { useLockers } from '../hooks/useLockers';
 import { useMemberSearch } from '../hooks/useMemberSearch';
@@ -27,6 +27,7 @@ import {
     DialogRoot,
     DialogTitle,
 } from '../components/ui/dialog';
+import { ConfirmActionDialog } from '../components/ConfirmActionDialog';
 import { Field } from '../components/ui/field';
 import { MemberSearchInput } from '../components/MemberSearchInput';
 import { lockersService } from '../services/lockers';
@@ -52,6 +53,10 @@ export function LockersView() {
     const lockerList = Array.isArray(lockers) ? lockers : [];
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isDeleteSubmitting, setIsDeleteSubmitting] = useState(false);
+    const [deletingLocker, setDeletingLocker] = useState<LockerDTO | null>(null);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
     const [formData, setFormData] = useState<CreateLockerRequest>({
         number: 1,
         location: '',
@@ -122,9 +127,25 @@ export function LockersView() {
         console.log('Edit locker', lockerId);
     };
 
-    const handleDeleteLocker = (lockerId: string) => {
-        // TODO: Implementar baja de locker cuando el backend esté listo
-        console.log('Delete locker', lockerId);
+    const openDeleteModal = (locker: LockerDTO) => {
+        setDeletingLocker(locker);
+        setDeleteError(null);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!deletingLocker) return;
+        setIsDeleteSubmitting(true);
+        setDeleteError(null);
+        try {
+            await lockersService.delete(deletingLocker.id);
+            setIsDeleteDialogOpen(false);
+            fetchLockers();
+        } catch (err: any) {
+            setDeleteError(err.message || 'Error al eliminar el locker');
+        } finally {
+            setIsDeleteSubmitting(false);
+        }
     };
 
     const getStatusStyles = (status: string) => {
@@ -149,6 +170,7 @@ export function LockersView() {
     };
 
     return (
+        <>
         <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
             <Stack gap="8">
                 <Flex justify="space-between" align="center">
@@ -423,9 +445,7 @@ export function LockersView() {
                                                         colorPalette="red"
                                                         aria-label="Eliminar locker"
                                                         onClick={() =>
-                                                            handleDeleteLocker(
-                                                                locker.id,
-                                                            )
+                                                            openDeleteModal(locker)
                                                         }
                                                     >
                                                         <LuTrash2 />
@@ -441,5 +461,21 @@ export function LockersView() {
                 </Box>
             </Stack>
         </DialogRoot>
+
+        <DialogRoot
+            open={isDeleteDialogOpen}
+            onOpenChange={(e) => setIsDeleteDialogOpen(e.open)}
+        >
+            <ConfirmActionDialog
+                title="Eliminar Locker"
+                description={`¿Estás seguro de que deseas eliminar el locker N° ${deletingLocker?.number}? Esta acción no se puede deshacer.`}
+                confirmLabel="Eliminar"
+                isLoading={isDeleteSubmitting}
+                error={deleteError}
+                variant="danger"
+                onConfirm={handleDelete}
+            />
+        </DialogRoot>
+        </>
     );
 }
