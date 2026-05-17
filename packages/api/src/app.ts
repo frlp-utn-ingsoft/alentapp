@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
@@ -12,6 +13,11 @@ import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/NewSportUseCase.js';
 import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
+
+// --- Equipment Loan ---
+import { PostgresEquipmentLoanRepository } from './infrastructure/PostgresEquipmentLoanRepository.js';
+import { CreateEquipmentLoanUseCase } from './application/CreateEquipmentLoanUseCase.js';
+import { EquipmentLoanController } from './delivery/EquipmentLoanController.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -59,6 +65,15 @@ export function buildApp() {
     server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
     server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
 
+    // --- Equipment Loan ---
+    const equipmentLoanRepo = new PostgresEquipmentLoanRepository();
+    const createEquipmentLoanUseCase = new CreateEquipmentLoanUseCase(equipmentLoanRepo, memberRepo); 
+    const equipmentLoanController = new EquipmentLoanController(createEquipmentLoanUseCase);
+
+    // --- Equipment Loan Route ---
+    server.post('/api/v1/equipment-loans', equipmentLoanController.create.bind(equipmentLoanController));
+
+    // --- Sports Route ---
     server.post('/api/v1/sports', sportController.create.bind(sportController));
     server.put('/api/v1/sports/:id', sportController.update.bind(sportController));
 
