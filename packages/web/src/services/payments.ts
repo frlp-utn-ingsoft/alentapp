@@ -15,13 +15,11 @@ export const paymentsService = {
   async create(data: CreatePaymentRequest): Promise<PaymentDTO> {
     const response = await fetch(`${API_URL}/pagos`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || 'Error al crear el pago');
     }
     const result = await response.json();
@@ -31,13 +29,11 @@ export const paymentsService = {
   async update(id: string, data: UpdatePaymentRequest): Promise<PaymentDTO> {
     const response = await fetch(`${API_URL}/pagos/${id}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || 'Error al actualizar el pago');
     }
     const result = await response.json();
@@ -49,20 +45,8 @@ export const paymentsService = {
       method: 'PATCH',
     });
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || 'Error al procesar el cobro');
-    }
-    const result = await response.json();
-    return result.data;
-  },
-
-  async cancel(id: string): Promise<PaymentDTO> {
-    const response = await fetch(`${API_URL}/pagos/${id}/cancel`, {
-      method: 'PATCH',
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Error al anular el pago');
     }
     const result = await response.json();
     return result.data;
