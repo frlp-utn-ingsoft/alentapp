@@ -2,11 +2,13 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateSportRequest, UpdateSportRequest } from '@alentapp/shared';
 import { CreateSportUseCase } from '../application/CreateSportUseCase.js';
 import { UpdateSportUseCase } from '../application/UpdateSportUseCase.js';
+import { DeleteSportUseCase } from '../application/DeleteSportUseCase.js';
 
 export class SportController {
     constructor(
         private readonly createSportUseCase: CreateSportUseCase,
         private readonly updateSportUseCase: UpdateSportUseCase,
+        private readonly deleteSportUseCase: DeleteSportUseCase,
     ) {}
 
     async create(
@@ -44,6 +46,24 @@ export class SportController {
                 || error.message.includes('El cupo máximo debe ser mayor a cero')
             ) {
                 return reply.status(400).send({ error: error.message });
+            }
+            return reply.status(500).send({ error: 'Error interno, reintente más tarde' });
+        }
+    }
+
+    async delete(
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply,
+    ) {
+        try {
+            await this.deleteSportUseCase.execute(request.params.id);
+            return reply.status(204).send();
+        } catch (error: any) {
+            if (error.message.includes('El deporte no existe')) {
+                return reply.status(400).send({ error: error.message });
+            }
+            if (error.message.includes('No se puede eliminar un deporte con inscripciones activas')) {
+                return reply.status(409).send({ error: error.message });
             }
             return reply.status(500).send({ error: 'Error interno, reintente más tarde' });
         }
