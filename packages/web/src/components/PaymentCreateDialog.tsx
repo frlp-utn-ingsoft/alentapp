@@ -17,7 +17,7 @@ import {
 } from './ui/dialog';
 import { Field } from "./ui/field";
 import { paymentsService } from '../services/payments';
-import type { MemberDTO, CreatePaymentRequest } from '@alentapp/shared';
+import type { MemberDTO } from '@alentapp/shared';
 import { toaster } from "./ui/toaster";
 
 interface PaymentCreateDialogProps {
