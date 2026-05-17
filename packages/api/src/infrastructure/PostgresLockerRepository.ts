@@ -20,19 +20,35 @@ type DBLocker = {
     member?: { name: string } | null;
 };
 
+function isDuplicateLockerNumber(error: unknown): boolean {
+    const err = error as { code?: string; meta?: { target?: unknown } };
+    if (err?.code !== 'P2002') return false;
+    const target = err.meta?.target;
+    if (Array.isArray(target)) return target.includes('number');
+    if (typeof target === 'string') return target.includes('number');
+    return false;
+}
+
 export class PostgresLockerRepository implements LockerRepository {
     async create(data: Omit<LockerDTO, 'id'>): Promise<LockerDTO> {
-        const locker = await prisma.locker.create({
-            data: {
-                number: data.number,
-                location: data.location,
-                status: data.status,
-                member_id: data.member_id,
-                deleted_at: null,
-            },
-        } as any);
+        try {
+            const locker = await prisma.locker.create({
+                data: {
+                    number: data.number,
+                    location: data.location,
+                    status: data.status,
+                    member_id: data.member_id,
+                    deleted_at: null,
+                },
+            } as any);
 
-        return this.mapToDTO(locker);
+            return this.mapToDTO(locker);
+        } catch (error) {
+            if (isDuplicateLockerNumber(error)) {
+                throw new Error('Ya existe un Locker con ese número');
+            }
+            throw error;
+        }
     }
 
     async findAll(): Promise<LockerDTO[]> {
@@ -72,17 +88,24 @@ export class PostgresLockerRepository implements LockerRepository {
     }
 
     async update(id: string, data: UpdateLockerRequest): Promise<LockerDTO> {
-        const locker = await prisma.locker.update({
-            where: { id },
-            data: {
-                ...(data.number !== undefined && { number: data.number }),
-                ...(data.location !== undefined && { location: data.location }),
-                ...(data.status !== undefined && { status: data.status }),
-                ...(data.member_id !== undefined && { member_id: data.member_id }),
-            },
-        });
+        try {
+            const locker = await prisma.locker.update({
+                where: { id },
+                data: {
+                    ...(data.number !== undefined && { number: data.number }),
+                    ...(data.location !== undefined && { location: data.location }),
+                    ...(data.status !== undefined && { status: data.status }),
+                    ...(data.member_id !== undefined && { member_id: data.member_id }),
+                },
+            });
 
-        return this.mapToDTO(locker);
+            return this.mapToDTO(locker);
+        } catch (error) {
+            if (isDuplicateLockerNumber(error)) {
+                throw new Error('Ya existe un Locker con ese número');
+            }
+            throw error;
+        }
     }
 
     async delete(id: string): Promise<void> {
