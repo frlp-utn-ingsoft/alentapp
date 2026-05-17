@@ -1,9 +1,10 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { CreateMemberUseCase } from '../application/NewMemberUseCase.js';
-import { GetMembersUseCase } from '../application/GetMembersUseCase.js';
-import { UpdateMemberUseCase } from '../application/UpdateMemberUseCase.js';
-import { DeleteMemberUseCase } from '../application/DeleteMemberUseCase.js';
+import { CreateMemberUseCase } from '../../application/useCases/NewMemberUseCase.js';
+import { GetMembersUseCase } from '../../application/useCases/GetMembersUseCase.js';
+import { UpdateMemberUseCase } from '../../application/useCases/UpdateMemberUseCase.js';
+import { DeleteMemberUseCase } from '../../application/useCases/DeleteMemberUseCase.js';
 import { CreateMemberRequest, UpdateMemberRequest } from '@alentapp/shared';
+import { MemberMapper } from '../mappers/MemberMapper.js';
 
 export class MemberController {
     constructor(
@@ -16,7 +17,7 @@ export class MemberController {
     async getAll(_request: FastifyRequest, reply: FastifyReply) {
         try {
             const socios = await this.getMembersUseCase.execute();
-            return reply.status(200).send({ data: socios });
+            return reply.status(200).send({ data: socios.map(MemberMapper.toDTO) });
         } catch (error: any) {
             return reply.status(500).send({ error: error.message });
         }
@@ -29,7 +30,7 @@ export class MemberController {
         try {
             request.log.info('Alguien pegó al endpoint de ping');
             const socio = await this.createMemberUseCase.execute(request.body);
-            return reply.status(201).send({ data: socio });
+            return reply.status(201).send({ data: MemberMapper.toDTO(socio) });
         } catch (error: any) {
             if (error.message.includes('Ya existe un miembro con ese DNI')) {
                 return reply.status(409).send({ error: error.message });
@@ -48,7 +49,7 @@ export class MemberController {
         try {
             const { id } = request.params;
             const socio = await this.updateMemberUseCase.execute(id, request.body);
-            return reply.status(200).send({ data: socio });
+            return reply.status(200).send({ data: MemberMapper.toDTO(socio) });
         } catch (error: any) {
             if (error.message.includes('Ya existe un miembro con ese DNI')) {
                 return reply.status(409).send({ error: error.message });
@@ -67,7 +68,7 @@ export class MemberController {
         try {
             const { id } = request.params;
             await this.deleteMemberUseCase.execute(id);
-            return reply.status(204).send(); // No Content
+            return reply.status(204).send();
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }

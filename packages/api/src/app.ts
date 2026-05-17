@@ -1,16 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
-import { MemberValidator } from './domain/services/MemberValidator.js';
-import { CreateMemberUseCase } from './application/NewMemberUseCase.js';
-import { GetMembersUseCase } from './application/GetMembersUseCase.js';
-import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
-import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
-import { MemberController } from './infrastructure/delivery/MemberController.js';
-import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
-import { CreatePaymentUseCase } from './application/CreatePaymentUseCase.js';
-import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
-import { PaymentController } from './infrastructure/delivery/PaymentController.js';
+import { memberRoutes } from './infrastructure/routers/memberRoutes.js';
+import { paymentRoutes } from './infrastructure/routers/paymentRoutes.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -32,33 +23,8 @@ export function buildApp() {
         credentials: true,
     });
 
-    const memberRepo = new PostgresMemberRepository();
-    const memberValidator = new MemberValidator(memberRepo);
-    
-    const createMemberUseCase = new CreateMemberUseCase(memberRepo, memberValidator);
-    const getMembersUseCase = new GetMembersUseCase(memberRepo);
-    const updateMemberUseCase = new UpdateMemberUseCase(memberRepo, memberValidator);
-    const deleteMemberUseCase = new DeleteMemberUseCase(memberRepo);
-
-    const memberController = new MemberController(
-        createMemberUseCase, 
-        getMembersUseCase,
-        updateMemberUseCase,
-        deleteMemberUseCase
-    );
-
-    server.get('/api/v1/socios', memberController.getAll.bind(memberController));
-    server.post('/api/v1/socios', memberController.create.bind(memberController));
-    server.put('/api/v1/socios/:id', memberController.update.bind(memberController));
-    server.delete('/api/v1/socios/:id', memberController.delete.bind(memberController));
-
-    const paymentRepo = new PostgresPaymentRepository();
-    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepo, memberRepo);
-    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo);
-    const paymentController = new PaymentController(createPaymentUseCase, getPaymentsUseCase);
-
-    server.get('/api/v1/payments', paymentController.getAll.bind(paymentController));
-    server.post('/api/v1/payments', paymentController.create.bind(paymentController));
+    server.register(memberRoutes);
+    server.register(paymentRoutes);
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })

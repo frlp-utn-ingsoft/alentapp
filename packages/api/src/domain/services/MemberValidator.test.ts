@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemberValidator } from './MemberValidator.js';
-import { MemberRepository } from '../MemberRepository.js';
+import { MemberRepository } from '../../application/ports/IMemberRepository.js';
 
 describe('MemberValidator', () => {
     // Creamos un Mock del repositorio para aislar el test de la Base de Datos
