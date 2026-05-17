@@ -33,6 +33,7 @@ import { LockerValidator } from './domain/services/LockerValidator.js';
 import { CreateLockerUseCase } from './application/Locker/NewLockerUseCase.js';
 import { GetLockersUseCase } from './application/Locker/GetLockersUseCase.js';
 import { UpdateLockerUseCase } from './application/Locker/UpdateLockerUseCase.js';
+import { DeleteLockerUseCase } from './application/Locker/DeleteLockerUseCase.js';
 import { LockerController } from './delivery/LockerController.js';
 
 export function buildApp() {
@@ -124,7 +125,8 @@ export function buildApp() {
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
     const getLockersUseCase = new GetLockersUseCase(lockerRepo);
     const updateLockerUseCase = new UpdateLockerUseCase(lockerRepo, lockerValidator, memberRepo);
-    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase, updateLockerUseCase);
+    const deleteLockerUseCase = new DeleteLockerUseCase(lockerRepo);
+    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase, updateLockerUseCase, deleteLockerUseCase);
 
     //Endpoints
 
@@ -155,6 +157,7 @@ export function buildApp() {
     server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
     server.patch('/api/v1/lockers/:id', lockerController.update.bind(lockerController));
+    server.delete('/api/v1/lockers/:id', lockerController.delete.bind(lockerController));
 
 
     server.get('/', async (req, rep) => {
