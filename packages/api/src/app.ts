@@ -14,6 +14,7 @@ import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
 import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.js';
 import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
 import { DisciplineController } from './delivery/DisciplineController.js';
+import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.js';
 
 // Sport
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
@@ -68,14 +69,14 @@ export function buildApp() {
         disciplineValidator,
     );
     const getDisciplinesUseCase = new GetDisciplinesUseCase(disciplineRepo);
+    const updateDisciplineUseCase = new UpdateDisciplineUseCase(disciplineRepo, disciplineValidator);
 
     const disciplineController = new DisciplineController(
         createDisciplineUseCase,
         getDisciplinesUseCase,
+        updateDisciplineUseCase,
     );
 
-    server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
-    server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
 
     // Deportes
     const sportRepo = new PostgresSportRepository();
@@ -97,6 +98,11 @@ export function buildApp() {
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
     
+    // RUTA DE DISCIPLINAS
+    server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
+    server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
+    server.put('/api/v1/disciplines/:id', disciplineController.update.bind(disciplineController));
+
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
     });
