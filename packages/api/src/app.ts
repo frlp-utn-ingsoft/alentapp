@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { memberRoutes } from './infrastructure/routers/memberRoutes.js';
 import { paymentRoutes } from './infrastructure/routers/paymentRoutes.js';
+import { sportRoutes } from './infrastructure/routers/sportRoutes.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -25,6 +26,7 @@ export function buildApp() {
 
     server.register(memberRoutes);
     server.register(paymentRoutes);
+    server.register(sportRoutes);
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
