@@ -1,21 +1,22 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import { disciplineRouter } from './infrastructure/routers/DisciplineRouter.js';
 import { memberRoutes } from './infrastructure/routers/memberRoutes.js';
 import { paymentRoutes } from './infrastructure/routers/paymentRoutes.js';
+
 
 export function buildApp() {
     const server = Fastify({
         logger: {
             level: 'info',
-            transport: process.env.NODE_ENV === 'development' 
-            ? {
-                target: 'pino-pretty',
-                options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
-                } 
-            : undefined,
+            transport: process.env.NODE_ENV === 'development'
+                ? {
+                    target: 'pino-pretty',
+                    options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
+                }
+                : undefined,
         },
     });
-
     server.register(cors, {
         origin: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -25,6 +26,8 @@ export function buildApp() {
 
     server.register(memberRoutes);
     server.register(paymentRoutes);
+    server.register(disciplineRouter);
+
 
     server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' })
