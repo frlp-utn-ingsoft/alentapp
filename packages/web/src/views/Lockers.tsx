@@ -25,6 +25,18 @@ import {
 } from "../components/ui/dialog";
 import { Field } from "../components/ui/field";
 
+const lockerStatusLabels: Record<LockerDTO["status"], string> = {
+  Available: "Disponible",
+  Occupied: "Ocupado",
+  Maintenance: "En mantenimiento",
+};
+
+const lockerStatusStyles: Record<LockerDTO["status"], { bg: string; color: string }> = {
+  Available: { bg: "green.50", color: "green.700" },
+  Occupied: { bg: "orange.50", color: "orange.700" },
+  Maintenance: { bg: "yellow.50", color: "yellow.700" },
+};
+
 export function LockersView() {
   const [createdLockers, setCreatedLockers] = useState<LockerDTO[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -195,12 +207,12 @@ export function LockersView() {
                         px="2"
                         py="0.5"
                         borderRadius="md"
-                        bg="green.50"
-                        color="green.700"
+                        bg={lockerStatusStyles[locker.status].bg}
+                        color={lockerStatusStyles[locker.status].color}
                         fontSize="xs"
                         fontWeight="bold"
                       >
-                        {locker.status}
+                        {lockerStatusLabels[locker.status]}
                       </Box>
                     </Table.Cell>
                     <Table.Cell color="fg.muted">{locker.memberId ?? "-"}</Table.Cell>
