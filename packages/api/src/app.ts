@@ -22,6 +22,7 @@ import { CreateSportUseCase } from './application/NewSportUseCase.js';
 import { GetSportsUseCase } from './application/GetSportsUseCase.js';
 import { SportController } from './delivery/SportController.js';
 import { SportValidator } from './domain/services/SportValidator.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
 
 export function buildApp() {
     const server = Fastify({
@@ -83,10 +84,12 @@ export function buildApp() {
     const sportValidator = new SportValidator(sportRepo);
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
 
     const sportController = new SportController(
         createSportUseCase,
-        getSportsUseCase
+        getSportsUseCase,
+        updateSportUseCase
     );
 
     // RUTA DE MIEMBROS
@@ -97,6 +100,7 @@ export function buildApp() {
     //RUTA DE DEPORTES
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
+    server.put('/api/v1/sports/:id', sportController.update.bind(sportController));
     
     // RUTA DE DISCIPLINAS
     server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
