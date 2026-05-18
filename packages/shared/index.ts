@@ -59,6 +59,7 @@ export type UpdateLockerRequest = {
   contract_end_date?: string | null;
 };
 
+// ==========================================
 // Medical Certificate
 // ==========================================
 export type MedicalCertificateStatus = 'in_review' | 'validated' | 'historical';
@@ -84,6 +85,14 @@ export interface CreateMedicalCertificateRequest {
   doctor_license: string;
   institution: string;
   member_id: string;
+}
+
+export interface UpdateMedicalCertificateRequest {
+  issue_date?: string;
+  expiry_date?: string;
+  doctor_license?: string;
+  institution?: string;
+  status?: 'in_review' | 'validated';
 }
 
 // ==========================================
@@ -145,6 +154,13 @@ export interface CreateDisciplineRequest {
   end_date: string; // ISO Date String
   is_total_suspension: boolean;
   member_id: string; // UUID
+}
+
+export interface UpdateDisciplineRequest {
+  reason?: string;
+  start_date?: string;
+  end_date?: string;
+  is_total_suspension?: boolean;
 }
 
 // ==========================================

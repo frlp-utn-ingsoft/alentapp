@@ -1,4 +1,4 @@
-import { CreateSportRequest, SportDTO } from '@alentapp/shared';
+import { CreateSportRequest, SportDTO, UpdateSportRequest } from '@alentapp/shared';
 
 // Puerto de salida del dominio.
 // Define las operaciones que necesitan los casos de uso sin depender de Prisma.
@@ -11,4 +11,10 @@ export interface SportRepository {
 
     // Devuelve todos los deportes activos para mostrarlos en el listado.
     findAllActive(): Promise<SportDTO[]>;
+
+    // Busca un deporte por su identificador.
+    findById(id: string): Promise<SportDTO | null>;
+
+    // Actualiza parcialmente los campos editables de un deporte.
+    update(id: string, data: UpdateSportRequest): Promise<SportDTO>;
 }

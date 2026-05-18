@@ -12,6 +12,7 @@ import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCertificateUseCase.js';
 import { GetMedicalCertificatesUseCase } from './application/GetMedicalCertificatesUseCase.js';
+import { UpdateMedicalCertificateUseCase } from './application/UpdateMedicalCertificateUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
@@ -25,6 +26,7 @@ import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
 import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.js';
 import { DisciplineController } from './delivery/DisciplineController.js';
 import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
+import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.js';
 
 // === Payment imports (PR 1: foundation + create) ===
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
@@ -77,6 +79,7 @@ export function buildApp() {
 
     const createMedicalCertificateUseCase = new CreateMedicalCertificateUseCase(medicalCertificateRepo, medicalCertificateValidator);
     const getMedicalCertificatesUseCase = new GetMedicalCertificatesUseCase(medicalCertificateRepo);
+    const updateMedicalCertificateUseCase = new UpdateMedicalCertificateUseCase(medicalCertificateRepo, medicalCertificateValidator);
 
     const memberController = new MemberController(
         createMemberUseCase,
@@ -103,7 +106,8 @@ export function buildApp() {
 
     const medicalCertificateController = new MedicalCertificateController(
         createMedicalCertificateUseCase,
-        getMedicalCertificatesUseCase
+        getMedicalCertificatesUseCase,
+        updateMedicalCertificateUseCase,
     );
 
     // ============================================================
@@ -116,9 +120,14 @@ export function buildApp() {
         disciplineRepo,
         disciplineValidator,
     );
+    const updateDisciplineUseCase = new UpdateDisciplineUseCase(
+        disciplineRepo, disciplineValidator
+    );
+
     const disciplineController = new DisciplineController(
         createDisciplineUseCase,
         getDisciplinesUseCase,
+        updateDisciplineUseCase,
     );
 
     // ============================================================
@@ -164,9 +173,11 @@ export function buildApp() {
 
     server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));
     server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
+    server.patch('/api/v1/medical-certificates/:id', medicalCertificateController.update.bind(medicalCertificateController));
 
     server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
     server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
+    server.patch('/api/v1/disciplines/:id', disciplineController.update.bind(disciplineController));
 
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
@@ -196,4 +207,4 @@ if (process.argv[1] && process.argv[1].endsWith('app.ts')) {
             process.exit(0);
         });
     });
-}
+} 
