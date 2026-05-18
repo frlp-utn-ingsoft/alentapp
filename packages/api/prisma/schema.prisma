@@ -24,6 +24,12 @@ enum MemberStatus {
     Suspendido
 }
 
+enum MedicalCertificateStatus {
+    in_review
+    validated
+    historical
+}
+
 model Member {
     id         String         @id @default(uuid())
     dni        String         @unique
@@ -33,6 +39,100 @@ model Member {
     category   MemberCategory
     status     MemberStatus   @default(Activo)
     created_at DateTime       @default(now())
+    certificates MedicalCertificate[]
+    payments    Payment[]
+    disciplines Discipline[]
 
-    @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+    lockers Locker[]
+
+  @@map("members") // Para que en la DB la tabla se llame 'members' en minúscula
+}
+
+enum LockerLocation {
+    MALE
+    FEMALE
+    CHILDREN
+}
+
+enum LockerStatus {
+    AVAILABLE
+    OCCUPIED
+    MAINTENANCE
+}
+
+model Locker {
+    id                String @id @default(uuid())
+    number            Int            @unique
+    location          LockerLocation
+    status            LockerStatus   @default(AVAILABLE)
+    member_id         String?
+    member            Member?        @relation(fields: [member_id], references: [id])
+    contract_end_date DateTime?
+
+  @@map("lockers") // Para que en la DB la tabla se llame 'lockers' en minúscula
+}
+
+model MedicalCertificate {
+    id             String   @id @default(uuid())
+    issue_date     DateTime @db.Date
+    expiry_date    DateTime @db.Date
+    doctor_license String
+    institution    String
+    status         MedicalCertificateStatus @default(in_review)
+    deleted_at     DateTime?
+    member_id      String
+    member         Member   @relation(fields: [member_id], references: [id])
+
+    @@map("medical_certificates")
+}
+
+enum PaymentStatus {
+    Pendiente
+    Pagado
+    Cancelado
+}
+
+
+model Payment {
+    id           String        @id @default(uuid())
+    member_id    String
+    amount       Decimal       @db.Decimal(12, 2)
+    month        Int
+    year         Int
+    status       PaymentStatus @default(Pendiente)
+    due_date     DateTime      @db.Date
+    payment_date DateTime?
+    created_at   DateTime      @default(now())
+    updated_at   DateTime      @updatedAt
+    canceled_at  DateTime?
+    member       Member        @relation(fields: [member_id], references: [id])
+
+    @@index([member_id])
+    @@index([status, due_date])
+    @@map("payments")
+}
+
+model Discipline {
+    id                  String    @id @default(uuid())
+    reason              String
+    start_date          DateTime
+    end_date            DateTime
+    is_total_suspension Boolean
+    deleted_at          DateTime?
+    member_id           String
+    member              Member    @relation(fields: [member_id], references: [id])
+
+    @@map("disciplines")
+}
+
+model Sport {
+    id                           String    @id @default(uuid())
+    name                         String
+    description                  String
+    max_capacity                 Int
+    additional_price             Float
+    requires_medical_certificate Boolean
+    deleted_at                   DateTime?
+
+    @@map("sports")
 }
