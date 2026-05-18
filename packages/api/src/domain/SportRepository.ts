@@ -19,5 +19,5 @@ export interface SportRepository {
     update(id: string, data: UpdateSportRequest): Promise<SportDTO>;
 
     //borrado logico de un deporte
-    softDelete(id: string): Promise<SportDTO>;
+    softDelete(id: string): Promise<void>;
 }
