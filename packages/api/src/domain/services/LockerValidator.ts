@@ -40,4 +40,28 @@ export class LockerValidator {
             throw new Error('Ya existe un locker con ese número');
         }
     }
+
+    async validateExists(id: string) {
+    const locker = await this.repo.findById(id);
+    if (!locker) throw new Error('El locker no existe');
+}
+
+    validateStatus(status?: string) {
+    const valid = ['AVAILABLE', 'MAINTENANCE'];
+    if (status && !valid.includes(status)) {
+    throw new Error('Estado inválido');
+    }
+}
+
+validateMaintenanceBlock(locker: any) {
+    if (locker.status === 'MAINTENANCE') {
+    throw new Error('El locker está en mantenimiento');
+    }
+}
+
+validateAlreadyOccupied(locker: any, member_id?: string | null) {
+    if (member_id && locker.member_id && locker.member_id !== member_id) {
+    throw new Error('El locker ya se encuentra asignado');
+    }
+}
 }

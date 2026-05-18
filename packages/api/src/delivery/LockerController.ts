@@ -1,12 +1,14 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateLockerUseCase } from '../application/CreateLockerUseCase.js';
 import { GetLockersUseCase } from '../application/GetLockersUseCase.js';
+import { UpdateLockerUseCase } from '../application/UpdateLockerUseCase.js';
 import { CreateLockerRequest } from '@alentapp/shared';
 
 export class LockerController {
     constructor(
         private readonly createLockerUseCase: CreateLockerUseCase,
-        private readonly getLockerUseCase: GetLockersUseCase
+        private readonly getLockerUseCase: GetLockersUseCase,
+        private readonly updateLockerUseCase: UpdateLockerUseCase
     ) {}
 
     async create(
@@ -49,4 +51,39 @@ export class LockerController {
             return reply.status(500).send({ error: 'Error interno' });
         }
     }
+
+    async update(
+    request: FastifyRequest<{
+    Params: { id: string };
+    Body: {
+        status?: 'AVAILABLE' | 'MAINTENANCE';
+        member_id?: string | null;
+        contract_end_date?: string | null;
+    };
+    }>,
+    reply: FastifyReply
+) {
+    try {
+    const locker = await this.updateLockerUseCase.execute(
+        request.params.id,
+        request.body
+    );
+
+    return reply.status(200).send({ data: locker });
+    } catch (error: any) {
+    if (error.message.includes('no existe')) {
+        return reply.status(404).send({ message: error.message });
+    }
+
+    if (
+        error.message.includes('mantenimiento') ||
+        error.message.includes('asignado') ||
+        error.message.includes('socio')
+    ) {
+        return reply.status(400).send({ message: error.message });
+    }
+
+    return reply.status(500).send({ message: 'Error interno' });
+    }
+}
 }
