@@ -1,6 +1,7 @@
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Stack, Input, Text, Box } from "@chakra-ui/react";
 import { Field } from "../ui/field";
+import type { MedicalCertificateListItem } from "@alentapp/shared";
 
 export interface MedicalCertificateFormData {
   member_dni: string;
@@ -8,6 +9,7 @@ export interface MedicalCertificateFormData {
   expiry_date: string;
   doctor_license: string;
   institution: string;
+  status?: string;
 }
 
 export interface MedicalCertificateFormRef {
@@ -43,12 +45,29 @@ function validateDate(value: string) {
   return "";
 }
 
-export const MedicalCertificateForm = forwardRef<MedicalCertificateFormRef, object>(function MedicalCertificateForm(_props, ref) {
-  const [memberDni, setMemberDni] = useState("");
-  const [issueDate, setIssueDate] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [doctorLicense, setDoctorLicense] = useState("");
-  const [institution, setInstitution] = useState("");
+export const MedicalCertificateForm = forwardRef<MedicalCertificateFormRef, { initialData?: MedicalCertificateListItem }>(function MedicalCertificateForm({ initialData }, ref) {
+  const [memberDni, setMemberDni] = useState(initialData?.member_dni ?? "");
+  const [issueDate, setIssueDate] = useState(initialData?.issue_date ?? "");
+  const [expiryDate, setExpiryDate] = useState(initialData?.expiry_date ?? "");
+  const [doctorLicense, setDoctorLicense] = useState(initialData?.doctor_license ?? "");
+  const [institution, setInstitution] = useState(initialData?.institution ?? "");
+  const [status, setStatus] = useState(initialData?.status ?? "");
+
+  const isEditing = !!initialData;
+
+  const toDateInputValue = (date: string) => {
+    return date.split("T")[0];
+  };
+
+  useEffect(() => {
+    setMemberDni(initialData?.member_dni ?? "");
+    setIssueDate(initialData ? toDateInputValue(initialData.issue_date) : "");
+    setExpiryDate(initialData ? toDateInputValue(initialData.expiry_date) : "");
+    setDoctorLicense(initialData?.doctor_license ?? "");
+    setInstitution(initialData?.institution ?? "");
+    setStatus(initialData?.status ?? "");
+    setErrors({ memberDni: "", issueDate: "", expiryDate: "", doctorLicense: "", institution: "", dates: "", form: "" });
+  }, [initialData]);
 
   const [errors, setErrors] = useState({
     memberDni: "",
@@ -63,7 +82,7 @@ export const MedicalCertificateForm = forwardRef<MedicalCertificateFormRef, obje
   useImperativeHandle(ref, () => ({
     validateAndGetData: () => {
       const newErrors = {
-        memberDni: validateDni(memberDni),
+        memberDni: isEditing ? "" : validateDni(memberDni),
         issueDate: validateDate(issueDate),
         expiryDate: validateDate(expiryDate),
         doctorLicense: validateDoctorLicense(doctorLicense),
@@ -86,17 +105,28 @@ export const MedicalCertificateForm = forwardRef<MedicalCertificateFormRef, obje
       }
 
       setErrors({ memberDni: "", issueDate: "", expiryDate: "", doctorLicense: "", institution: "", dates: "", form: "" });
-      return { member_dni: memberDni, issue_date: issueDate, expiry_date: expiryDate, doctor_license: doctorLicense, institution };
+      const result: MedicalCertificateFormData = {
+        member_dni: memberDni,
+        issue_date: issueDate,
+        expiry_date: expiryDate,
+        doctor_license: doctorLicense,
+        institution,
+      };
+      if (isEditing) {
+        result.status = status;
+      }
+      return result;
     },
     reset: () => {
-      setMemberDni("");
-      setIssueDate("");
-      setExpiryDate("");
-      setDoctorLicense("");
-      setInstitution("");
+      setMemberDni(initialData?.member_dni ?? "");
+      setIssueDate(initialData ? toDateInputValue(initialData.issue_date) : "");
+      setExpiryDate(initialData ? toDateInputValue(initialData.expiry_date) : "");
+      setDoctorLicense(initialData?.doctor_license ?? "");
+      setInstitution(initialData?.institution ?? "");
+      setStatus(initialData?.status ?? "");
       setErrors({ memberDni: "", issueDate: "", expiryDate: "", doctorLicense: "", institution: "", dates: "", form: "" });
     },
-  }), [memberDni, issueDate, expiryDate, doctorLicense, institution]);
+  }), [memberDni, issueDate, expiryDate, doctorLicense, institution, status, isEditing, initialData]);
 
   useEffect(() => {
     if (issueDate && expiryDate) {
@@ -124,6 +154,7 @@ export const MedicalCertificateForm = forwardRef<MedicalCertificateFormRef, obje
             placeholder="Ej. 12345678"
             maxLength={8}
             value={memberDni}
+            disabled={isEditing}
             onChange={(e) => {
               setMemberDni(e.target.value);
               setErrors((prev) => ({ ...prev, memberDni: validateDni(e.target.value), form: "" }));
@@ -193,6 +224,28 @@ export const MedicalCertificateForm = forwardRef<MedicalCertificateFormRef, obje
           <Text fontSize="xs" color="fg.muted" mt="1">Hasta 60 caracteres</Text>
         )}
       </Box>
+
+      {isEditing && (
+        <Box>
+          <Field label="Estado" required>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "1px solid var(--chakra-colors-gray-200)",
+                backgroundColor: "var(--chakra-colors-bg-panel)",
+                fontSize: "14px",
+              }}
+            >
+              <option value="in_review">En revisión</option>
+              <option value="validated">Validado</option>
+            </select>
+          </Field>
+        </Box>
+      )}
 
       {errors.form && (
         <Box bg="red.50" color="red.700" px="3" py="2" borderRadius="md" border="1px solid" borderColor="red.200">
