@@ -34,7 +34,7 @@ import { DeleteDisciplineUseCase } from './application/DeleteDisciplineUseCase.j
 // === Payment imports ===
 // PR 1: crear y listar
 // PR 2: cobrar y editar
-// PR 3: anular (próximo PR)
+// PR 3: anular
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { SystemClock } from './infrastructure/SystemClock.js';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
@@ -42,6 +42,7 @@ import { NewPaymentUseCase } from './application/NewPaymentUseCase.js';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { MarkPaymentAsPaidUseCase } from './application/MarkPaymentAsPaidUseCase.js';
 import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
+import { CancelPaymentUseCase } from './application/CancelPaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
 
 import { PostgresLockerRepository } from './infrastructure/PostgresLockerRepository.js';
@@ -90,7 +91,11 @@ export function buildApp() {
         medicalCertificateValidator,
     );
     const getMedicalCertificatesUseCase = new GetMedicalCertificatesUseCase(medicalCertificateRepo);
-    const updateMedicalCertificateUseCase = new UpdateMedicalCertificateUseCase(medicalCertificateRepo, medicalCertificateValidator);
+    const updateMedicalCertificateUseCase = new UpdateMedicalCertificateUseCase(
+        medicalCertificateRepo,
+        medicalCertificateValidator,
+    );
+
     const memberController = new MemberController(
         createMemberUseCase,
         getMembersUseCase,
@@ -103,7 +108,11 @@ export function buildApp() {
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
     const getLockersUseCase = new GetLockersUseCase(lockerRepo);
     const updateLockerUseCase = new UpdateLockerUseCase(lockerRepo, memberRepo);
-    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase, updateLockerUseCase);
+    const lockerController = new LockerController(
+        createLockerUseCase,
+        getLockersUseCase,
+        updateLockerUseCase,
+    );
 
     const medicalCertificateController = new MedicalCertificateController(
         createMedicalCertificateUseCase,
@@ -118,14 +127,8 @@ export function buildApp() {
     const disciplineValidator = new DisciplineValidator(memberRepo);
     const getDisciplinesUseCase = new GetDisciplinesUseCase(disciplineRepo);
     const deleteDisciplineUseCase = new DeleteDisciplineUseCase(disciplineRepo);
-
-    const createDisciplineUseCase = new CreateDisciplineUseCase(
-        disciplineRepo,
-        disciplineValidator,
-    );
-    const updateDisciplineUseCase = new UpdateDisciplineUseCase(
-        disciplineRepo, disciplineValidator
-    );
+    const createDisciplineUseCase = new CreateDisciplineUseCase(disciplineRepo, disciplineValidator);
+    const updateDisciplineUseCase = new UpdateDisciplineUseCase(disciplineRepo, disciplineValidator);
 
     const disciplineController = new DisciplineController(
         createDisciplineUseCase,
@@ -142,18 +145,14 @@ export function buildApp() {
 
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
-
-    const updateSportUseCase = new UpdateSportUseCase(
-        sportRepo,
-        sportValidator,
-    );
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
 
     const sportController = new SportController(
         createSportUseCase,
         getSportsUseCase,
         updateSportUseCase,
     );
-    
+
     // ============================================================
     // Payments
     // ============================================================
@@ -170,12 +169,14 @@ export function buildApp() {
     const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo, paymentValidator);
     const markPaymentAsPaidUseCase = new MarkPaymentAsPaidUseCase(paymentRepo, clock);
     const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
+    const cancelPaymentUseCase = new CancelPaymentUseCase(paymentRepo, clock);
 
     const paymentController = new PaymentController(
         newPaymentUseCase,
         getPaymentsUseCase,
         markPaymentAsPaidUseCase,
         updatePaymentUseCase,
+        cancelPaymentUseCase,
     );
 
     // ============================================================
@@ -202,16 +203,17 @@ export function buildApp() {
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
     server.patch('/api/v1/sports/:id', sportController.update.bind(sportController));
-    
+
     server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
     server.patch('/api/v1/pagos/:id', paymentController.update.bind(paymentController));
     server.patch('/api/v1/pagos/:id/pay', paymentController.pay.bind(paymentController));
+    server.patch('/api/v1/pagos/:id/cancel', paymentController.cancel.bind(paymentController));
 
     server.get('/', async (req, rep) => {
-        rep.status(200).send({ msg: 'asd' })
+        rep.status(200).send({ msg: 'asd' });
     });
-    
+
     return server;
 }
 
