@@ -12,15 +12,18 @@ Center,
 Input,
 } from "@chakra-ui/react";
 
-import { LuPlus, LuRefreshCw } from "react-icons/lu";
+import { LuPlus, LuRefreshCw, LuPencil } from "react-icons/lu";
 import { useEffect, useState } from "react";
 
 import { lockersService } from "../services/lockers";
+import { membersService } from "../services/members";
 
 import type {
 LockerDTO,
 CreateLockerRequest,
 LockerLocation,
+LockerStatus,
+MemberDTO,
 } from "@alentapp/shared";
 
 import {
@@ -30,8 +33,6 @@ DialogHeader,
 DialogTitle,
 DialogBody,
 DialogFooter,
-DialogActionTrigger,
-DialogCloseTrigger,
 } from "../components/ui/dialog";
 
 import { Field } from "../components/ui/field";
@@ -53,20 +54,42 @@ items: [
 ],
 });
 
+const statuses = createListCollection({
+items: [
+    { label: "Disponible", value: "AVAILABLE" },
+    { label: "Mantenimiento", value: "MAINTENANCE" },
+],
+});
+
 export function LockersView() {
 const [lockers, setLockers] = useState<LockerDTO[]>([]);
-const [isLoading, setIsLoading] = useState(true);
-const [error, setError] = useState<string | null>(null);
+const [members, setMembers] = useState<MemberDTO[]>([]);
 
-const [isDialogOpen, setIsDialogOpen] = useState(false);
+const [isLoading, setIsLoading] = useState(true);
+const [_error, setError] = useState<string | null>(null);
+
+const [isCreateOpen, setIsCreateOpen] = useState(false);
+const [isEditOpen, setIsEditOpen] = useState(false);
 const [isSubmitting, setIsSubmitting] = useState(false);
 
-const [formData, setFormData] =
-    useState<CreateLockerRequest>({
+const [selectedLocker, setSelectedLocker] = useState<LockerDTO | null>(null);
+
+const [formData, setFormData] = useState<CreateLockerRequest>({
     number: 1,
     location: "MALE",
-    });
+});
 
+const [updateData, setUpdateData] = useState<{
+    status: LockerStatus;
+    member_id: string | null;
+    contract_end_date: string | null;
+}>({
+    status: "AVAILABLE",
+    member_id: null,
+    contract_end_date: null,
+});
+
+  // ===================== FETCH LOCKERS =====================
 const fetchLockers = async () => {
     setIsLoading(true);
     setError(null);
@@ -75,245 +98,283 @@ const fetchLockers = async () => {
     const data = await lockersService.getAll();
     setLockers(data);
     } catch (err: any) {
-    setError(err.message || "Error al cargar lockers");
+    setError(err.message);
     } finally {
     setIsLoading(false);
     }
 };
 
-const openCreateModal = () => {
-    setFormData({
-    number: 1,
-    location: "MALE",
-    });
-
-    setIsDialogOpen(true);
-};
-
-const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setIsSubmitting(true);
-
+  // ===================== FETCH MEMBERS =====================
+const fetchMembers = async () => {
     try {
-    await lockersService.create(formData);
-
-    setIsDialogOpen(false);
-
-    fetchLockers();
-    } catch (err: any) {
-    alert(err.message || "Error al crear locker");
-    } finally {
-    setIsSubmitting(false);
+    const data = await membersService.getAll();
+    setMembers(data ?? []);
+    } catch (err) {
+    console.error("Error cargando socios", err);
+    setMembers([]);
     }
 };
 
 useEffect(() => {
     fetchLockers();
+    fetchMembers();
 }, []);
 
-return (
-    <DialogRoot
-    open={isDialogOpen}
-    onOpenChange={(e) => setIsDialogOpen(e.open)}
-    >
-    <Stack gap="8">
-        <Flex justify="space-between" align="center">
-        <Stack gap="1">
-            <Heading size="2xl" fontWeight="bold">
-            Administración de Lockers
-            </Heading>
+  // ===================== CREATE =====================
+const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-            <Text color="fg.muted" fontSize="md">
-            Gestiona los lockers disponibles del club.
-            </Text>
+    try {
+    await lockersService.create(formData);
+    setIsCreateOpen(false);
+    fetchLockers();
+    } catch (err: any) {
+    alert(err.message);
+    } finally {
+    setIsSubmitting(false);
+    }
+};
+
+  // ===================== UPDATE =====================
+const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedLocker) return;
+
+    setIsSubmitting(true);
+
+    try {
+    await lockersService.update(selectedLocker.id, updateData);
+    setIsEditOpen(false);
+    fetchLockers();
+    } catch (err: any) {
+    alert(err.message);
+    } finally {
+    setIsSubmitting(false);
+    }
+};
+
+  const openEdit = (locker: LockerDTO) => {
+    setSelectedLocker(locker);
+    setUpdateData({
+      status: locker.status,
+      member_id: locker.member_id,
+      contract_end_date: locker.contract_end_date,
+    });
+    setIsEditOpen(true);
+  };
+
+  return (
+    <Stack gap="8">
+
+      {/* HEADER */}
+      <Flex justify="space-between" align="center">
+        <Stack>
+          <Heading>Lockers</Heading>
+          <Text color="fg.muted">Gestión completa de lockers</Text>
         </Stack>
 
-        <HStack gap="3">
-            <Button
-            variant="outline"
-            onClick={fetchLockers}
-            disabled={isLoading}
-            >
-            <LuRefreshCw /> Actualizar
-            </Button>
+        <HStack>
+          <Button onClick={fetchLockers} variant="outline">
+            <LuRefreshCw />
+          </Button>
 
-            <Button
-            colorPalette="blue"
-            size="md"
-            onClick={openCreateModal}
-            >
-            <LuPlus /> Agregar Locker
-            </Button>
+          <Button onClick={() => setIsCreateOpen(true)}>
+            <LuPlus /> Crear
+          </Button>
         </HStack>
-        </Flex>
+      </Flex>
 
-        <DialogContent>
-        <form onSubmit={handleSubmit}>
-            <DialogHeader>
-            <DialogTitle>
-                Agregar Nuevo Locker
-            </DialogTitle>
-            </DialogHeader>
-
-            <DialogBody>
-            <Stack gap="4">
-                <Field label="Número" required>
-                <Input
-                    type="number"
-                    min={1}
-                    value={formData.number}
-                    onChange={(e) =>
-                    setFormData({
-                        ...formData,
-                        number: Number(e.target.value),
-                    })
-                    }
-                    required
-                />
-                </Field>
-
-                <Field label="Ubicación" required>
-                <SelectRoot
-                collection={locations}
-                value={[formData.location]}
-                onValueChange={(e) =>
-                setFormData({
-                ...formData,
-                location: e.value[0] as LockerLocation,
-                })
-                }
-> 
-
-                    <SelectTrigger>
-                    <SelectValueText placeholder="Seleccione ubicación" />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                    {locations.items.map((location) => (
-                        <SelectItem
-                        item={location}
-                        key={location.value}
-                        >
-                        {location.label}
-                        </SelectItem>
-                    ))}
-                    </SelectContent>
-                </SelectRoot>
-                </Field>
-            </Stack>
-            </DialogBody>
-
-            <DialogFooter>
-            <DialogActionTrigger asChild>
-                <Button variant="outline">
-                Cancelar
-                </Button>
-            </DialogActionTrigger>
-
-            <Button
-                type="submit"
-                colorPalette="blue"
-                loading={isSubmitting}
-            >
-                Crear Locker
-            </Button>
-            </DialogFooter>
-
-            <DialogCloseTrigger />
-        </form>
-        </DialogContent>
-
-        {error && (
-        <Box
-            p="4"
-            bg="red.50"
-            color="red.700"
-            borderRadius="md"
-            border="1px solid"
-            borderColor="red.200"
-        >
-            <Text fontWeight="bold">Error:</Text>
-            <Text>{error}</Text>
-        </Box>
-        )}
-
-        <Box
-        bg="bg.panel"
-        borderRadius="xl"
-        boxShadow="sm"
-        borderWidth="1px"
-        overflow="hidden"
-        minH="300px"
-        position="relative"
-        >
+      {/* TABLE */}
+      <Box borderWidth="1px" borderRadius="xl">
         {isLoading ? (
-            <Center h="300px">
-            <Stack align="center" gap="4">
-                <Spinner size="xl" />
-                <Text color="fg.muted">
-                Cargando lockers...
-                </Text>
-            </Stack>
-            </Center>
-        ) : lockers.length === 0 ? (
-            <Center h="300px">
-            <Stack align="center" gap="4">
-                <Text color="fg.muted">
-                No se encontraron lockers.
-                </Text>
-
-                <Button
-                variant="ghost"
-                onClick={fetchLockers}
-                >
-                Reintentar
-                </Button>
-            </Stack>
-            </Center>
+          <Center h="200px">
+            <Spinner />
+          </Center>
         ) : (
-            <Table.Root
-            size="md"
-            variant="line"
-            interactive
-            >
+          <Table.Root>
             <Table.Header>
-                <Table.Row bg="bg.muted/50">
-                <Table.ColumnHeader py="4">
-                    Número
-                </Table.ColumnHeader>
-
-                <Table.ColumnHeader py="4">
-                    Ubicación
-                </Table.ColumnHeader>
-
-                <Table.ColumnHeader py="4">
-                    Estado
-                </Table.ColumnHeader>
-                </Table.Row>
+              <Table.Row>
+                <Table.ColumnHeader>Número</Table.ColumnHeader>
+                <Table.ColumnHeader>Estado</Table.ColumnHeader>
+                <Table.ColumnHeader>Socio</Table.ColumnHeader>
+                <Table.ColumnHeader>Acciones</Table.ColumnHeader>
+              </Table.Row>
             </Table.Header>
 
             <Table.Body>
-                {lockers.map((locker) => (
-                <Table.Row key={locker.id}>
-                    <Table.Cell fontWeight="semibold">
-                    {locker.number}
-                    </Table.Cell>
-
-                    <Table.Cell>
-                    {locker.location}
-                    </Table.Cell>
-
-                    <Table.Cell>
-                    {locker.status}
-                    </Table.Cell>
+              {lockers.map((l) => (
+                <Table.Row key={l.id}>
+                  <Table.Cell>{l.number}</Table.Cell>
+                  <Table.Cell>{l.status}</Table.Cell>
+                  <Table.Cell>{l.member_id ?? "-"}</Table.Cell>
+                  <Table.Cell>
+                    <Button size="sm" onClick={() => openEdit(l)}>
+                      <LuPencil />
+                    </Button>
+                  </Table.Cell>
                 </Table.Row>
-                ))}
+              ))}
             </Table.Body>
-            </Table.Root>
+          </Table.Root>
         )}
-        </Box>
+      </Box>
+
+      {/* ================= CREATE ================= */}
+      <DialogRoot open={isCreateOpen} onOpenChange={(e) => setIsCreateOpen(e.open)}>
+        <DialogContent>
+          <form onSubmit={handleCreate}>
+            <DialogHeader>
+              <DialogTitle>Crear Locker</DialogTitle>
+            </DialogHeader>
+
+            <DialogBody>
+              <Stack gap="4">
+
+                <Field label="Número">
+                  <Input
+                    value={formData.number}
+                    onChange={(e) =>
+                      setFormData({ ...formData, number: Number(e.target.value) })
+                    }
+                  />
+                </Field>
+
+                <Field label="Ubicación">
+                  <SelectRoot
+                    collection={locations}
+                    value={[formData.location]}
+                    onValueChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        location: e.value[0] as LockerLocation,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValueText />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations.items.map((l) => (
+                        <SelectItem key={l.value} item={l}>
+                          {l.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </SelectRoot>
+                </Field>
+
+              </Stack>
+            </DialogBody>
+
+            <DialogFooter>
+              <Button type="submit" loading={isSubmitting}>
+                Crear
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </DialogRoot>
+
+      {/* ================= EDIT ================= */}
+      <DialogRoot open={isEditOpen} onOpenChange={(e) => setIsEditOpen(e.open)}>
+        <DialogContent>
+          <form onSubmit={handleUpdate}>
+            <DialogHeader>
+              <DialogTitle>Editar Locker</DialogTitle>
+            </DialogHeader>
+
+            <DialogBody>
+              <Stack gap="4">
+
+                {/* STATUS */}
+                <Field label="Estado">
+                  <SelectRoot
+                    collection={statuses}
+                    value={[updateData.status]}
+                    onValueChange={(e) =>
+                      setUpdateData({
+                        ...updateData,
+                        status: e.value[0] as LockerStatus,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValueText />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses.items.map((s) => (
+                        <SelectItem key={s.value} item={s}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </SelectRoot>
+                </Field>
+
+                {/* SOCIO */}
+                <Field label="Socio">
+                  <SelectRoot
+                    collection={createListCollection({
+                      items: members.map((m) => ({
+                        label: `${m.name} (${m.dni})`,
+                        value: m.id,
+                      })),
+                    })}
+                    value={updateData.member_id ? [updateData.member_id] : []}
+                    onValueChange={(e) =>
+                      setUpdateData({
+                        ...updateData,
+                        member_id: e.value[0] || null,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValueText placeholder="Seleccionar socio" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      {members.map((m) => (
+                        <SelectItem
+                          key={m.id}
+                          item={{
+                            label: `${m.name} (${m.dni})`,
+                            value: m.id,
+                          }}
+                        >
+                          {m.name} ({m.dni})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </SelectRoot>
+                </Field>
+
+                {/* CONTRACT */}
+                <Field label="Fin contrato">
+                  <Input
+                    type="date"
+                    value={updateData.contract_end_date ?? ""}
+                    onChange={(e) =>
+                      setUpdateData({
+                        ...updateData,
+                        contract_end_date: e.target.value || null,
+                      })
+                    }
+                  />
+                </Field>
+
+              </Stack>
+            </DialogBody>
+
+            <DialogFooter>
+              <Button type="submit" loading={isSubmitting}>
+                Guardar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </DialogRoot>
+
     </Stack>
-    </DialogRoot>
-);
+  );
 }

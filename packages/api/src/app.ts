@@ -11,6 +11,8 @@ import { UpdateMemberUseCase } from './application/UpdateMemberUseCase.js';
 import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCertificateUseCase.js';
 import { GetMedicalCertificatesUseCase } from './application/GetMedicalCertificatesUseCase.js';
+import { UpdateMedicalCertificateUseCase } from './application/UpdateMedicalCertificateUseCase.js';
+
 import { MemberController } from './delivery/MemberController.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
 
@@ -30,11 +32,12 @@ import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.j
 import { DisciplineController } from './delivery/DisciplineController.js';
 import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
 import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.js';
+import { DeleteDisciplineUseCase } from './application/DeleteDisciplineUseCase.js';
 
 // === Payment imports ===
 // PR 1: crear y listar
 // PR 2: cobrar y editar
-// PR 3: anular (próximo PR)
+// PR 3: anular
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { SystemClock } from './infrastructure/SystemClock.js';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
@@ -42,6 +45,7 @@ import { NewPaymentUseCase } from './application/NewPaymentUseCase.js';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { MarkPaymentAsPaidUseCase } from './application/MarkPaymentAsPaidUseCase.js';
 import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
+import { CancelPaymentUseCase } from './application/CancelPaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
 
 import { PostgresLockerRepository } from './infrastructure/PostgresLockerRepository.js';
@@ -49,6 +53,7 @@ import { LockerValidator } from './domain/services/LockerValidator.js';
 import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
 import { LockerController } from './delivery/LockerController.js';
 import { GetLockersUseCase } from './application/GetLockersUseCase.js';
+import { UpdateLockerUseCase } from './application/UpdateLockerUseCase.js';
 
 
 export function buildApp() {
@@ -89,6 +94,10 @@ export function buildApp() {
         medicalCertificateValidator,
     );
     const getMedicalCertificatesUseCase = new GetMedicalCertificatesUseCase(medicalCertificateRepo);
+    const updateMedicalCertificateUseCase = new UpdateMedicalCertificateUseCase(
+        medicalCertificateRepo,
+        medicalCertificateValidator,
+    );
 
     const memberController = new MemberController(
         createMemberUseCase,
@@ -101,11 +110,17 @@ export function buildApp() {
     const lockerValidator = new LockerValidator(lockerRepo);
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
     const getLockersUseCase = new GetLockersUseCase(lockerRepo);
-    const lockerController = new LockerController(createLockerUseCase, getLockersUseCase);
+    const updateLockerUseCase = new UpdateLockerUseCase(lockerRepo, memberRepo);
+    const lockerController = new LockerController(
+        createLockerUseCase,
+        getLockersUseCase,
+        updateLockerUseCase,
+    );
 
     const medicalCertificateController = new MedicalCertificateController(
         createMedicalCertificateUseCase,
         getMedicalCertificatesUseCase,
+        updateMedicalCertificateUseCase,
     );
 
     // ============================================================
@@ -114,6 +129,7 @@ export function buildApp() {
     const disciplineRepo = new PostgresDisciplineRepository();
     const disciplineValidator = new DisciplineValidator(memberRepo);
     const getDisciplinesUseCase = new GetDisciplinesUseCase(disciplineRepo);
+    const deleteDisciplineUseCase = new DeleteDisciplineUseCase(disciplineRepo);
     const createDisciplineUseCase = new CreateDisciplineUseCase(disciplineRepo, disciplineValidator);
     const updateDisciplineUseCase = new UpdateDisciplineUseCase(disciplineRepo, disciplineValidator);
 
@@ -121,6 +137,7 @@ export function buildApp() {
         createDisciplineUseCase,
         getDisciplinesUseCase,
         updateDisciplineUseCase,
+        deleteDisciplineUseCase,
     );
 
     // ============================================================
@@ -143,28 +160,30 @@ export function buildApp() {
     );
 
     // ============================================================
-// Payments
-// ============================================================
-const clock = new SystemClock();
-const paymentRepo = new PostgresPaymentRepository();
-const paymentValidator = new PaymentValidator(clock);
+    // Payments
+    // ============================================================
+    const clock = new SystemClock();
+    const paymentRepo = new PostgresPaymentRepository();
+    const paymentValidator = new PaymentValidator(clock);
 
-const newPaymentUseCase = new NewPaymentUseCase(
-    paymentRepo,
-    memberRepo,
-    paymentValidator,
-    clock,
-);
-const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo, paymentValidator);
-const markPaymentAsPaidUseCase = new MarkPaymentAsPaidUseCase(paymentRepo, clock);
-const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
+    const newPaymentUseCase = new NewPaymentUseCase(
+        paymentRepo,
+        memberRepo,
+        paymentValidator,
+        clock,
+    );
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo, paymentValidator);
+    const markPaymentAsPaidUseCase = new MarkPaymentAsPaidUseCase(paymentRepo, clock);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
+    const cancelPaymentUseCase = new CancelPaymentUseCase(paymentRepo, clock);
 
-const paymentController = new PaymentController(
-    newPaymentUseCase,
-    getPaymentsUseCase,
-    markPaymentAsPaidUseCase,
-    updatePaymentUseCase,
-);
+    const paymentController = new PaymentController(
+        newPaymentUseCase,
+        getPaymentsUseCase,
+        markPaymentAsPaidUseCase,
+        updatePaymentUseCase,
+        cancelPaymentUseCase,
+    );
 
     // ============================================================
     // Routes
@@ -176,13 +195,16 @@ const paymentController = new PaymentController(
 
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
     server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
+    server.patch('/api/v1/lockers/:id', lockerController.update.bind(lockerController));
 
     server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));
     server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
+    server.patch('/api/v1/medical-certificates/:id', medicalCertificateController.update.bind(medicalCertificateController));
 
     server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
     server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
     server.patch('/api/v1/disciplines/:id', disciplineController.update.bind(disciplineController));
+    server.delete('/api/v1/disciplines/:id', disciplineController.delete.bind(disciplineController));
 
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
@@ -193,11 +215,12 @@ const paymentController = new PaymentController(
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
     server.patch('/api/v1/pagos/:id', paymentController.update.bind(paymentController));
     server.patch('/api/v1/pagos/:id/pay', paymentController.pay.bind(paymentController));
+    server.patch('/api/v1/pagos/:id/cancel', paymentController.cancel.bind(paymentController));
 
     server.get('/', async (req, rep) => {
-        rep.status(200).send({ msg: 'asd' })
+        rep.status(200).send({ msg: 'asd' });
     });
-    
+
     return server;
 }
 

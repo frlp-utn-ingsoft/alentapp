@@ -52,6 +52,13 @@ export interface CreateLockerRequest {
   number: number;
   location: LockerLocation;
 }
+
+export type UpdateLockerRequest = {
+  status?: 'AVAILABLE' | 'MAINTENANCE';
+  member_id?: string | null;
+  contract_end_date?: string | null;
+};
+
 // ==========================================
 // Medical Certificate
 // ==========================================
@@ -78,6 +85,14 @@ export interface CreateMedicalCertificateRequest {
   doctor_license: string;
   institution: string;
   member_id: string;
+}
+
+export interface UpdateMedicalCertificateRequest {
+  issue_date?: string;
+  expiry_date?: string;
+  doctor_license?: string;
+  institution?: string;
+  status?: 'in_review' | 'validated';
 }
 
 // ==========================================
@@ -167,11 +182,4 @@ export interface CreateSportRequest {
   max_capacity: number;
   additional_price: number;
   requires_medical_certificate: boolean;
-}
-
-export interface UpdateSportRequest {
-  description?: string;
-  max_capacity?: number;
-  additional_price?: number;
-  requires_medical_certificate?: boolean;
 }

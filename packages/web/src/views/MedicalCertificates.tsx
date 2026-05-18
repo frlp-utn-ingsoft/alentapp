@@ -9,12 +9,13 @@ import {
   Flex,
   Spinner,
   Center,
+  IconButton,
 } from "@chakra-ui/react";
-import { LuPlus, LuRefreshCw } from "react-icons/lu";
+import { LuPlus, LuRefreshCw, LuPencil } from "react-icons/lu";
 import { useEffect, useState, useRef } from "react";
 import { medicalCertificatesService } from "../services/medicalCertificates";
 import { membersService } from "../services/members";
-import type { MedicalCertificateListItem, MemberDTO, CreateMedicalCertificateRequest } from "@alentapp/shared";
+import type { MedicalCertificateListItem, MemberDTO, CreateMedicalCertificateRequest, UpdateMedicalCertificateRequest } from "@alentapp/shared";
 import {
   DialogRoot,
   DialogContent,
@@ -48,6 +49,8 @@ export function MedicalCertificatesView() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [editingCertificateId, setEditingCertificateId] = useState<string | null>(null);
+  const [editingInitialData, setEditingInitialData] = useState<MedicalCertificateListItem | undefined>(undefined);
 
   const formRef = useRef<MedicalCertificateFormRef>(null);
 
@@ -70,8 +73,24 @@ export function MedicalCertificatesView() {
 
   const openCreateModal = () => {
     setSubmitError(null);
+    setEditingCertificateId(null);
+    setEditingInitialData(undefined);
     formRef.current?.reset();
     setIsDialogOpen(true);
+  };
+
+  const openEditModal = (cert: MedicalCertificateListItem) => {
+    setSubmitError(null);
+    setEditingCertificateId(cert.id);
+    setEditingInitialData(cert);
+    setIsDialogOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsDialogOpen(false);
+    setEditingCertificateId(null);
+    setEditingInitialData(undefined);
+    setSubmitError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,25 +106,41 @@ export function MedicalCertificatesView() {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const member = members.find((m) => m.dni === data.member_dni);
-      if (!member) {
-        setSubmitError(`No se encontró un socio con DNI ${data.member_dni}`);
-        return;
+      if (editingCertificateId) {
+        const requestData: UpdateMedicalCertificateRequest = {
+          issue_date: data.issue_date,
+          expiry_date: data.expiry_date,
+          doctor_license: data.doctor_license,
+          institution: data.institution,
+        };
+
+        if (data.status && data.status !== editingInitialData?.status) {
+          requestData.status = data.status as 'in_review' | 'validated';
+        }
+
+        await medicalCertificatesService.update(editingCertificateId, requestData);
+      } else {
+        const member = members.find((m) => m.dni === data.member_dni);
+        if (!member) {
+          setSubmitError(`No se encontró un socio con DNI ${data.member_dni}`);
+          return;
+        }
+
+        const requestData: CreateMedicalCertificateRequest = {
+          member_id: member.id,
+          issue_date: data.issue_date,
+          expiry_date: data.expiry_date,
+          doctor_license: data.doctor_license,
+          institution: data.institution,
+        };
+
+        await medicalCertificatesService.create(requestData);
       }
 
-      const requestData: CreateMedicalCertificateRequest = {
-        member_id: member.id,
-        issue_date: data.issue_date,
-        expiry_date: data.expiry_date,
-        doctor_license: data.doctor_license,
-        institution: data.institution,
-      };
-
-      await medicalCertificatesService.create(requestData);
-      setIsDialogOpen(false);
+      closeModal();
       fetchCertificates();
     } catch (err: any) {
-      setSubmitError(err.message || "Error al crear el certificado");
+      setSubmitError(err.message || "Error al guardar el certificado");
     } finally {
       setIsSubmitting(false);
     }
@@ -116,7 +151,7 @@ export function MedicalCertificatesView() {
   }, []);
 
   return (
-    <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
+    <DialogRoot open={isDialogOpen} onOpenChange={(e) => { if (!e.open) closeModal(); }}>
       <Stack gap="8">
         <Flex justify="space-between" align="center">
           <Stack gap="1">
@@ -138,10 +173,12 @@ export function MedicalCertificatesView() {
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Agregar Nuevo Certificado Médico</DialogTitle>
+              <DialogTitle>
+                {editingCertificateId ? "Editar Certificado Médico" : "Agregar Nuevo Certificado Médico"}
+              </DialogTitle>
             </DialogHeader>
             <DialogBody>
-              <MedicalCertificateForm ref={formRef} />
+              <MedicalCertificateForm ref={formRef} initialData={editingInitialData} />
               {submitError && (
                 <Box mt="4" p="3" bg="red.50" color="red.700" borderRadius="md" border="1px solid" borderColor="red.200">
                   <Text fontWeight="bold" fontSize="sm">Error:</Text>
@@ -154,7 +191,7 @@ export function MedicalCertificatesView() {
                 <Button variant="outline">Cancelar</Button>
               </DialogActionTrigger>
               <Button type="submit" colorPalette="blue" loading={isSubmitting}>
-                Crear Certificado
+                {editingCertificateId ? "Guardar Cambios" : "Crear Certificado"}
               </Button>
             </DialogFooter>
             <DialogCloseTrigger />
@@ -201,6 +238,7 @@ export function MedicalCertificatesView() {
                   <Table.ColumnHeader py="4">Matrícula</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Institución</Table.ColumnHeader>
                   <Table.ColumnHeader py="4">Estado</Table.ColumnHeader>
+                  <Table.ColumnHeader py="4" textAlign="end">Acciones</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -228,6 +266,16 @@ export function MedicalCertificatesView() {
                         >
                           {statusLabels[cert.status] || cert.status}
                         </Box>
+                      </Table.Cell>
+                      <Table.Cell textAlign="end">
+                        <IconButton
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Editar certificado"
+                          onClick={() => openEditModal(cert)}
+                        >
+                          <LuPencil />
+                        </IconButton>
                       </Table.Cell>
                     </Table.Row>
                   );

@@ -60,6 +60,18 @@ function Layout() {
                             </Text>
                         </RouterLink>
                         <RouterLink to="/sports">
+                        <Text
+                                fontWeight="semibold"
+                                fontSize="sm"
+                                textTransform="uppercase"
+                                letterSpacing="wider"
+                                color="fg.muted"
+                                _hover={{ color: "blue.500", textDecoration: "none" }}
+                            >
+                                Deporte
+                            </Text>
+                            </RouterLink>
+                        <RouterLink to="/disciplines">
                             <Text
                                 fontWeight="semibold"
                                 fontSize="sm"
@@ -69,6 +81,7 @@ function Layout() {
                                 _hover={{ color: "blue.500", textDecoration: "none" }}
                             >
                                 Deportes
+                                Sanciones
                             </Text>
                         </RouterLink>
                     </HStack>
