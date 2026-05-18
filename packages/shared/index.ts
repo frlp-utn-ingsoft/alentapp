@@ -52,6 +52,13 @@ export interface CreateLockerRequest {
   number: number;
   location: LockerLocation;
 }
+
+export type UpdateLockerRequest = {
+  status?: 'AVAILABLE' | 'MAINTENANCE';
+  member_id?: string | null;
+  contract_end_date?: string | null;
+};
+
 // ==========================================
 // Medical Certificate
 // ==========================================

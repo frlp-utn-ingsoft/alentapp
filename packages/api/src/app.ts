@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import 'dotenv/config';
 
 import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
 import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
@@ -40,6 +41,7 @@ import { LockerValidator } from './domain/services/LockerValidator.js';
 import { CreateLockerUseCase } from './application/CreateLockerUseCase.js';
 import { LockerController } from './delivery/LockerController.js';
 import { GetLockersUseCase } from './application/GetLockersUseCase.js';
+import { UpdateLockerUseCase } from './application/UpdateLockerUseCase.js';
 
 
 export function buildApp() {
@@ -90,9 +92,15 @@ export function buildApp() {
     const lockerValidator = new LockerValidator(lockerRepo);
     const createLockerUseCase = new CreateLockerUseCase(lockerRepo, lockerValidator);
     const getLockersUseCase = new GetLockersUseCase(lockerRepo);
+    
+    const updateLockerUseCase = new UpdateLockerUseCase(
+    lockerRepo,
+    memberRepo
+);
     const lockerController = new LockerController(
     createLockerUseCase,
-    getLockersUseCase
+    getLockersUseCase,
+    updateLockerUseCase
 );
 
 
@@ -161,6 +169,7 @@ export function buildApp() {
     
     server.post('/api/v1/lockers', lockerController.create.bind(lockerController));
     server.get('/api/v1/lockers', lockerController.getAll.bind(lockerController));
+    server.patch('/api/v1/lockers/:id', lockerController.update.bind(lockerController));
 
     server.get('/api/v1/medical-certificates', medicalCertificateController.getAll.bind(medicalCertificateController));
     server.post('/api/v1/medical-certificates', medicalCertificateController.create.bind(medicalCertificateController));
@@ -198,4 +207,4 @@ if (process.argv[1] && process.argv[1].endsWith('app.ts')) {
             process.exit(0);
         });
     });
-}
+} 

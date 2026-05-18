@@ -36,4 +36,19 @@ async create(data: CreateLockerRequest): Promise<LockerDTO> {
     const result = await response.json();
     return result.data;
 },
+
+async update(id: string, data: any) {
+    const response = await fetch(`${API_URL}/lockers/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+});
+
+if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.message);
+}
+
+return (await response.json()).data;
+}
 };
