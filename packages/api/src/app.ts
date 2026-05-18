@@ -1,6 +1,5 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import 'dotenv/config';
 
 import { PostgresMemberRepository } from './infrastructure/PostgresMemberRepository.js';
 import { PostgresMedicalCertificateRepository } from './infrastructure/PostgresMedicalCertificateRepository.js';
@@ -13,13 +12,16 @@ import { DeleteMemberUseCase } from './application/DeleteMemberUseCase.js';
 import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCertificateUseCase.js';
 import { GetMedicalCertificatesUseCase } from './application/GetMedicalCertificatesUseCase.js';
 import { UpdateMedicalCertificateUseCase } from './application/UpdateMedicalCertificateUseCase.js';
+
 import { MemberController } from './delivery/MemberController.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
+import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
 import { GetSportsUseCase } from './application/GetSportsUseCase.js';
+import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
-import { SportValidator } from './domain/services/SportValidator.js';
+
 
 import { PostgresDisciplineRepository } from './infrastructure/PostgresDisciplineRepository.js';
 import { DisciplineValidator } from './domain/services/DisciplineValidator.js';
@@ -27,6 +29,7 @@ import { CreateDisciplineUseCase } from './application/CreateDisciplineUseCase.j
 import { DisciplineController } from './delivery/DisciplineController.js';
 import { GetDisciplinesUseCase } from './application/GetDisciplinesUseCase.js';
 import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.js';
+import { DeleteDisciplineUseCase } from './application/DeleteDisciplineUseCase.js';
 
 // === Payment imports ===
 // PR 1: crear y listar
@@ -123,6 +126,7 @@ export function buildApp() {
     const disciplineRepo = new PostgresDisciplineRepository();
     const disciplineValidator = new DisciplineValidator(memberRepo);
     const getDisciplinesUseCase = new GetDisciplinesUseCase(disciplineRepo);
+    const deleteDisciplineUseCase = new DeleteDisciplineUseCase(disciplineRepo);
     const createDisciplineUseCase = new CreateDisciplineUseCase(disciplineRepo, disciplineValidator);
     const updateDisciplineUseCase = new UpdateDisciplineUseCase(disciplineRepo, disciplineValidator);
 
@@ -130,6 +134,7 @@ export function buildApp() {
         createDisciplineUseCase,
         getDisciplinesUseCase,
         updateDisciplineUseCase,
+        deleteDisciplineUseCase,
     );
 
     // ============================================================
@@ -140,8 +145,13 @@ export function buildApp() {
 
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator);
 
-    const sportController = new SportController(createSportUseCase, getSportsUseCase);
+    const sportController = new SportController(
+        createSportUseCase,
+        getSportsUseCase,
+        updateSportUseCase,
+    );
 
     // ============================================================
     // Payments
@@ -188,9 +198,11 @@ export function buildApp() {
     server.post('/api/v1/disciplines', disciplineController.create.bind(disciplineController));
     server.get('/api/v1/disciplines', disciplineController.getAll.bind(disciplineController));
     server.patch('/api/v1/disciplines/:id', disciplineController.update.bind(disciplineController));
+    server.delete('/api/v1/disciplines/:id', disciplineController.delete.bind(disciplineController));
 
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
+    server.patch('/api/v1/sports/:id', sportController.update.bind(sportController));
 
     server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
@@ -198,7 +210,7 @@ export function buildApp() {
     server.patch('/api/v1/pagos/:id/pay', paymentController.pay.bind(paymentController));
     server.patch('/api/v1/pagos/:id/cancel', paymentController.cancel.bind(paymentController));
 
-    server.get('/', async (_req, rep) => {
+    server.get('/', async (req, rep) => {
         rep.status(200).send({ msg: 'asd' });
     });
 
