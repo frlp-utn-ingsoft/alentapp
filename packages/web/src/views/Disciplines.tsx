@@ -55,7 +55,7 @@ export function DisciplinesView() {
   });
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("es-AR");
+    return date.split("T")[0].split("-").reverse().join("/");
   };
 
   const fetchDisciplines = async () => {
