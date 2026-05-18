@@ -86,11 +86,11 @@ export class SportController {
     async delete(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
             const { id } = request.params;
-            const sport = await this.deleteSportUseCase.execute(id);
-            return reply.status(200).send({ data: sport });
+            await this.deleteSportUseCase.execute(id);
+            return reply.status(200).send({ message: 'Deporte eliminado correctamente' });
         } catch (error: any) {
-            if (error.message.includes('no existe')) {
-              return reply.status(404).send({ error: error.message });
+            if (error.message.includes('no existe') || error.message.includes('ya fue dado de baja')) {
+                return reply.status(404).send({ error: error.message });
             }
             return reply.status(500).send({ error: 'Error interno, reintente más tarde' });
         }
