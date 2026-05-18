@@ -88,14 +88,6 @@ export interface UpdateMedicalCertificateRequest {
   status?: 'in_review' | 'validated';
 }
 
-export interface UpdateMedicalCertificateRequest {
-  issue_date?: string;
-  expiry_date?: string;
-  doctor_license?: string;
-  institution?: string;
-  status?: 'in_review' | 'validated';
-}
-
 // ==========================================
 // Payment
 // ==========================================
