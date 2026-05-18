@@ -13,11 +13,14 @@ import { CreateMedicalCertificateUseCase } from './application/CreateMedicalCert
 import { GetMedicalCertificatesUseCase } from './application/GetMedicalCertificatesUseCase.js';
 import { MemberController } from './delivery/MemberController.js';
 import { MedicalCertificateController } from './delivery/MedicalCertificateController.js';
+
+
 import { PostgresSportRepository } from './infrastructure/PostgresSportRepository.js';
 import { SportValidator } from './domain/services/SportValidator.js';
 import { CreateSportUseCase } from './application/CreateSportUseCase.js';
 import { GetSportsUseCase } from './application/GetSportsUseCase.js';
 import { UpdateSportUseCase } from './application/UpdateSportUseCase.js';
+import { DeleteSportUseCase } from './application/DeleteSportUseCase.js';
 import { SportController } from './delivery/SportController.js';
 
 
@@ -128,16 +131,15 @@ export function buildApp() {
 
     const createSportUseCase = new CreateSportUseCase(sportRepo, sportValidator);
     const getSportsUseCase = new GetSportsUseCase(sportRepo);
+    const updateSportUseCase = new UpdateSportUseCase(sportRepo, sportValidator,);
+    const deleteSportUseCase = new DeleteSportUseCase(sportRepo);
 
-    const updateSportUseCase = new UpdateSportUseCase(
-        sportRepo,
-        sportValidator,
-    );
-
+    
     const sportController = new SportController(
         createSportUseCase,
         getSportsUseCase,
         updateSportUseCase,
+        deleteSportUseCase,
     );
 
     // ============================================================
@@ -185,7 +187,8 @@ const paymentController = new PaymentController(
     server.get('/api/v1/sports', sportController.getAll.bind(sportController));
     server.post('/api/v1/sports', sportController.create.bind(sportController));
     server.patch('/api/v1/sports/:id', sportController.update.bind(sportController));
-    
+    server.delete('/api/v1/sports/:id', sportController.delete.bind(sportController));
+
     server.get('/api/v1/pagos', paymentController.getAll.bind(paymentController));
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
     server.patch('/api/v1/pagos/:id', paymentController.update.bind(paymentController));
