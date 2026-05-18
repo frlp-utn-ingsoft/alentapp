@@ -29,7 +29,7 @@ import { UpdateDisciplineUseCase } from './application/UpdateDisciplineUseCase.j
 // === Payment imports ===
 // PR 1: crear y listar
 // PR 2: cobrar y editar
-// PR 3: anular (próximo PR)
+// PR 3: anular
 import { PostgresPaymentRepository } from './infrastructure/PostgresPaymentRepository.js';
 import { SystemClock } from './infrastructure/SystemClock.js';
 import { PaymentValidator } from './domain/services/PaymentValidator.js';
@@ -37,6 +37,7 @@ import { NewPaymentUseCase } from './application/NewPaymentUseCase.js';
 import { GetPaymentsUseCase } from './application/GetPaymentsUseCase.js';
 import { MarkPaymentAsPaidUseCase } from './application/MarkPaymentAsPaidUseCase.js';
 import { UpdatePaymentUseCase } from './application/UpdatePaymentUseCase.js';
+import { CancelPaymentUseCase } from './application/CancelPaymentUseCase.js';
 import { PaymentController } from './delivery/PaymentController.js';
 
 import { PostgresLockerRepository } from './infrastructure/PostgresLockerRepository.js';
@@ -130,28 +131,30 @@ export function buildApp() {
     const sportController = new SportController(createSportUseCase, getSportsUseCase);
 
     // ============================================================
-// Payments
-// ============================================================
-const clock = new SystemClock();
-const paymentRepo = new PostgresPaymentRepository();
-const paymentValidator = new PaymentValidator(clock);
+    // Payments
+    // ============================================================
+    const clock = new SystemClock();
+    const paymentRepo = new PostgresPaymentRepository();
+    const paymentValidator = new PaymentValidator(clock);
 
-const newPaymentUseCase = new NewPaymentUseCase(
-    paymentRepo,
-    memberRepo,
-    paymentValidator,
-    clock,
-);
-const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo, paymentValidator);
-const markPaymentAsPaidUseCase = new MarkPaymentAsPaidUseCase(paymentRepo, clock);
-const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
+    const newPaymentUseCase = new NewPaymentUseCase(
+        paymentRepo,
+        memberRepo,
+        paymentValidator,
+        clock,
+    );
+    const getPaymentsUseCase = new GetPaymentsUseCase(paymentRepo, paymentValidator);
+    const markPaymentAsPaidUseCase = new MarkPaymentAsPaidUseCase(paymentRepo, clock);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepo, paymentValidator);
+    const cancelPaymentUseCase = new CancelPaymentUseCase(paymentRepo, clock);
 
-const paymentController = new PaymentController(
-    newPaymentUseCase,
-    getPaymentsUseCase,
-    markPaymentAsPaidUseCase,
-    updatePaymentUseCase,
-);
+    const paymentController = new PaymentController(
+        newPaymentUseCase,
+        getPaymentsUseCase,
+        markPaymentAsPaidUseCase,
+        updatePaymentUseCase,
+        cancelPaymentUseCase,
+    );
 
     // ============================================================
     // Routes
@@ -178,6 +181,7 @@ const paymentController = new PaymentController(
     server.post('/api/v1/pagos', paymentController.create.bind(paymentController));
     server.patch('/api/v1/pagos/:id', paymentController.update.bind(paymentController));
     server.patch('/api/v1/pagos/:id/pay', paymentController.pay.bind(paymentController));
+    server.patch('/api/v1/pagos/:id/cancel', paymentController.cancel.bind(paymentController));
 
     server.get('/', async (_req, rep) => {
         rep.status(200).send({ msg: 'asd' });
